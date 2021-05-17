@@ -1,0 +1,3 @@
+list of things that have to be done at some point:
+
+. cmake lists for building c layer under different compilers

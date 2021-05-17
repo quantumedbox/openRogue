@@ -1,0 +1,12 @@
+# environment configuration for resolving python stuff without relying on any of python versions
+# paths should be in posix conventions
+# python settings will be evaluated to objects:
+# dependencies="["test", "test2"]"
+
+python="./python/python"
+c_compiler="./tcc"
+scriptPath="./scripts"
+enginePath="./scripts/openRogue"
+
+# support for comments ('#'' should be the first symbol in line):
+# entryModule="run_test"

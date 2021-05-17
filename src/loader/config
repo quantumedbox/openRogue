@@ -1,0 +1,11 @@
+# environment configuration for resolving python stuff without relying on any of python versions
+# python settings will be evaluated to objects:
+# dependencies="["test", "test2"]"
+
+# python="/pypy3.7-v7.3.4-win64/pypy3"
+c_compiler="/tcc"
+scriptPath="/scripts"
+engineModule="openRogue"
+
+# support for comments ('#'' should be the first symbol in line):
+# entryModule="run_test"
