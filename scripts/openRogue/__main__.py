@@ -2,6 +2,7 @@ from . import extern
 from . import cjit
 from . import signal
 from . import modules
+from . import language
 
 for i in modules.get_modules_info():
 	print(i.path)

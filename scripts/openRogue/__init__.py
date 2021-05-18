@@ -9,7 +9,7 @@ import sys
 
 from . import modules
 
-modules.registry_module("openRogue", "0.1a")
+modules.register_module("openRogue", "0.1a")
 
 
 print(sys.version)

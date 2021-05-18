@@ -2,8 +2,10 @@
 	Executable that resolves the python executable path and config file variables
 */
 
+// TODO *nix stuff isn't tested at all
 // TODO Passing argument of run to python
-// TODO MSC compatability
+// TODO MSC comparability
+// TODO Centralized error handling
 
 #include <stdlib.h>
 #include <stdio.h>

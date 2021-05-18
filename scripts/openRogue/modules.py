@@ -1,11 +1,13 @@
+"""
+Centralized module resolution, registry and control
+"""
+
 import inspect
 import os
 
 from . import signal
 
 from types import ModuleType
-
-# Module for module resolution, registry and control
 
 
 class ModuleInfo:
@@ -25,10 +27,10 @@ class ModuleInfo:
 
 
 # Maybe make the version as integer ?
-def registry_module(name: str, version: str):
+def register_module(name: str, version: str):
 	"""
 	Module registry functionality
-	Doc string is used as description text
+	Doc string of the module is used as description text
 	! Should be called from __init__
 	"""
 	caller = get_caller_module()
