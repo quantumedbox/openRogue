@@ -1,40 +1,40 @@
 /*
-	Executable that resolves the path to Python executable and config file
-	For now only POSIX, compile it with MinGW ubder Windows
+	Executable that resolves the python executable path and config file variables
 */
 
-// It should be so fucking error-prone, damn
-// For now i don't really care that much tho
-
-// TODO divide the module into several files for each os-dependent way
-// TODO wide char/utf-8 support
-// TODO free() on allocated strings
+// TODO Passing argument of run to python
+// TODO MSC compatability
 
 #include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
-
-#ifndef _MSC_VER
+#include <limits.h>
 #include <dirent.h>
-#else
-#error "Microsoft Compiler isn't supported for now as it doesn't implement dirent.h\nSources are available and you could add support for it through Win32 api"
-#endif
 
 #ifdef _WIN32
-#include <windows.h>
-#endif
+	#include <windows.h>
+	#include <direct.h>
+	#define get_dir _getcwd
+	#define set_env_var(name, var) _putenv_s(name, var)
+#else
+	#include <unistd.h>
+	#define get_dir getcwd
+	#define set_env_var(name, var) setenv(name, var, 1)
+ #endif
 
-// Be careful with it!
+
+// Max length of config line
 #define BUFFER_SIZE 1024
-#define COMMAND_LINE_BUFFER 32768 // Maximum for windows
+//
+#define MAX_COMMANDLINE_LENGTH 32768
 
 #define CONFIG_PATH "config"
 
-const char* interpreters_list[] = {
+const char* interpreters[] = {
 	"python", "py", "python3", "pypy3",
 };
-const size_t n_interpreters = sizeof(interpreters_list) / sizeof(*interpreters_list);
+const size_t n_interpreters = sizeof(interpreters) / sizeof(*interpreters);
 
 const char* dirs_to_lookup[] = {
 	"/python",
@@ -42,7 +42,7 @@ const char* dirs_to_lookup[] = {
 const size_t n_dirs = sizeof(dirs_to_lookup) / sizeof(*dirs_to_lookup);
 
 
-char* nix_path_to_windows(const char* path) {
+char* nix_path_to_windows_path(const char* path) {
 	char* n;
 	// discrad relative './'
 	if (strstr(path, "./") == path) {
@@ -52,7 +52,6 @@ char* nix_path_to_windows(const char* path) {
 		n = (char*)calloc(strlen(path)+1, sizeof(char));
 		strcpy(n, path);
 	}
-
 	// swap '/' to '\'
 	char* p = strtok(n, "/");
 	while (p != NULL) {
@@ -62,95 +61,11 @@ char* nix_path_to_windows(const char* path) {
 		}
 		p = next;
 	}
-
-	// if extension isn't present then assume that the file is .exe
-	// (which means that paths cannot contain dots unless they're indicating extensions which might be a problem)
-	if (strchr(n, '.') == NULL) {
-		size_t len = strlen(n);
-		n = (char*)realloc(n, (len+5) * sizeof(char));
-		strcpy(n + len, ".exe");
-	}
-
 	return n;
 }
 
 
-const char* get_interpreter_from_path() {
-	const char* _PATH = getenv("PATH");
-	if (_PATH == NULL) {
-		perror("PATH variable isn't present in environment");
-		return NULL;
-	}
-
-	char* PATH = (char*)calloc(strlen(_PATH)+1, sizeof(char));
-	strcpy(PATH, _PATH);
-
-	#ifdef _WIN32
-	char *p = strtok(PATH, ";");
-	#else
-	char *p = strtok(PATH, ":");
-	#endif
-
-	char* inter_path = NULL;
-
-	while(p != NULL) {
-		DIR *dir;
-		struct dirent *ent;
-		// Loop through every directory in PATH
-		if ((dir = opendir(p)) != NULL) {
-			// Loop through every file in the directory
-			while ((ent = readdir(dir)) != NULL) {
-				// If name of the file consist a dot, - divide the name by it
-				char* dot = strchr(ent->d_name, '.');
-				char* f_name = {'\0'};
-				if (dot != NULL) {
-					ptrdiff_t f_name_s = dot - ent->d_name;
-					f_name = (char*)calloc(f_name_s+1, sizeof(char));
-					strncpy(f_name, ent->d_name, f_name_s);
-				// ... or use the name as it is
-				} else {
-					f_name = ent->d_name;
-				}
-				// Finally, compare found file to a interpreter list
-				for (size_t i = n_interpreters; i--;) {
-					if (!strcmp(interpreters_list[i], f_name)) {
-						// If match is found - store a full path to it into 'inter_path' and break from loop
-						inter_path = (char*)calloc(strlen(p)+ent->d_namlen+2, sizeof(char));
-						strcpy(inter_path, p);
-						#ifdef _WIN32
-						inter_path[strlen(inter_path)] = '\\';
-						#else
-						inter_path[strlen(inter_path)] = '/';
-						#endif
-						strcpy(&inter_path[strlen(p)+1], ent->d_name);
-						goto FOUND;
-					}
-				}
-			}
-		FOUND:
-			closedir(dir);
-		} else {
-			perror("Cannot open directory to fetch files:\n");
-			exit(EXIT_FAILURE);
-		}
-
-		if (inter_path != NULL) {
-			break;
-		}
-
-		#ifdef _WIN32
-		p = strtok(NULL, ";");
-		#else
-		p = strtok(NULL, ":");
-		#endif
-	}
-
-	free(PATH);
-
-	return inter_path;
-}
-
-
+// returned value should be freed
 char* get_config_variable(const char* var_name) {
 	FILE *f = fopen(CONFIG_PATH, "r");
 	if (f == NULL) {
@@ -199,50 +114,39 @@ char* get_config_variable(const char* var_name) {
 	return NULL;
 }
 
+char* ENGINEMODULE = NULL;
 
-void init_environment() {
+void resolve_config() {
 	char* scriptPath_v = get_config_variable("scriptPath");
 	if (scriptPath_v) {
-		_putenv_s("PATH", scriptPath_v);
+		set_env_var("PYTHONPATH", scriptPath_v);
 		free(scriptPath_v);
 	}
 
 	char* c_compiler_v = get_config_variable("c_compiler");
 	if (c_compiler_v) {
-		_putenv_s("c_compiler", c_compiler_v);
+		set_env_var("CC", c_compiler_v);
 		free(c_compiler_v);
+	}
+
+	char* engineModule_v = get_config_variable("engineModule");
+	if (engineModule_v) {
+		if (ENGINEMODULE != NULL) {
+			free(ENGINEMODULE);
+		}
+		ENGINEMODULE = engineModule_v;
+	} else {
+		printf("Engine module isn't specified in config\n");
+		exit(EXIT_FAILURE);
 	}
 }
 
 
-void start_python(const char* py_path) {
-	init_environment();
+bool start_python(const char* py_path) {
+	char exec[MAX_COMMANDLINE_LENGTH];
 
-	char* engineModule = get_config_variable("enginePath");
-	if (engineModule == NULL) {
-		printf("Engine module isn't specified in config\n");
-		exit(EXIT_FAILURE);
-	}
-
+	#ifdef _WIN32
 	{
-	// POSIX variant
-		#if defined __unix__ || defined __unix || defined unix
-		char exec[COMMAND_LINE_BUFFER] = {'\0'};
-		sprintf(exec, "%s -m %s", py_path, engineModule);
-	
-		free(engineModule);
-	
-		if (!system(NULL)) {
-			perror("Cannot call process\n");
-			exit(EXIT_FAILURE);
-		}
-		int exit_code = system(exec);
-		#endif
-	}
-
-	{
-	// WINAPI call of CreateProcessA
-		#if defined _WIN32 || defined _WIN64
 		STARTUPINFO si;
 		PROCESS_INFORMATION pi;
 	
@@ -251,43 +155,123 @@ void start_python(const char* py_path) {
 		si.cb = sizeof(si);
 		ZeroMemory(&pi, sizeof(pi));
 
-		char exec[COMMAND_LINE_BUFFER] = {'\0'};
-		sprintf(exec, "-m %s", engineModule);
-	
-		free(engineModule);
-		char* winpath = nix_path_to_windows(py_path);
+		sprintf(exec, "%s -m %s", py_path, ENGINEMODULE);
 
 		if (CreateProcessA(
-				winpath,
-				exec, NULL, NULL,
+				NULL, exec, NULL, NULL,
 				FALSE, 0, NULL,
-				NULL, &si, &pi) == 0
+				NULL, &si, &pi
+				) == 0
 		) {
-			int err = GetLastError();
-			printf("Error code %d while starting a new process\n", err);
-			exit(EXIT_FAILURE);
+			int errc = GetLastError();
+			if (errc == ENOENT) {
+				return false;
+			} else {
+				printf("Error code %d while starting a python process:\n" \
+						"%s\nPlease check the 'python' configuration" \
+						"and make sure that it is available\n",
+						errc, exec
+				);
+				exit(EXIT_FAILURE);
+			}
 		}
 		WaitForSingleObject(pi.hProcess, INFINITE);
-	
-		free(winpath);
-		#endif
 	}
+	#else
+	{	
+		if (!system(NULL)) {
+			perror("Cannot call process\n");
+			exit(EXIT_FAILURE);
+		}
+
+		sprintf(exec, "%s -m %s", py_path, ENGINEMODULE);
+		int errc = system(exec);
+
+		if (errc == ENOENT) {
+			return false;
+		} else {
+			perror("Error while trying to execute python\n");
+			exit(EXIT_FAILURE);
+		}
+	}
+	#endif
+
+	return true;
+}
+
+
+bool resolve_python() {
+	// 'python' config line
+	char* python_v = get_config_variable("python");
+	if (python_v) {
+		if (start_python(python_v)) {
+			free(python_v);
+			return true;
+		}
+		free(python_v);
+	}
+	// Search in PATH
+	for (int i = 0; i < n_interpreters; i++) {
+		if (start_python(interpreters[i])) {
+			return true;
+		}
+	}
+	// Search in subdirectories
+	for (int i = 0; i < n_dirs; i++) {
+		char buff[PATH_MAX];
+		get_dir(buff, PATH_MAX);
+
+		if (strlen(buff) + strlen(dirs_to_lookup[i] + 1) <= PATH_MAX) {
+			strcpy(buff+strlen(buff), dirs_to_lookup[i]);
+
+			// Check if dir exists
+			// TODO WINAPI way
+			DIR* dir = opendir(buff);
+			if (dir) 
+				closedir(dir);
+			else if (errno == ENOENT) {
+				printf("Directory %s doesn't exits\n", buff);
+				continue;
+			} else
+				exit(errno);
+
+			// #ifdef _WIN32
+			// char* winpath = nix_path_to_windows_path(buff);
+			// strcpy(buff, winpath);
+			// free(winpath);
+			// #endif
+
+			ssize_t dir_b = strlen(buff);
+			buff[dir_b] = '/';
+
+			// TODO Path len checks
+			for (int i = 0; i < n_interpreters; i++) {
+				strcpy(buff+dir_b+1, interpreters[i]);
+				if (start_python(buff)) {
+					return true;
+				}
+			}
+
+			if (start_python(buff)) {
+				return true;
+			}
+
+		} else {
+			printf("Warning: skipping possible dir checking because of path length\n");
+		}
+	}
+	return false;
 }
 
 
 int main(int argc, const char** argv) {
-	const char* py = get_config_variable("python");
-	if (py) {
-		start_python(py);
-	} else {
-		py = get_interpreter_from_path();
-		if (py) {
-			start_python(py);
-		} else {
-			printf("Cannot find python interpreter in PATH and 'python' config setting wasn't given\n");
-			exit(EXIT_FAILURE);
-		} 
-		// TODO Search in default dirs if nothing found
+	resolve_config();
+	if (!resolve_python()) {
+		printf("Cannot find any suitable python executable in the system\n" \
+				"If your system does have it, - configure your system PATH to contain it.\n" \
+				"Or set the 'python' variable in 'config' file of openRogue.\n" \
+				"Alternativly, you could install python in 'python' subdirectory of this folder.");
+		return ENOENT;
 	}
 
 	return 0;

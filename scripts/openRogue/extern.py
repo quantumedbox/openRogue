@@ -4,15 +4,14 @@ import importlib
 import subprocess
 
 
-def depend(*args):
+def depend(*args) -> None:
 	"""
 	Resolves pip dependencies on runtime
 	"""
-
 	try:
 		import pip
 	except ImportError:
-		# pip is ensured to be, but you have to call ensurepip for it to be detectable
+		# pip is ensured to be in pypy3, but you have to call ensurepip for it to be detectable
 		if os.path.basename(sys.executable).split('.')[0] == "pypy3":
 			subprocess.check_call([sys.executable, "-m", "ensurepip"])
 		else:

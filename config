@@ -1,12 +1,17 @@
-# environment configuration for resolving python stuff without relying on any of python versions
-# paths should be in posix conventions
+# environment configuration for resolving python stuff without relying on any present (or not present) python version
+# paths should be in posix conventions i.e. with '/' as delimiter
+
 # python settings will be evaluated to objects:
-# dependencies="["test", "test2"]"
+# myvar="["test", "test2"]" -> list("test", "test2")
 
-python="./python/python"
-c_compiler="./tcc"
+# path to desirable python executable (otherwise python is picked from PATH or standard ./python directory)
+python="./python/pypy3"
+
+# used for jit dll compilation
+c_compiler="./tcc/tcc"
+
+# PYTHONPATH of running python subprocess
 scriptPath="./scripts"
-enginePath="./scripts/openRogue"
 
-# support for comments ('#'' should be the first symbol in line):
-# entryModule="run_test"
+# should be contained in scriptPath and is used as entry point for execution
+engineModule="openRogue"
