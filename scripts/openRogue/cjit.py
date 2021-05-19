@@ -10,7 +10,8 @@ from typing import Any, Union
 # realisation of JIT C compilation by creating proxies that transform the arguments automatically
 
 # TODO compile linux shared objects
-
+# TODO rename 'dll' to 'so' (shared object) or just 'shared'
+# TODO examples
 # TODO automatic byref()
 # TODO ability to pass python functions as arguments
 # TODO cache tables and clearing of unutilized dlls

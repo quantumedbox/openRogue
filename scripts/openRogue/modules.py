@@ -1,7 +1,6 @@
 """
 Centralized module resolution, registry and control
 """
-
 import inspect
 import os
 

@@ -1,7 +1,18 @@
 """
 Localization submodule
-"""
 
+Usage example:
+
+	entity_desc = language.Translation(
+		eng="my entity description",
+		rus="описание сущности моей",
+	)
+
+	print(entity_desc)
+	language.set_language("run")
+	print(entity_desc)
+
+"""
 import sys
 import locale
 import ctypes

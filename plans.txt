@@ -2,11 +2,20 @@ list of things that have to be done at some point:
 
 . cmake lists for building c layer under different compilers
 . gcc and cl support with cjit
-. graphics layer in SDL2
-. interface primitives
+. libtcod integration
 . node logic, inheritance model
 . events and actions
 . themes
-. language support
 . scenes and /root/
+
+
+priorities:
+
+. graphics layer in SDL2
+. interface primitives
+
+
+in process:
+
 . signal events
+. language support

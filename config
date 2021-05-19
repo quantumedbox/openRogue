@@ -2,10 +2,12 @@
 # paths should be in posix conventions i.e. with '/' as delimiter
 
 # python settings will be evaluated to objects:
+# TODO
 # myvar="["test", "test2"]" -> list("test", "test2")
 
 # rewrite system language locale by this setting
-language="en_EN"
+# TODO
+# language="english"
 
 # path to desirable python executable (otherwise python is picked from PATH or standard ./python directory)
 python="./python/pypy3"
