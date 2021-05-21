@@ -8,11 +8,13 @@ Submodules:
 import sys
 
 from . import modules
+from . import config_reader
 
 modules.register_module("openRogue", "0.1a")
 
-
 print(sys.version)
+
+config_reader.update_config()
 
 if sys.version_info[0] != 3:
 	raise RuntimeError("Given openRogue implementation requires Python 3")

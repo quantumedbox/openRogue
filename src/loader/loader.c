@@ -34,7 +34,7 @@
 #define CONFIG_PATH "config"
 
 const char* interpreters[] = {
-	"python", "py", "python3", "pypy3",
+	"python", "py", "python3", "pypy3", "ipy",
 };
 const size_t n_interpreters = sizeof(interpreters) / sizeof(*interpreters);
 
@@ -90,7 +90,7 @@ char* get_config_variable(const char* var_name) {
 		// For now - just spit an error
 		char* n_l = strchr(buff, '\n');
 		if (n_l == NULL) {
-			printf("Line %d is too long for buffer to contain\n", cur_line);
+			printf("Line %llu is too long for buffer to contain\n", cur_line);
 			exit(EXIT_FAILURE);
 		}
 
@@ -122,6 +122,7 @@ void resolve_config() {
 	char* scriptPath_v = get_config_variable("scriptPath");
 	if (scriptPath_v) {
 		set_env_var("PYTHONPATH", scriptPath_v);
+		set_env_var("IRONPYTHONPATH", scriptPath_v);
 		free(scriptPath_v);
 	}
 

@@ -1,7 +1,7 @@
 """
 Translation module test
 """
-import language
+import lang
 
 if __name__ == "__main__":
 	test = language.Translation(

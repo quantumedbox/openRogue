@@ -8,7 +8,7 @@ run:
 	$(CC) $(CFLAGS) src/loader/loader.c -o run.exe $(DEBUG)
 
 backend:
-	$(CC) $(CFLAGS) src/backend/backend.h -shared -o openRogue.dll $(DEBUG) -lopengl32 -lglew32 -l:SDL2.dll
+	$(CC) $(CFLAGS) src/backend/backend.h -shared -fPIC -o openRogue.dll $(DEBUG) -lopengl32 -lglew32 -l:SDL2.dll
 
 debug: DEBUG=-g
 release: DEBUG=

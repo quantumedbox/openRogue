@@ -1,0 +1,46 @@
+
+openRogue could have different realizations of window contexts, event handling and rendering
+but they all should follow the unified interface to work interchangeably
+
+
+types:
+
+	. Window 	-- 	anything that is used to describing concrete underlying window
+					with SDL it's directly SDL_Window* pointer, but other realizations
+					could have, for example, special structs to manage windows
+
+definitions:
+	
+	. EventQueue	-- struct that contains array of events and the len of this array to be used on python side to create event objects
+
+	. WINDOW_SIGNAL -- unified signals of window life cycle such as closing, resizing, gaining focus and etc.
+
+
+
+-- Create new window context and return pointer to data that represents windows
+
+Window* init_window(int width, int height, const char* title);
+
+
+
+-- Close signals are resolved by Python layer depending on their WINDOW_SIGNAL output
+
+void close_window(Window*);
+
+
+
+-- Process all window related events and return bitmask of WINDOW_SIGNALs
+
+WINDOW_SIGNAL process_window(Window*);
+
+
+
+-- Forms and returns EventQueue buffer which consists of events belonging to given Window argument
+
+EventQueue* dispatch_window_events(Window*);
+
+
+
+-- Clean up allocated event queue
+
+void _free_event_queue(EventQueue*);

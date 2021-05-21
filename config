@@ -2,17 +2,18 @@
 # paths should be in posix conventions i.e. with '/' as delimiter
 
 # python settings will be evaluated to objects:
-# TODO
 # myvar="["test", "test2"]" -> list("test", "test2")
 
 # rewrite system language locale by this setting
-# TODO
-# language="english"
+language="english"
 
 # path to desirable python executable (otherwise python is picked from PATH or standard ./python directory)
-python="./python/pypy3"
+# python="./python/pypy3"
 
-# used for jit dll compilation
+# default backend override
+backend_api="./openRogue"
+
+# used for jit shared object compilation
 c_compiler="./tcc/tcc"
 
 # PYTHONPATH of running python subprocess
@@ -20,3 +21,5 @@ scriptPath="./scripts"
 
 # should be contained in scriptPath and is used as entry point for execution
 engineModule="openRogue"
+
+debug=True

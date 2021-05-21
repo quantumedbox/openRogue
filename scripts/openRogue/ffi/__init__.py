@@ -1,3 +1,5 @@
 from . ffi import *
+from . definitions import *
 
-ffi._init_shared()
+# Global manager that resolves access to shared objects
+manager = FFIManager()

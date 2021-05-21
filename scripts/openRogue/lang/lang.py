@@ -20,9 +20,6 @@ import ctypes
 # TODO .mo objects
 # import gettext
 
-# Const definition for default language resolution when desirable language isn't available
-IMRERIALIST_LINGUA = "en"
-
 # Current binded language locale
 _LINGUA = None
 

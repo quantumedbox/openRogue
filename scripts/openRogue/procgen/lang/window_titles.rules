@@ -1,0 +1,83 @@
+# Word form definitions
+# TODO Ability to define imports from other files to segment the language specific definitions
+# $import("./russian.rules")
+
+DICTIONARY:
+	окно:
+		nominative+single=		окно
+		nominative+plural=		окна
+		genitive+signle=		окна
+		genitive+plural=		окон
+		dative+single=			окну
+		dative+plural=			окнам
+		accusative+single=		окно
+		accusative+plural=		окна
+		instrumental+single=	окном
+		instrumental+plural=	окнами
+		prepositional+signle=	окне
+		prepositional+plural=	окнах
+
+	взгляд:
+		nominative+single=		взгляд
+		nominative+plural=		взгляды
+		genitive+signle=		взгляда
+		genitive+plural=		взгляов
+		dative+single=			взгляду
+		dative+plural=			взглядам
+		accusative+single=		взгляд
+		accusative+plural=		взгляды
+		instrumental+single=	взглядом
+		instrumental+plural=	взглядами
+		prepositional+signle=	взгляде
+		prepositional+plural=	взглядах
+
+	пустота:
+		nominative+single=		пустота
+		nominative+plural=		пустоты
+		genitive+signle=		пустоты
+		genitive+plural=		пустот
+		dative+single=			пустоте
+		dative+plural=			пустотам
+		accusative+single=		пустоту
+		accusative+plural=		пустоты
+		instrumental+single=	пустотой
+		instrumental+plural=	пустотами
+		prepositional+signle=	пустоте
+		prepositional+plural=	пустотах
+
+	window(noun):
+		rus=окно
+
+	view(noun):
+		rus=взгляд
+
+	void(noun):
+		rus=пустота
+
+
+
+
+# Defines connections between words
+# They are implemented as 'methods' for certain POS
+GRAMMAR:
+	noun:
+		of(self, subj):
+			self + "of" + subj
+			# Language specific definition of grammar
+			rus:
+				self + subj(genitive, self.plurality)
+
+		into(self, subj):
+			self + "into" + subj
+			rus:
+				self + "в" + subj(accusative, self.plurality)
+
+
+
+# Function declaration
+GenTitle():
+	# TODO Easy ways for random picking from lists and etc.
+	if $pickfrom(0, 1) == 0:
+		return $window.of(void)
+	else:
+		return $view.into(void)
