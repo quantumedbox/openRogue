@@ -1,3 +1,5 @@
-from . node import *
 from . root import *
-from . window import *
+from . container import *
+
+# Public global root node
+root = Root()

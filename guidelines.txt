@@ -1,9 +1,0 @@
-the idea of project is allowing the users and developers full control over distribution and even distributions of other users
-engine and all extensions should be able to run on every python realisation and every os that these realisation support
-there's always a race between realizations and not every one of them are able to keep up (to CPython)
-
-for python 3 it is prefarable to use at most the 3.7.10 version as PyPy and CPython both support it at the moment
-but for extensivly shared modules it might be better to use 3.0 as it could be translated by 3to2 module quite reliebly
-
-python 2 code should also be supported, but mostly by translating it into python 3 code
-in some instances python 2 code is desirable, especially when running JPython that could only be used with it

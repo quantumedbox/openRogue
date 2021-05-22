@@ -11,7 +11,7 @@ language="english"
 # python="./python/pypy3"
 
 # default backend override
-backend_api="./openRogue"
+backend_api="./backends/openRogue_SDL"
 
 # used for jit shared object compilation
 c_compiler="./tcc/tcc"

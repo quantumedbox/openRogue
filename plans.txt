@@ -1,14 +1,17 @@
 list of things that have to be done at some point:
 
-. cmake lists for building c layer under different compilers
-. gcc and cl support with cjit
+. context constructors (building system window on /root/ children from UI classes)
+. use CFFI for API calling
+. cmake lists
 . libtcod integration
 . node logic, inheritance model
 . events and actions
 . themes
 . scenes and /root/
 . language procgen
-. logging system
+. logging
+. optional curses backend
+. curses based debugging/console interface
 
 
 priorities:

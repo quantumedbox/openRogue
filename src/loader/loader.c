@@ -2,8 +2,8 @@
 	Executable that resolves the python executable path and config file variables
 */
 
-// TODO *nix stuff isn't tested at all
-// TODO Passing argument of run to python
+// TODO unix stuff isn't tested at all
+// TODO Passing arguments to python
 // TODO MSC comparability
 // TODO Centralized error handling
 
@@ -199,6 +199,7 @@ bool start_python(const char* py_path) {
 	}
 	#endif
 
+	printf("ASDFASDFASDFASDFAWEFQECQWECQWECQWECQWEC");
 	return true;
 }
 

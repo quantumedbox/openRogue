@@ -9,6 +9,8 @@ from typing import Any, Union
 
 # realisation of JIT C compilation by creating proxies that transform the arguments automatically
 
+# CFFI is good as compiler interface
+
 
 # TODO consideration of Cython
 # TODO compile linux shared objects

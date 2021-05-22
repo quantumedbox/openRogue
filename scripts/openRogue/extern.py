@@ -3,6 +3,8 @@ import sys
 import importlib
 import subprocess
 
+from . config_reader import get_config
+
 
 def depend(*args) -> None:
 	"""
@@ -16,7 +18,7 @@ def depend(*args) -> None:
 			subprocess.check_call([sys.executable, "-m", "ensurepip"])
 		else:
 			print("pip isn't present, trying to get it from get-pip.py")
-			subprocess.check_call([sys.executable, "get-pip.py"])
+			subprocess.check_call([sys.executable, get_config("scriptPath") + "/get-pip.py"])
 
 	for module in args:
 		try:

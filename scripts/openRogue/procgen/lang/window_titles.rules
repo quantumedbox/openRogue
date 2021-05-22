@@ -1,3 +1,5 @@
+!!! THERE'S NO NEED TO WRITE NEW SYNTAXES !!!
+
 # Word form definitions
 # TODO Ability to define imports from other files to segment the language specific definitions
 # $import("./russian.rules")

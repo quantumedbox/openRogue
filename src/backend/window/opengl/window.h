@@ -1,6 +1,10 @@
-#define OPENGL_MINOR_VER 30
-#define OPENGL_MAJOR_VER 46
+#define OPENGL_MINOR_VER 3
+#define OPENGL_MAJOR_VER 4
 #define DEFAULT_WINDOW_NAME "openRogue"
+
+#define WINDOW_FILL_COLOR_R 0.2
+#define WINDOW_FILL_COLOR_G 0
+#define WINDOW_FILL_COLOR_B 0.062
 
 // Event buffer is used for back-and-forth transfer when event polling
 // If event does not belong to current window it should be saved in event queue for another window
@@ -14,14 +18,22 @@
 // Milliseconds in which events are considered to be valid
 #define EVENT_TIMEOUT 1024
 
+//
+typedef struct {
+	SDL_Window* window;
+	SDL_GLContext context;
+	bitmask_t id;
+
+	uint32_t time_delta;
+	uint32_t prev_timestamp;
+}
+WindowHandler;
 
 // TODO Descriptions
 
-// TODO process_window and dispatch_window_events should be united
-
 /*
 */
-SDL_Window* init_window(int width, int height, const char* title);
+WindowHandler* init_window(int width, int height, const char* title);
 
 /*
 */
@@ -29,16 +41,11 @@ void update_window();
 
 /*
 */
-void close_window(SDL_Window*);
+void close_window(WindowHandler*);
 
 /*
 */
-bitmask_t process_window(SDL_Window*);
-
-/*
-*/
-EventQueue* dispatch_window_events(SDL_Window*);
-
+EventQueue* process_window(WindowHandler*);
 
 /*
 	Python code should call to free memory when it's done

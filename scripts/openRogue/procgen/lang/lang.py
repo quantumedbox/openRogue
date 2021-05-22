@@ -1,3 +1,3 @@
 """
-Procedural phrase generation from special 'rules' format
+Procedural phrase generation with support of language grammar
 """

@@ -12,18 +12,16 @@
 int _SDL_INITIALIZED = 0;
 
 
-// TODO Window structure that holds related data such as GL_Context, sizes and etc.
+// TODO Receiving errors on Python side
 
 
-SDL_Window* init_window(int width, int height, const char* title)
+WindowHandler* init_window(int width, int height, const char* title)
 {
 	if (!_SDL_INITIALIZED) {
 		SDL_Init(SDL_INIT_EVERYTHING);
 		SDL_GL_LoadLibrary(NULL);
 		_SDL_INITIALIZED = 1;
 	}
-
-	SDL_Window* window;
 
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, true);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, OPENGL_MAJOR_VER);
@@ -37,34 +35,36 @@ SDL_Window* init_window(int width, int height, const char* title)
 		title = DEFAULT_WINDOW_NAME;
 	}
 
-	window = SDL_CreateWindow(
+	SDL_Window* win = SDL_CreateWindow(
 		title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 		width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
 	);
 
-	if (!window) {
+	if (!win) {
 		printf("Could not create OpenGL window: %s\n", SDL_GetError());
-		return 0;
+		return NULL;
 	}
 
-	/*SDL_GLContext context = */SDL_GL_CreateContext(window);
-	glewInit();
-
-	// SDL_GL_MakeCurrent(window, context);
+	SDL_GLContext context = SDL_GL_CreateContext(win);
+	
+	GLenum error;
+	if ((error = glewInit()) != GLEW_OK) {
+		printf("Error on GLEW initialization: %s\n", glewGetErrorString(error));
+		return NULL;
+	}
 
 	SDL_GL_SetSwapInterval(1);
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 
-	return window;
+	WindowHandler* win_h = (WindowHandler*)calloc(1, sizeof(WindowHandler));
+	win_h->window = win;
+	win_h->context = context;
+	win_h->id = SDL_GetWindowID(win);
+
+	return win_h;
 }
-
-
-// void update_window()
-// {
-
-// }
 
 
 // Used for temporally store polled events that do not belong to current processed window
@@ -107,52 +107,12 @@ void _clear_winodow_events(int window_id)
 }
 
 
-// TODO Switch-case
-bitmask_t process_window(SDL_Window* w)
+void close_window(WindowHandler* w)
 {
-	bitmask_t mask = 0;
-
-	int window_id = SDL_GetWindowID(w);
-
-	glClearColor(0.4, 0.4, 0.4, 1.0);
-	// glClear(GL_COLOR_BUFFER_BIT);
-	// glFlush();
-	SDL_GL_SwapWindow(w);
-
-	SDL_Event event;
-	while (SDL_PollEvent(&event))
-	{
-		// if (event.type == SDL_QUIT)
-		// {
-		// 	// TODO Python layer should resolve window closure, this layer - is only signaling
-		// 	MASK_SET_BIT(mask, WINDOW_SIGNAL_CLOSED);
-		// 	// SDL_Quit();
-		// 	// break;
-		// }
-		if (event.type == SDL_WINDOWEVENT && event.window.windowID == window_id)
-		{
-			if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
-				MASK_SET_BIT(mask, WINDOW_SIGNAL_CLOSED);
-				// TODO Python layer should resolve window closure, this layer - is only signaling
-				// SDL_DestroyWindow(w);
-				// _clear_winodow_events(window_id);
-				// break;
-			}
-		} else {
-			_add_buffered_event(event);
-		}
-	}
-	_push_buffered_events();
-
-	return mask;
-}
-
-
-
-void close_window(SDL_Window* w)
-{
-	_clear_winodow_events(SDL_GetWindowID(w));
-	SDL_DestroyWindow(w);
+	_clear_winodow_events(w->id);
+	SDL_GL_DeleteContext(w->context);
+	SDL_DestroyWindow(w->window);
+	free(w);
 }
 
 
@@ -245,17 +205,29 @@ void _dispatch_mouse_button(EventQueue* queue, SDL_Event event)
 }
 
 
-EventQueue* dispatch_window_events(SDL_Window* w)
+EventQueue* process_window(WindowHandler* w)
 {
+	// Temp
+	SDL_GL_MakeCurrent(w->window, w->context);
+
+	glClearColor(
+		WINDOW_FILL_COLOR_R,
+		WINDOW_FILL_COLOR_G,
+		WINDOW_FILL_COLOR_B,
+		1.0
+	);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glFlush();
+	SDL_GL_SwapWindow(w->window);
+
 	EventQueue* queue = (EventQueue*)malloc(sizeof(EventQueue));
 	queue->events = (Event*)malloc(DISPATCH_BUFFER_SIZE * sizeof(Event));
 	queue->len = 0;
-
-	int window_id = SDL_GetWindowID(w);
+	queue->window_signals = WINDOW_SIGNAL_CLEAR;
 
 	#define check_window_id_of_type(_type) 			\
 													\
-			if (event._type.windowID != window_id)	\
+			if (event._type.windowID != w->id)		\
 					{								\
 					_add_buffered_event(event);		\
 					continue; 						\
@@ -269,6 +241,7 @@ EventQueue* dispatch_window_events(SDL_Window* w)
 			check_window_id_of_type(window);
 			_dispatch_keypress(queue, event);
 		}
+
 		else if (event.type == SDL_MOUSEMOTION) {
 			check_window_id_of_type(motion);
 			_dispatch_mouse_motion(queue, event);
@@ -279,6 +252,17 @@ EventQueue* dispatch_window_events(SDL_Window* w)
 			_dispatch_mouse_button(queue, event);
 		}
 
+		else if (event.type == SDL_WINDOWEVENT) {
+			check_window_id_of_type(window);
+			switch (event.window.type) {
+			case SDL_WINDOWEVENT_CLOSE:
+				MASK_SET_BIT(queue->window_signals, WINDOW_SIGNAL_CLOSED);
+				break;
+			default:
+				break;
+			}
+		}
+
 		// Halt dispatch if buffer is full
 		if (queue->len >= DISPATCH_BUFFER_SIZE) {
 			break;
@@ -286,7 +270,6 @@ EventQueue* dispatch_window_events(SDL_Window* w)
 	}
 	_push_buffered_events();
 
-	// printf("len: %u\n", dispatch_queue.len);
 	return queue;
 }
 

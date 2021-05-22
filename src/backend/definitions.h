@@ -1,5 +1,51 @@
 #include <inttypes.h>
 
+
+// Generic event for all controllers that describe actions in relative position
+typedef struct {
+	bitmask_t mouse_action;
+	bool is_pressed;
+	// TODO touch_screen_action; i.e touch_down, touch_press, touch_up
+	// TODO controllers axis motions
+	int32_t x;
+	int32_t y;
+	int32_t x_motion;
+	int32_t y_motion;
+}
+PointerEvent;
+
+// Generic event for all controllers that describe named actions
+typedef struct {
+	bitmask_t action;
+	bool is_key_pressed;
+	bool is_key_repeat;
+	uint32_t keycode;
+	bitmask_t keymod;
+}
+InputEvent;
+
+
+typedef struct {
+	bitmask_t type;
+	uint32_t timestamp;
+	// uint32_t windowid; // events should always be dispatched by window
+	union {
+		PointerEvent pointer_event;
+		InputEvent input_event;
+		// TODO text_event; // Unicode text output
+	};
+}
+Event;
+
+// 
+typedef struct {
+	Event* events;
+	len_t len;
+	bitmask_t window_signals;
+}
+EventQueue;
+
+
 enum EventType {
 	POINTER_EVENT 		= 1,
 	INPUT_EVENT 		= 2,
@@ -31,50 +77,9 @@ enum KeyMod {
 	KEYMOD_RIGHT_ALT	= 32,
 };
 
-// Generic event for all controllers that describe actions in relative position
-typedef struct {
-	bitmask_t mouse_action;
-	bool is_pressed;
-	// TODO touch_screen_action; i.e touch_down, touch_press, touch_up
-	// TODO controllers axis motions
-	int32_t x;
-	int32_t y;
-	int32_t x_motion;
-	int32_t y_motion;
-}
-PointerEvent;
-
-// Generic event for all controllers that describe named actions
-typedef struct {
-	bitmask_t action;
-	bool is_key_pressed;
-	bool is_key_repeat;
-	uint32_t keycode;
-	bitmask_t keymod;
-}
-InputEvent;
-
-typedef struct {
-	bitmask_t type;
-	uint32_t timestamp;
-	// uint32_t windowid; // events should always be dispatched by window
-	union {
-		PointerEvent pointer_event;
-		InputEvent input_event;
-		// TODO text_event; // Unicode text output
-	};
-}
-Event;
-
-// 
-typedef struct {
-	Event* events;
-	len_t len;
-}
-EventQueue;
-
 // Window change signals that used to form bit mask
 enum WINDOW_SIGNAL {
+	WINDOW_SIGNAL_CLEAR = 0,
 	WINDOW_SIGNAL_CLOSED = 1,
 	WINDOW_SIGNAL_RESIZED = 2,
 	WINDOW_SIGNAL_SHOWN = 4,
