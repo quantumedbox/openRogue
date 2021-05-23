@@ -219,6 +219,33 @@ void _dispatch_mouse_button(EventQueue* queue, SDL_Event event)
 }
 
 
+void _dispatch_window_resize(EventQueue* queue, SDL_Event event)
+{
+	Event current;
+
+	current.type = RESIZE_EVENT;
+	current.timestamp = event.common.timestamp;
+
+	current.resize_event.width = event.window.data1;
+	current.resize_event.height = event.window.data2;
+
+	queue->events[queue->len] = current;
+	queue->len++;
+}
+
+
+void _dispatch_window_close(EventQueue* queue, SDL_Event event)
+{
+	Event current;
+
+	current.type = CLOSE_EVENT;
+	current.timestamp = event.common.timestamp;
+
+	queue->events[queue->len] = current;
+	queue->len++;
+}
+
+
 EventQueue* process_window(WindowHandler* w)
 {
 	// Temp
@@ -237,7 +264,6 @@ EventQueue* process_window(WindowHandler* w)
 	EventQueue* queue = (EventQueue*)malloc(sizeof(EventQueue));
 	queue->events = (Event*)malloc(DISPATCH_BUFFER_SIZE * sizeof(Event));
 	queue->len = 0;
-	queue->window_signals = WINDOW_SIGNAL_CLEAR;
 
 	#define check_window_id_of_type(_type) 			\
 													\
@@ -251,14 +277,14 @@ EventQueue* process_window(WindowHandler* w)
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
-		if ((event.type == SDL_KEYDOWN) || (event.type == SDL_KEYUP)) {
-			check_window_id_of_type(window);
-			_dispatch_keypress(queue, event);
-		}
-
-		else if (event.type == SDL_MOUSEMOTION) {
+		if (event.type == SDL_MOUSEMOTION) {
 			check_window_id_of_type(motion);
 			_dispatch_mouse_motion(queue, event);
+		}
+
+		else if ((event.type == SDL_KEYDOWN) || (event.type == SDL_KEYUP)) {
+			check_window_id_of_type(window);
+			_dispatch_keypress(queue, event);
 		}
 
 		else if (event.type == SDL_MOUSEBUTTONUP) {
@@ -268,9 +294,12 @@ EventQueue* process_window(WindowHandler* w)
 
 		else if (event.type == SDL_WINDOWEVENT) {
 			check_window_id_of_type(window);
-			switch (event.window.type) {
+			switch (event.window.event) {
 			case SDL_WINDOWEVENT_CLOSE:
-				MASK_SET_BIT(queue->window_signals, WINDOW_SIGNAL_CLOSED);
+				_dispatch_window_close(queue, event);
+				break;
+			case SDL_WINDOWEVENT_RESIZED:
+				_dispatch_window_resize(queue, event);
 				break;
 			default:
 				break;

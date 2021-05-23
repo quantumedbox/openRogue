@@ -19,7 +19,6 @@ class Node:
 	Parent should be the owner of all children nodes that only
 	gives weak references to access them
 	"""
-
 	__slots__ = (
 		"name",
 		"event_ports",
@@ -53,7 +52,6 @@ class Node:
 		Used for deallocating data which is not tracked by garbage collector
 		Or as callback on deletion
 		"""
-		print(self.name, "was freed")
 
 
 	def __del__(self) -> None:

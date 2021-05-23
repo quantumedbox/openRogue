@@ -14,6 +14,10 @@ class C_PointerEvent(Structure):
 				('y_motion', c_int32)]
 
 
+class C_CloseEvent(Structure):
+	_fields_ = []
+
+
 class C_InputEvent(Structure):
 	_fields_ = [('action', c_uint32),
 				('is_key_pressed', c_bool),
@@ -22,9 +26,16 @@ class C_InputEvent(Structure):
 				('keymod', c_uint32)]
 
 
+class C_ResizeEvent(Structure):
+	_fields_ = [('width', c_uint32),
+				('height', c_uint32)]
+
+
 class C_EventUnion(Union):
 	_fields_ = [('pointer_event', C_PointerEvent),
-				('input_event', C_InputEvent)]
+				('input_event', C_InputEvent),
+				('close_event', C_CloseEvent),
+				('resize_event', C_ResizeEvent)]
 
 
 class C_Event(Structure):
@@ -36,14 +47,16 @@ class C_Event(Structure):
 
 class C_EventQueue(Structure):
 	_fields_ = [('events', POINTER(C_Event)),
-				('window_signals', c_uint32),
 				('len', c_size_t)]
+				# ('window_signals', c_uint32)]
 
 
 class EventType(IntFlag):
 	UNKNOUN_EVENT	= 0
 	POINTER_EVENT 	= 1
 	INPUT_EVENT 	= 2
+	CLOSE_EVENT		= 4
+	RESIZE_EVENT	= 8
 
 
 class WindowSignal(IntFlag):

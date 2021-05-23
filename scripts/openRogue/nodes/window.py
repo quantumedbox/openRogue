@@ -8,7 +8,7 @@ they are base game objects that do have standard interfaces as every other objec
 from . import ui
 from .. import ffi
 
-from .. types import component
+from .. types import component, Vector
 
 # TODO Random roguelike style window titles on default
 
@@ -43,8 +43,12 @@ class WindowComponent(component.Component):
 		"""
 		event_queue = self._api.process_window(self._window)
 
-		# for i in range(event_queue.contents.len):
-		# 	print(event_queue.contents.events[i])
+		for i in range(event_queue.contents.len):
+			event = event_queue.contents.events[i]
+			if event.type == ffi.EventType.CLOSE_EVENT:
+				self.close_window_behaviour()
+			elif event.type == ffi.EventType.RESIZE_EVENT:
+				self.size = Vector(event.resize_event.width, (event.resize_event.height))
 
 		self._api._free_event_queue(event_queue)
 
@@ -63,3 +67,11 @@ class WindowComponent(component.Component):
 
 	def _repos_window(self, *args):
 		self._api.repos_window(self._window, self.pos.x, self.pos.y)
+
+
+	def close_window_behaviour(self):
+		"""
+		Called when window receives close event
+		By default it deletes the object
+		"""
+		self._parent().free_child(self.name)
