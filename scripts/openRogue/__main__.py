@@ -5,10 +5,16 @@
 # from . import language
 # from . import ffi
 from . import nodes
-
-# Обновления окон должны быть обновлениями, вызываемые из структуры
-# Прямой контроль циклов стоит избегать
+from . types import Vector
 
 main = nodes.root.init_child("main", nodes.Container)
+
+main.size = Vector(600, 400)
+main.pos = Vector(120, 120)
+
+# alt = nodes.root.init_child("alt", nodes.Container)
+
+# alt.size = Vector(64, 64)
+# alt.pos = Vector(320, 240)
 
 nodes.root.loop()

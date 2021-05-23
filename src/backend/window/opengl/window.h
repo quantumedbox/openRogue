@@ -48,6 +48,14 @@ void close_window(WindowHandler*);
 EventQueue* process_window(WindowHandler*);
 
 /*
+*/
+void resize_window(WindowHandler*, int width, int height);
+
+/*
+*/
+void repos_window(WindowHandler*, int x, int y);
+
+/*
 	Python code should call to free memory when it's done
 */
 void _free_event_queue(EventQueue*);

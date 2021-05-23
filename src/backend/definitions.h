@@ -1,6 +1,25 @@
 #include <inttypes.h>
 
 
+typedef struct
+{
+	uint8_t type;
+	uint32_t x;
+	uint32_t y;
+	uint32_t width;
+	uint32_t height;
+
+	union {
+		struct strip {
+			const char* text;
+		};
+		struct tile {
+			const char* symbol;
+		};
+	};
+}
+Primitive;
+
 // Generic event for all controllers that describe actions in relative position
 typedef struct {
 	bitmask_t mouse_action;
@@ -47,8 +66,8 @@ EventQueue;
 
 
 enum EventType {
-	POINTER_EVENT 		= 1,
-	INPUT_EVENT 		= 2,
+	POINTER_EVENT 	= 1,
+	INPUT_EVENT 	= 2,
 };
 
 enum MouseAction {
@@ -62,9 +81,9 @@ enum MouseAction {
 };
 
 enum InputAction {
-	INPUT_CLEAR			= 0,
-	INPUT_KEYDOWN		= 1,
-	INPUT_KEYUP			= 2,
+	INPUT_CLEAR		= 0,
+	INPUT_KEYDOWN	= 1,
+	INPUT_KEYUP		= 2,
 };
 
 enum KeyMod {
@@ -79,18 +98,18 @@ enum KeyMod {
 
 // Window change signals that used to form bit mask
 enum WINDOW_SIGNAL {
-	WINDOW_SIGNAL_CLEAR = 0,
-	WINDOW_SIGNAL_CLOSED = 1,
-	WINDOW_SIGNAL_RESIZED = 2,
-	WINDOW_SIGNAL_SHOWN = 4,
-	WINDOW_SIGNAL_HIDDEN = 8,
-	WINDOW_SIGNAL_EXPOSED = 16,
-	WINDOW_SIGNAL_MOVED = 32,
-	WINDOW_SIGNAL_MINIMIZED = 64,
-	WINDOW_SIGNAL_MAXIMIZED = 128,
-	WINDOW_SIGNAL_RESTORED = 256,
+	WINDOW_SIGNAL_CLEAR 		= 0,
+	WINDOW_SIGNAL_CLOSED 		= 1,
+	WINDOW_SIGNAL_RESIZED 		= 2,
+	WINDOW_SIGNAL_SHOWN 		= 4,
+	WINDOW_SIGNAL_HIDDEN 		= 8,
+	WINDOW_SIGNAL_EXPOSED 		= 16,
+	WINDOW_SIGNAL_MOVED 		= 32,
+	WINDOW_SIGNAL_MINIMIZED 	= 64,
+	WINDOW_SIGNAL_MAXIMIZED 	= 128,
+	WINDOW_SIGNAL_RESTORED 		= 256,
 	WINDOW_SIGNAL_MOUSE_ENTERED = 512,
-	WINDOW_SIGNAL_MOUSE_EXITED = 1024,
-	WINDOW_SIGNAL_FOCUS_GAINED = 2048,
-	WINDOW_SIGNAL_FOCUS_LOST = 4096,
+	WINDOW_SIGNAL_MOUSE_EXITED 	= 1024,
+	WINDOW_SIGNAL_FOCUS_GAINED 	= 2048,
+	WINDOW_SIGNAL_FOCUS_LOST 	= 4096,
 };

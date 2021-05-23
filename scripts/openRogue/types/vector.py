@@ -1,6 +1,7 @@
 """
 """
 
+# ??? Maybe just use tuples ???
 # TODO Calculation methods
 # TODO Numpy implementation if needed (or even binding to cglm if we need calculations)
 
@@ -24,4 +25,4 @@ class Vector:
 	y = property(get_y, set_y)
 	# aliases for sizes
 	width = property(get_x, set_x)
-	height = property(get_x, set_x)
+	height = property(get_y, set_y)

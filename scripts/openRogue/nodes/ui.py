@@ -10,11 +10,28 @@ from .. types import Vector
 
 class NodeUI(node.Node):
 
-	def __init__(self, x=0, y=0, width=64, height=64):
+	def __init__(self, x=0, y=0, width=120, height=80):
 		node.Node.__init__(self)
 		self.event_ports["ui"] = self.ui_event
-		self.position = Vector(x, y)
-		self.size = Vector(width, height)
+		self._pos = Vector(x, y)
+		self._size = Vector(width, height)
+
+
+	@property
+	def size(self):
+		return self._size
+
+	@size.setter
+	def size(self, size: Vector):
+		self._size = size
+
+	@property
+	def pos(self):
+		return self._pos
+
+	@pos.setter
+	def pos(self, pos: Vector):
+		self._pos = pos
 
 
 	def ui_event(self, event: object) -> None:

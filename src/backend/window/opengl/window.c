@@ -17,6 +17,8 @@ int _SDL_INITIALIZED = 0;
 
 WindowHandler* init_window(int width, int height, const char* title)
 {
+	printf("%llu\n", sizeof(Primitive));
+
 	if (!_SDL_INITIALIZED) {
 		SDL_Init(SDL_INIT_EVERYTHING);
 		SDL_GL_LoadLibrary(NULL);
@@ -113,6 +115,18 @@ void close_window(WindowHandler* w)
 	SDL_GL_DeleteContext(w->context);
 	SDL_DestroyWindow(w->window);
 	free(w);
+}
+
+
+void resize_window(WindowHandler* w, int width, int height)
+{
+	SDL_SetWindowSize(w->window, width, height);
+}
+
+
+void repos_window(WindowHandler* w, int x, int y)
+{
+	SDL_SetWindowPosition(w->window, x, y);
 }
 
 

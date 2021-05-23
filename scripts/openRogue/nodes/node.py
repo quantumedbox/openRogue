@@ -7,9 +7,9 @@ from typing import Union
 
 # ??? Maybe it's better to return/store proxies and not weakrefs?
 
-# TODO Piping components by dynamic decorators
-
 # TODO Vertual method "tree_entered" that is called when node is added to an other node that is in /root/ tree
+# TODO Re-attachment of nodes
+# TODO Concrete name structure
 
 
 class Node:
@@ -41,7 +41,13 @@ class Node:
 		self.name = ""
 
 
-	def free(self):
+	def update(self, event) -> None:
+		"""
+		-- FREE TO OVERRIDE --
+		"""
+
+
+	def free(self) -> None:
 		"""
 		-- FREE TO OVERRIDE --
 		Used for deallocating data which is not tracked by garbage collector
@@ -49,7 +55,8 @@ class Node:
 		"""
 		print(self.name, "was freed")
 
-	def __del__(self):
+
+	def __del__(self) -> None:
 		self.free()
 
 
@@ -104,11 +111,6 @@ class Node:
 		return None
 
 
-	def update(self, event: object) -> None:
-		"""
-		"""
-
-
 	def emit_event(self, ptype: str, event: object) -> None:
 		"""
 		"""
@@ -120,10 +122,10 @@ class Node:
 	def __str__(self) -> str:
 		return "\n".join(
 			[
-				"-- %s (%s)" % (self.name, type(self).__name__),
-				"children: {}".format(", ".join(
-					"%s (%s)" % (child.name, type(child).__name__) for child in self._children)
-				),
-				"event_ports: {}".format(self.event_ports),
+				"%s (%s)" % (self.name, type(self).__name__),
+				# "children: {}".format(", ".join(
+				# 	"%s (%s)" % (child.name, type(child).__name__) for child in self._children)
+				# ),
+				# "event_ports: {}".format(self.event_ports),
 			]
 		)
