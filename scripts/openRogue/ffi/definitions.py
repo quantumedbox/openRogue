@@ -14,8 +14,8 @@ class C_PointerEvent(Structure):
 				('y_motion', c_int32)]
 
 
-class C_CloseEvent(Structure):
-	_fields_ = []
+# class C_CloseEvent(Structure):
+# 	_fields_ = []
 
 
 class C_InputEvent(Structure):
@@ -34,7 +34,7 @@ class C_ResizeEvent(Structure):
 class C_EventUnion(Union):
 	_fields_ = [('pointer_event', C_PointerEvent),
 				('input_event', C_InputEvent),
-				('close_event', C_CloseEvent),
+				# ('close_event', C_CloseEvent),
 				('resize_event', C_ResizeEvent)]
 
 
@@ -47,7 +47,7 @@ class C_Event(Structure):
 
 class C_EventQueue(Structure):
 	_fields_ = [('events', POINTER(C_Event)),
-				('len', c_size_t)]
+				('len', c_uint32)]
 				# ('window_signals', c_uint32)]
 
 

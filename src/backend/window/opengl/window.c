@@ -17,8 +17,6 @@ int _SDL_INITIALIZED = 0;
 
 WindowHandler* init_window(int width, int height, const char* title)
 {
-	printf("%llu\n", sizeof(Primitive));
-
 	if (!_SDL_INITIALIZED) {
 		SDL_Init(SDL_INIT_EVERYTHING);
 		SDL_GL_LoadLibrary(NULL);
@@ -248,6 +246,11 @@ void _dispatch_window_close(EventQueue* queue, SDL_Event event)
 
 EventQueue* process_window(WindowHandler* w)
 {
+	// Crude way of constant checking
+	// const char* err_str = SDL_GetError();
+	// if (err_str != NULL) {
+	// 	printf("error: %s\n", err_str);
+	// }
 	// Temp
 	SDL_GL_MakeCurrent(w->window, w->context);
 
@@ -313,6 +316,7 @@ EventQueue* process_window(WindowHandler* w)
 	}
 	_push_buffered_events();
 
+	// printf("len: %llu\n", queue->len);
 	return queue;
 }
 

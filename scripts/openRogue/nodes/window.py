@@ -28,13 +28,13 @@ class WindowComponent(component.Component):
 		self._api = ffi.manager.resolve("default")
 
 		self._window = self._api.init_window(self.size.width, self.size.height, self.name.encode())
-
+		#
 		component.deploy_front(self, "free", self._free_window)
-
+		#
 		component.deploy_back(self, "update", self._update_window)
-
+		#
 		component.deploy_back(self, "size", self._resize_window, propf="setter")
-
+		#
 		component.deploy_back(self, "pos", self._repos_window, propf="setter")
 
 
@@ -46,9 +46,13 @@ class WindowComponent(component.Component):
 		for i in range(event_queue.contents.len):
 			event = event_queue.contents.events[i]
 			if event.type == ffi.EventType.CLOSE_EVENT:
+				# print("close event")
 				self.close_window_behaviour()
+				# print("after close")
 			elif event.type == ffi.EventType.RESIZE_EVENT:
-				self.size = Vector(event.resize_event.width, (event.resize_event.height))
+				# print("resize event")
+				self.resize_window_behaviour(Vector(event.resize_event.width, event.resize_event.height))
+				# print("after resize")
 
 		self._api._free_event_queue(event_queue)
 
@@ -69,9 +73,19 @@ class WindowComponent(component.Component):
 		self._api.repos_window(self._window, self.pos.x, self.pos.y)
 
 
+	# ---------------------------------------------------- Behaviors --- #
+	# Special window component callbacks that are called on specific window events
+	# They could overrided if needed
+
 	def close_window_behaviour(self):
 		"""
-		Called when window receives close event
+		Called when system window receives close event
 		By default it deletes the object
 		"""
 		self._parent().free_child(self.name)
+
+	def resize_window_behaviour(self, size: Vector):
+		"""
+		Called when system window changes its size
+		"""
+		self.size = size

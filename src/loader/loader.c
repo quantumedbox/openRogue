@@ -199,7 +199,6 @@ bool start_python(const char* py_path) {
 	}
 	#endif
 
-	printf("ASDFASDFASDFASDFAWEFQECQWECQWECQWECQWEC");
 	return true;
 }
 

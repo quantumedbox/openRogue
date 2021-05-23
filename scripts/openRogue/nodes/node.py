@@ -52,6 +52,7 @@ class Node:
 		Used for deallocating data which is not tracked by garbage collector
 		Or as callback on deletion
 		"""
+		print(self, "was freed")
 
 
 	def __del__(self) -> None:

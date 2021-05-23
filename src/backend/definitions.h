@@ -66,7 +66,7 @@ typedef struct {
 	union {
 		PointerEvent pointer_event;
 		InputEvent input_event;
-		CloseEvent close_event;
+		// CloseEvent close_event;
 		ResizeEvent resize_event;
 		// TODO text_event; // Unicode text output
 	};
@@ -76,7 +76,7 @@ Event;
 // 
 typedef struct {
 	Event* events;
-	len_t len;
+	uint32_t len;
 	// bitmask_t window_signals;
 }
 EventQueue;
