@@ -53,10 +53,18 @@ CloseEvent;
 
 typedef struct
 {
-	uint32_t width;
-	uint32_t height;
+	int32_t width;
+	int32_t height;
 }
 ResizeEvent;
+
+
+typedef struct
+{
+	int32_t x;
+	int32_t y;
+}
+ReposEvent;
 
 
 typedef struct {
@@ -68,6 +76,7 @@ typedef struct {
 		InputEvent input_event;
 		// CloseEvent close_event;
 		ResizeEvent resize_event;
+		ReposEvent repos_event;
 		// TODO text_event; // Unicode text output
 	};
 }
@@ -77,7 +86,6 @@ Event;
 typedef struct {
 	Event* events;
 	uint32_t len;
-	// bitmask_t window_signals;
 }
 EventQueue;
 
@@ -88,6 +96,7 @@ enum EventType {
 	INPUT_EVENT 	= 2,
 	CLOSE_EVENT		= 4,
 	RESIZE_EVENT	= 8,
+	REPOS_EVENT 	= 16,
 };
 
 enum MouseAction {
@@ -115,21 +124,3 @@ enum KeyMod {
 	KEYMOD_LEFT_ALT		= 16,
 	KEYMOD_RIGHT_ALT	= 32,
 };
-
-// Window change signals that used to form bit mask
-// enum WINDOW_SIGNAL {
-// 	WINDOW_SIGNAL_CLEAR 		= 0,
-// 	WINDOW_SIGNAL_CLOSED 		= 1,
-// 	WINDOW_SIGNAL_RESIZED 		= 2,
-// 	WINDOW_SIGNAL_SHOWN 		= 4,
-// 	WINDOW_SIGNAL_HIDDEN 		= 8,
-// 	WINDOW_SIGNAL_EXPOSED 		= 16,
-// 	WINDOW_SIGNAL_MOVED 		= 32,
-// 	WINDOW_SIGNAL_MINIMIZED 	= 64,
-// 	WINDOW_SIGNAL_MAXIMIZED 	= 128,
-// 	WINDOW_SIGNAL_RESTORED 		= 256,
-// 	WINDOW_SIGNAL_MOUSE_ENTERED = 512,
-// 	WINDOW_SIGNAL_MOUSE_EXITED 	= 1024,
-// 	WINDOW_SIGNAL_FOCUS_GAINED 	= 2048,
-// 	WINDOW_SIGNAL_FOCUS_LOST 	= 4096,
-// };

@@ -5,15 +5,11 @@ but they all should follow the unified interface to work interchangeably
 
 types:
 
-	. Window 	-- 	anything that is used to describing concrete underlying window
-					with SDL it's directly SDL_Window* pointer, but other realizations
-					could have, for example, special structs to manage windows
+	. Window 	--  anything that is used to describing concrete underlying window, usually through struct
 
 definitions:
 	
 	. EventQueue	-- struct that contains array of events and the len of this array to be used on python side to create event objects
-
-	. WINDOW_SIGNAL -- unified signals of window life cycle such as closing, resizing, gaining focus and etc.
 
 
 
@@ -23,7 +19,7 @@ Window* init_window(int width, int height, const char* title);
 
 
 
--- Close signals are resolved by Python layer depending on their WINDOW_SIGNAL output
+-- Close and free all data of window
 
 void close_window(Window*);
 

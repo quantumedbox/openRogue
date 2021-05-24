@@ -1,13 +1,11 @@
 list of things that have to be done at some point:
 
-. context constructors (building system window on /root/ children from UI classes)
+. reattachment of nodes and restructuring them accordingly
+. register the changes that are made by component integration to give ability to delete them
+. redo/fix event queuing
 . use CFFI for API calling
 . cmake lists
 . libtcod integration
-. node logic, inheritance model
-. events and actions
-. themes
-. scenes and /root/
 . language procgen
 . logging
 . optional curses backend
@@ -16,8 +14,18 @@ list of things that have to be done at some point:
 
 priorities:
 
+. graphics layer in SDL2
+. interface primitives
+
 
 in process:
 
-. graphics layer in SDL2
-. interface primitives
+. events and actions
+. themes
+. node logic, inheritance model
+
+
+done:
+
+. context constructors (building system window on /root/ children from UI classes)
+. scenes and /root/

@@ -26,3 +26,6 @@ class Vector:
 	# aliases for sizes
 	width = property(get_x, set_x)
 	height = property(get_y, set_y)
+
+	def as_tuple(self) -> (int, int):
+		return (self.x, self.y)

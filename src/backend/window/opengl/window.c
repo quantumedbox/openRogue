@@ -15,6 +15,21 @@ int _SDL_INITIALIZED = 0;
 // TODO Receiving errors on Python side
 
 
+// TODO
+/*
+	Forms event queues to send
+
+	SDL_AddEventWatch(EventQueueFormer, NULL);
+*/
+int EventQueueFormer(void* _, SDL_Event* event)
+{
+
+	printf("hm!!!!!!!!!\n");
+
+	return 0;
+}
+
+
 WindowHandler* init_window(int width, int height, const char* title)
 {
 	if (!_SDL_INITIALIZED) {
@@ -55,7 +70,9 @@ WindowHandler* init_window(int width, int height, const char* title)
 
 	SDL_GL_SetSwapInterval(1);
 
-	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUE_SRC_ALPHA);
+	// glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 
 	WindowHandler* win_h = (WindowHandler*)calloc(1, sizeof(WindowHandler));
@@ -71,7 +88,7 @@ WindowHandler* init_window(int width, int height, const char* title)
 SDL_Event 	event_buffer[EVENT_BUFFER_SIZE];
 size_t 		event_buffer_len;
 
-__forceinline void _push_buffered_events()
+/*__forceinline*/ void _push_buffered_events()
 {
 	uint32_t cur_tick = SDL_GetTicks();
 	// Does order of addition matter? I believe it might
@@ -216,9 +233,21 @@ void _dispatch_mouse_button(EventQueue* queue, SDL_Event event)
 	queue->len++;
 }
 
+void _dispatch_window_close(EventQueue* queue, SDL_Event event)
+{
+	Event current;
+
+	current.type = CLOSE_EVENT;
+	current.timestamp = event.common.timestamp;
+
+	queue->events[queue->len] = current;
+	queue->len++;
+}
+
 
 void _dispatch_window_resize(EventQueue* queue, SDL_Event event)
 {
+	printf("resized!\n");
 	Event current;
 
 	current.type = RESIZE_EVENT;
@@ -232,12 +261,15 @@ void _dispatch_window_resize(EventQueue* queue, SDL_Event event)
 }
 
 
-void _dispatch_window_close(EventQueue* queue, SDL_Event event)
+void _dispatch_window_repos(EventQueue* queue, SDL_Event event)
 {
 	Event current;
 
-	current.type = CLOSE_EVENT;
+	current.type = REPOS_EVENT;
 	current.timestamp = event.common.timestamp;
+
+	current.repos_event.x = event.window.data1;
+	current.repos_event.y = event.window.data2;
 
 	queue->events[queue->len] = current;
 	queue->len++;
@@ -303,6 +335,9 @@ EventQueue* process_window(WindowHandler* w)
 				break;
 			case SDL_WINDOWEVENT_RESIZED:
 				_dispatch_window_resize(queue, event);
+				break;
+			case SDL_WINDOWEVENT_MOVED:
+				_dispatch_window_repos(queue, event);
 				break;
 			default:
 				break;

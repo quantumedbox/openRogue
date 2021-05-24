@@ -46,13 +46,13 @@ class WindowComponent(component.Component):
 		for i in range(event_queue.contents.len):
 			event = event_queue.contents.events[i]
 			if event.type == ffi.EventType.CLOSE_EVENT:
-				# print("close event")
 				self.close_window_behaviour()
-				# print("after close")
+
 			elif event.type == ffi.EventType.RESIZE_EVENT:
-				# print("resize event")
 				self.resize_window_behaviour(Vector(event.resize_event.width, event.resize_event.height))
-				# print("after resize")
+
+			elif event.type == ffi.EventType.REPOS_EVENT:
+				self.repos_window_behaviour(Vector(event.repos_event.x, event.repos_event.y))
 
 		self._api._free_event_queue(event_queue)
 
@@ -73,19 +73,25 @@ class WindowComponent(component.Component):
 		self._api.repos_window(self._window, self.pos.x, self.pos.y)
 
 
-	# ---------------------------------------------------- Behaviors --- #
+	# ------------------------------------------------------------ Behaviors --- #
 	# Special window component callbacks that are called on specific window events
 	# They could overrided if needed
 
-	def close_window_behaviour(self):
+	def close_window_behaviour(self) -> None:
 		"""
 		Called when system window receives close event
-		By default it deletes the object
+		By default it deletes the object from its parent and thus leaves the tree
 		"""
 		self._parent().free_child(self.name)
 
-	def resize_window_behaviour(self, size: Vector):
+	def resize_window_behaviour(self, size: Vector) -> None:
 		"""
 		Called when system window changes its size
 		"""
 		self.size = size
+
+	def repos_window_behaviour(self, pos: Vector) -> None:
+		"""
+		Called when system window changes its position
+		"""
+		self.pos = pos

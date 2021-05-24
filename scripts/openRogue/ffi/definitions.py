@@ -27,15 +27,21 @@ class C_InputEvent(Structure):
 
 
 class C_ResizeEvent(Structure):
-	_fields_ = [('width', c_uint32),
-				('height', c_uint32)]
+	_fields_ = [('width', c_int32),
+				('height', c_int32)]
+
+
+class C_ReposEvent(Structure):
+	_fields_ = [('x', c_int32),
+				('y', c_int32)]
 
 
 class C_EventUnion(Union):
 	_fields_ = [('pointer_event', C_PointerEvent),
 				('input_event', C_InputEvent),
 				# ('close_event', C_CloseEvent),
-				('resize_event', C_ResizeEvent)]
+				('resize_event', C_ResizeEvent),
+				('repos_event', C_ReposEvent)]
 
 
 class C_Event(Structure):
@@ -57,6 +63,7 @@ class EventType(IntFlag):
 	INPUT_EVENT 	= 2
 	CLOSE_EVENT		= 4
 	RESIZE_EVENT	= 8
+	REPOS_EVENT		= 16,
 
 
 class WindowSignal(IntFlag):
