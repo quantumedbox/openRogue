@@ -70,8 +70,8 @@ WindowHandler* init_window(int width, int height, const char* title)
 
 	SDL_GL_SetSwapInterval(1);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUE_SRC_ALPHA);
+	// glEnable(GL_BLEND);
+	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUE_SRC_ALPHA);
 	// glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 

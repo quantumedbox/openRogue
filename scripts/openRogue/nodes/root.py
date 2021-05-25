@@ -12,7 +12,10 @@ class Root(node.Node):
 	It mimics the desktop in ways that allow children to be aware of their screen position and etc.
 	Every children of root that is derived from UI class is considered to be its own system window
 	"""
-	__slots__ = ("size", "exit_if_no_more_windows")
+	__slots__ = (
+		"size",
+		"exit_if_no_more_windows",
+		)
 
 	def __init__(self):
 		node.Node.__init__(self)

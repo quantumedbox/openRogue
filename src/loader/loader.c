@@ -2,6 +2,8 @@
 	Executable that resolves the python executable path and config file variables
 */
 
+// TODO Err stream redirection if needed
+// TODO Do not close console on fatal error
 // TODO unix stuff isn't tested at all
 // TODO Passing arguments to python
 // TODO MSC comparability
@@ -179,11 +181,6 @@ bool start_python(const char* py_path) {
 			}
 		}
 		// WaitForSingleObject(pi.hProcess, INFINITE);
-		int err = MsgWaitForMultipleObjectsEx(1, pi.hProcess, false, INFINITE, QS_ALLEVENTS);
-		if (err == WAIT_FAILED) {
-			printf("Wait process exited with code %lu\n", GetLastError());
-			exit(-1);
-		}
 	}
 	#else
 	{
