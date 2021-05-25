@@ -178,10 +178,15 @@ bool start_python(const char* py_path) {
 				exit(EXIT_FAILURE);
 			}
 		}
-		WaitForSingleObject(pi.hProcess, INFINITE);
+		// WaitForSingleObject(pi.hProcess, INFINITE);
+		int err = MsgWaitForMultipleObjectsEx(1, pi.hProcess, false, INFINITE, QS_ALLEVENTS);
+		if (err == WAIT_FAILED) {
+			printf("Wait process exited with code %lu\n", GetLastError());
+			exit(-1);
+		}
 	}
 	#else
-	{	
+	{
 		if (!system(NULL)) {
 			perror("Cannot call process\n");
 			exit(EXIT_FAILURE);

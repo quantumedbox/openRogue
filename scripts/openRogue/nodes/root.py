@@ -12,13 +12,14 @@ class Root(node.Node):
 	It mimics the desktop in ways that allow children to be aware of their screen position and etc.
 	Every children of root that is derived from UI class is considered to be its own system window
 	"""
-	__slots__ = ("size",)
+	__slots__ = ("size", "exit_if_no_more_windows")
 
 	def __init__(self):
 		node.Node.__init__(self)
 		self.name = "root"
 		# TODO get screen size (should it be implemented in the Backend? by SDL_ListModes() for example)
 		self.size = Vector(0, 0)
+		self.exit_if_no_more_windows = True
 
 
 	def attach_child(self, name: str, child: 'Node'):
@@ -36,4 +37,6 @@ class Root(node.Node):
 		Init game loop
 		"""
 		while True:
+			if self.exit_if_no_more_windows and len(self._children) == 0:
+				break
 			self.emit_event("update", None)
