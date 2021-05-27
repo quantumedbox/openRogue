@@ -1,41 +1,54 @@
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 
 #include "window.h"
+#include "../../map.h"
 
 
-int _SDL_INITIALIZED = 0;
+int _is_window_subsystem_initialized = false;
 
 
 // TODO Receiving errors on Python side
 
+// TODO Window map to store active windows in C side too if needed
 
-// TODO
-/*
-	Forms event queues to send
 
-	SDL_AddEventWatch(EventQueueFormer, NULL);
-*/
-int EventQueueFormer(void* _, SDL_Event* event)
+// ----------------------------------------------------------------- Global objects -- //
+
+
+// Stores window handlers by their id
+Map* window_pool = NULL;
+
+
+// -------------------------------------------------------------------- Realization -- //
+
+
+static int _init_window_subsystem()
 {
+	SDL_Init(SDL_INIT_EVERYTHING);
 
-	printf("hm!!!!!!!!!\n");
+	SDL_AddEventWatch(event_queue_former, NULL);
+
+	SDL_GL_LoadLibrary(NULL);
+
+	window_pool = mapNew();
+
+	_is_window_subsystem_initialized = true;
 
 	return 0;
 }
 
 
-WindowHandler* init_window(int width, int height, const char* title)
+window_id_t init_window(int width, int height, const char* title)
 {
-	if (!_SDL_INITIALIZED) {
-		SDL_Init(SDL_INIT_EVERYTHING);
-		SDL_GL_LoadLibrary(NULL);
-		_SDL_INITIALIZED = 1;
+	if (!_is_window_subsystem_initialized) {
+		if (_init_window_subsystem() == -1)
+			return 0;
 	}
 
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, true);
@@ -46,26 +59,26 @@ WindowHandler* init_window(int width, int height, const char* title)
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-	if (title == NULL) {
+	if (title == 0) {
 		title = DEFAULT_WINDOW_NAME;
 	}
 
 	SDL_Window* win = SDL_CreateWindow(
-		title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-		width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
-	);
+	                      title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+	                      width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
+	                  );
 
 	if (!win) {
 		printf("Could not create OpenGL window: %s\n", SDL_GetError());
-		return NULL;
+		return 0;
 	}
 
 	SDL_GLContext context = SDL_GL_CreateContext(win);
-	
+
 	GLenum error;
 	if ((error = glewInit()) != GLEW_OK) {
 		printf("Error on GLEW initialization: %s\n", glewGetErrorString(error));
-		return NULL;
+		return 0;
 	}
 
 	SDL_GL_SetSwapInterval(1);
@@ -80,7 +93,12 @@ WindowHandler* init_window(int width, int height, const char* title)
 	win_h->context = context;
 	win_h->id = SDL_GetWindowID(win);
 
-	return win_h;
+	win_h->queue.events = (Event*)malloc(DISPATCH_BUFFER_SIZE * sizeof(Event));
+	win_h->queue.len = 0;
+
+	mapAdd(window_pool, win_h->id, (void*)win_h);
+
+	return win_h->id;
 }
 
 
@@ -124,8 +142,11 @@ void _clear_winodow_events(int window_id)
 }
 
 
-void close_window(WindowHandler* w)
+void close_window(window_id_t w_id)
 {
+	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_id);
+	mapDel(window_pool, w_id);
+
 	_clear_winodow_events(w->id);
 	SDL_GL_DeleteContext(w->context);
 	SDL_DestroyWindow(w->window);
@@ -133,14 +154,18 @@ void close_window(WindowHandler* w)
 }
 
 
-void resize_window(WindowHandler* w, int width, int height)
+void resize_window(window_id_t w_id, int width, int height)
 {
+	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_id);
+
 	SDL_SetWindowSize(w->window, width, height);
 }
 
 
-void repos_window(WindowHandler* w, int x, int y)
+void repos_window(window_id_t w_id, int x, int y)
 {
+	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_id);
+
 	SDL_SetWindowPosition(w->window, x, y);
 }
 
@@ -247,7 +272,6 @@ void _dispatch_window_close(EventQueue* queue, SDL_Event event)
 
 void _dispatch_window_resize(EventQueue* queue, SDL_Event event)
 {
-	printf("resized!\n");
 	Event current;
 
 	current.type = RESIZE_EVENT;
@@ -276,88 +300,84 @@ void _dispatch_window_repos(EventQueue* queue, SDL_Event event)
 }
 
 
-EventQueue* process_window(WindowHandler* w)
+EventQueue process_window(window_id_t w_id)
 {
+	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_id);
+
 	// Crude way of constant checking
 	// const char* err_str = SDL_GetError();
 	// if (err_str != NULL) {
 	// 	printf("error: %s\n", err_str);
 	// }
+
 	// Temp
 	SDL_GL_MakeCurrent(w->window, w->context);
 
 	glClearColor(
-		WINDOW_FILL_COLOR_R,
-		WINDOW_FILL_COLOR_G,
-		WINDOW_FILL_COLOR_B,
-		1.0
+	    WINDOW_FILL_COLOR_R,
+	    WINDOW_FILL_COLOR_G,
+	    WINDOW_FILL_COLOR_B,
+	    1.0
 	);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glFlush();
 	SDL_GL_SwapWindow(w->window);
 
-	EventQueue* queue = (EventQueue*)malloc(sizeof(EventQueue));
-	queue->events = (Event*)malloc(DISPATCH_BUFFER_SIZE * sizeof(Event));
-	queue->len = 0;
+	EventQueue queue = w->queue;
 
-	#define check_window_id_of_type(_type) 			\
-													\
-			if (event._type.windowID != w->id)		\
-					{								\
-					_add_buffered_event(event);		\
-					continue; 						\
-				}
+	w->queue.events = (Event*)malloc(DISPATCH_BUFFER_SIZE * sizeof(Event));
+	w->queue.len = 0;
 
+	SDL_Event _;
+	while (SDL_PollEvent(&_)) {}
 
-	SDL_Event event;
-	while (SDL_PollEvent(&event))
-	{
-		if (event.type == SDL_MOUSEMOTION) {
-			check_window_id_of_type(motion);
-			_dispatch_mouse_motion(queue, event);
-		}
-
-		else if ((event.type == SDL_KEYDOWN) || (event.type == SDL_KEYUP)) {
-			check_window_id_of_type(window);
-			_dispatch_keypress(queue, event);
-		}
-
-		else if (event.type == SDL_MOUSEBUTTONUP) {
-			check_window_id_of_type(button);
-			_dispatch_mouse_button(queue, event);
-		}
-
-		else if (event.type == SDL_WINDOWEVENT) {
-			check_window_id_of_type(window);
-			switch (event.window.event) {
-			case SDL_WINDOWEVENT_CLOSE:
-				_dispatch_window_close(queue, event);
-				break;
-			case SDL_WINDOWEVENT_RESIZED:
-				_dispatch_window_resize(queue, event);
-				break;
-			case SDL_WINDOWEVENT_MOVED:
-				_dispatch_window_repos(queue, event);
-				break;
-			default:
-				break;
-			}
-		}
-
-		// Halt dispatch if buffer is full
-		if (queue->len >= DISPATCH_BUFFER_SIZE) {
-			break;
-		}
-	}
-	_push_buffered_events();
-
-	// printf("len: %llu\n", queue->len);
 	return queue;
 }
 
-
-void _free_event_queue(EventQueue* queue)
+/*
+	Forms event queues to send
+*/
+int event_queue_former(void* _, SDL_Event* event_ptr)
 {
-	free(queue->events);
-	free(queue);
+	SDL_Event event = *event_ptr;
+
+	// Helper for getting window ids from event union fields
+	#define queue_from_type(_type) &(((WindowHandler*)mapGet(window_pool, event._type.windowID))->queue)
+
+	if (event.type == SDL_MOUSEMOTION) {
+		_dispatch_mouse_motion(queue_from_type(motion), event);
+	}
+
+	else if ((event.type == SDL_KEYDOWN) || (event.type == SDL_KEYUP)) {
+		_dispatch_keypress(queue_from_type(window), event);
+	}
+
+	else if (event.type == SDL_MOUSEBUTTONUP) {
+		_dispatch_mouse_button(queue_from_type(button), event);
+	}
+
+	else if (event.type == SDL_WINDOWEVENT) {
+		switch (event.window.event) {
+		case SDL_WINDOWEVENT_CLOSE:
+			_dispatch_window_close(queue_from_type(window), event);
+			break;
+		case SDL_WINDOWEVENT_RESIZED:
+			_dispatch_window_resize(queue_from_type(window), event);
+			break;
+		case SDL_WINDOWEVENT_MOVED:
+			_dispatch_window_repos(queue_from_type(window), event);
+			break;
+		default:
+			break;
+		}
+	}
+
+	return 0;
+}
+
+
+void _free_event_queue(EventQueue queue)
+{
+	free(queue.events);
+	// free(queue);
 }

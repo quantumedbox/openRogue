@@ -82,7 +82,7 @@ typedef struct {
 }
 Event;
 
-// 
+//
 typedef struct {
 	Event* events;
 	uint32_t len;

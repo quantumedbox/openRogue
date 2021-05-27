@@ -6,7 +6,7 @@
 //
 typedef uint32_t bitmask_t;
 
-// Len type for strictly 32 bit size_t 
+// Len type for strictly 32 bit size_t
 typedef uint32_t len_t;
 
 #define MASK_SET_BIT(mask, bit) 	mask |= bit

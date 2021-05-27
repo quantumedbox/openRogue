@@ -18,11 +18,15 @@
 // Milliseconds in which events are considered to be valid
 #define EVENT_TIMEOUT 1024
 
+typedef uint32_t window_id_t;
+
 //
 typedef struct {
 	SDL_Window* window;
 	SDL_GLContext context;
-	bitmask_t id;
+	window_id_t id;
+
+	EventQueue queue;
 
 	uint32_t time_delta;
 	uint32_t prev_timestamp;
@@ -33,7 +37,11 @@ WindowHandler;
 
 /*
 */
-WindowHandler* init_window(int width, int height, const char* title);
+int event_queue_former(void*, SDL_Event*);
+
+/*
+*/
+window_id_t init_window(int width, int height, const char* title);
 
 /*
 */
@@ -41,21 +49,21 @@ void update_window();
 
 /*
 */
-void close_window(WindowHandler*);
+void close_window(window_id_t);
 
 /*
 */
-EventQueue* process_window(WindowHandler*);
+EventQueue process_window(window_id_t);
 
 /*
 */
-void resize_window(WindowHandler*, int width, int height);
+void resize_window(window_id_t, int width, int height);
 
 /*
 */
-void repos_window(WindowHandler*, int x, int y);
+void repos_window(window_id_t, int x, int y);
 
 /*
 	Python code should call to free memory when it's done
 */
-void _free_event_queue(EventQueue*);
+void _free_event_queue(EventQueue);

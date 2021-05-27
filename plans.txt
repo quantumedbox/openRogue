@@ -1,5 +1,7 @@
 list of things that have to be done at some point:
 
+. 'chance' submodule
+. wchar support in config file
 . reattachment of nodes and restructuring them accordingly
 . register the changes that are made by component integration to give ability to delete them
 . redo/fix event queuing
@@ -14,6 +16,7 @@ list of things that have to be done at some point:
 
 priorities:
 
+. text rendering
 . graphics layer in SDL2
 . interface primitives
 
