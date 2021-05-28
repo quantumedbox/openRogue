@@ -17,9 +17,9 @@ backend_api="./backends/openRogue_SDL"
 c_compiler="./tcc/tcc"
 
 # PYTHONPATH of running python subprocess
-scriptPath="./scripts"
+script_path="./scripts"
 
 # should be contained in scriptPath and is used as entry point for execution
-engineModule="openRogue"
+engine_module="openRogue"
 
 debug=True

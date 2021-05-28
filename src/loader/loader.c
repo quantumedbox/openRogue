@@ -128,7 +128,7 @@ get_config_variable (const char* var_name)
 void
 resolve_config ()
 {
-	char* scriptPath_v = get_config_variable("scriptPath");
+	char* scriptPath_v = get_config_variable("script_path");
 	if (scriptPath_v) {
 		set_env_var("PYTHONPATH", scriptPath_v);
 		set_env_var("IRONPYTHONPATH", scriptPath_v);
@@ -141,7 +141,7 @@ resolve_config ()
 		free(c_compiler_v);
 	}
 
-	char* engineModule_v = get_config_variable("engineModule");
+	char* engineModule_v = get_config_variable("engine_module");
 	if (engineModule_v) {
 		if (ENGINEMODULE != NULL) {
 			free(ENGINEMODULE);
