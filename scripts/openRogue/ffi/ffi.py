@@ -50,9 +50,7 @@ class FFIInterface:
         "process_window",
         "resize_window",
         "repos_window",
-
-        #
-        "_free_event_queue",
+        "free_event_queue",
     )
 
     def __init__(self, shared):
@@ -72,5 +70,5 @@ class FFIInterface:
         self.repos_window = shared.repos_window
         self.repos_window.argtypes = (c_void_p, c_int, c_int)
 
-        self._free_event_queue = shared._free_event_queue
-        self._free_event_queue.argtypes = (C_EventQueue, )
+        self.free_event_queue = shared.free_event_queue
+        self.free_event_queue.argtypes = (C_EventQueue, )

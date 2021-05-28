@@ -1,7 +1,8 @@
-/*
-	Naive map
-*/
 #pragma once
+
+/*
+	Naive map implementation
+*/
 
 // TODO Unit tests
 

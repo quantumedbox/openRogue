@@ -1,19 +1,14 @@
 #define OPENGL_MINOR_VER 3
 #define OPENGL_MAJOR_VER 4
+
 #define DEFAULT_WINDOW_NAME "openRogue"
 
 #define WINDOW_FILL_COLOR_R 0.2
 #define WINDOW_FILL_COLOR_G 0
 #define WINDOW_FILL_COLOR_B 0.062
 
-// Event buffer is used for back-and-forth transfer when event polling
-// If event does not belong to current window it should be saved in event queue for another window
-#define EVENT_BUFFER_SIZE 1024
-
-// How many events could be transfered to python with single dispatch call
-// More precisely - the number describes how many Event types should be allocated
-// TODO Maybe its reasonable to reallocate buffer on demand, but events are usually do not stack up that much
-#define DISPATCH_BUFFER_SIZE 32
+// Size of staticly allocated event queue buffer
+#define EVENT_BUFFER_SIZE 1
 
 // Milliseconds in which events are considered to be valid
 #define EVENT_TIMEOUT 1024

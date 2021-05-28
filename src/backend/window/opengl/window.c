@@ -7,16 +7,19 @@
 #include <SDL2/SDL.h>
 
 #include "window.h"
-#include "../../map.h"
+#include "map.h"
 
 
-int _is_window_subsystem_initialized = false;
+static int is_window_subsystem_initialized = false;
 
 
 // TODO Receiving errors on Python side
 
 // TODO Window map to store active windows in C side too if needed
 
+
+// Helper for getting window ids from event union fields
+#define queue_from_event_type(event, type) &(((WindowHandler*)mapGet(window_pool, event.type.windowID))->queue)
 
 // ----------------------------------------------------------------- Global objects -- //
 
@@ -28,7 +31,9 @@ Map* window_pool = NULL;
 // -------------------------------------------------------------------- Realization -- //
 
 
-static int _init_window_subsystem()
+static
+int
+init_window_subsystem ()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
 
@@ -38,16 +43,17 @@ static int _init_window_subsystem()
 
 	window_pool = mapNew();
 
-	_is_window_subsystem_initialized = true;
+	is_window_subsystem_initialized = true;
 
 	return 0;
 }
 
 
-window_id_t init_window(int width, int height, const char* title)
+window_id_t
+init_window (int width, int height, const char* title)
 {
-	if (!_is_window_subsystem_initialized) {
-		if (_init_window_subsystem() == -1)
+	if (!is_window_subsystem_initialized) {
+		if (init_window_subsystem() == -1)
 			return 0;
 	}
 
@@ -93,7 +99,7 @@ window_id_t init_window(int width, int height, const char* title)
 	win_h->context = context;
 	win_h->id = SDL_GetWindowID(win);
 
-	win_h->queue.events = (Event*)malloc(DISPATCH_BUFFER_SIZE * sizeof(Event));
+	win_h->queue.events = (Event*)malloc(EVENT_BUFFER_SIZE * sizeof(Event));
 	win_h->queue.len = 0;
 
 	mapAdd(window_pool, win_h->id, (void*)win_h);
@@ -102,59 +108,22 @@ window_id_t init_window(int width, int height, const char* title)
 }
 
 
-// Used for temporally store polled events that do not belong to current processed window
-SDL_Event 	event_buffer[EVENT_BUFFER_SIZE];
-size_t 		event_buffer_len;
-
-/*__forceinline*/ void _push_buffered_events()
-{
-	uint32_t cur_tick = SDL_GetTicks();
-	// Does order of addition matter? I believe it might
-	for (register int i = 0; i < event_buffer_len; i++ ) {
-		if (event_buffer[i].common.timestamp - cur_tick >= EVENT_TIMEOUT)
-			continue;
-		SDL_PushEvent(&event_buffer[i]);
-	}
-	event_buffer_len = 0;
-}
-
-
-// If events are not processed for a long time they will be erased from buffer to prevent overflowing
-__forceinline void _add_buffered_event(SDL_Event event)
-{
-	if (event_buffer_len >= EVENT_BUFFER_SIZE)
-		return;
-	event_buffer[event_buffer_len] = event;
-	event_buffer_len++;
-}
-
-
-// When window is no longer valid we should clear all leftover events in event stack
-void _clear_winodow_events(int window_id)
-{
-	SDL_Event event;
-	while (SDL_PollEvent(&event))
-	{
-		if (event.type != SDL_WINDOWEVENT || event.window.windowID != window_id)
-			_add_buffered_event(event);
-	}
-	_push_buffered_events();
-}
-
-
-void close_window(window_id_t w_id)
+void
+close_window (window_id_t w_id)
 {
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_id);
 	mapDel(window_pool, w_id);
 
-	_clear_winodow_events(w->id);
+	free(w->queue.events);
+
 	SDL_GL_DeleteContext(w->context);
 	SDL_DestroyWindow(w->window);
 	free(w);
 }
 
 
-void resize_window(window_id_t w_id, int width, int height)
+void
+resize_window (window_id_t w_id, int width, int height)
 {
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_id);
 
@@ -162,7 +131,8 @@ void resize_window(window_id_t w_id, int width, int height)
 }
 
 
-void repos_window(window_id_t w_id, int x, int y)
+void
+repos_window (window_id_t w_id, int x, int y)
 {
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_id);
 
@@ -170,9 +140,14 @@ void repos_window(window_id_t w_id, int x, int y)
 }
 
 
-__forceinline void _dispatch_keypress(EventQueue* queue, SDL_Event event)
+static
+void
+dispatch_keypress (EventQueue* queue, SDL_Event event)
 {
 	Event current;
+
+	if (queue->len >= EVENT_BUFFER_SIZE)
+		return;
 
 	current.type = INPUT_EVENT;
 	current.timestamp = event.common.timestamp;
@@ -210,9 +185,14 @@ __forceinline void _dispatch_keypress(EventQueue* queue, SDL_Event event)
 }
 
 
-void _dispatch_mouse_motion(EventQueue* queue, SDL_Event event)
+static
+void
+_dispatch_mouse_motion (EventQueue* queue, SDL_Event event)
 {
 	Event current;
+
+	if (queue->len >= EVENT_BUFFER_SIZE)
+		return;
 
 	current.type = POINTER_EVENT;
 	current.timestamp = event.common.timestamp;
@@ -229,9 +209,14 @@ void _dispatch_mouse_motion(EventQueue* queue, SDL_Event event)
 }
 
 
-void _dispatch_mouse_button(EventQueue* queue, SDL_Event event)
+static
+void
+dispatch_mouse_button (EventQueue* queue, SDL_Event event)
 {
 	Event current;
+
+	if (queue->len >= EVENT_BUFFER_SIZE)
+		return;
 
 	current.type = POINTER_EVENT;
 	current.timestamp = event.common.timestamp;
@@ -258,9 +243,14 @@ void _dispatch_mouse_button(EventQueue* queue, SDL_Event event)
 	queue->len++;
 }
 
-void _dispatch_window_close(EventQueue* queue, SDL_Event event)
+static
+void
+dispatch_window_close (EventQueue* queue, SDL_Event event)
 {
 	Event current;
+
+	if (queue->len >= EVENT_BUFFER_SIZE)
+		return;
 
 	current.type = CLOSE_EVENT;
 	current.timestamp = event.common.timestamp;
@@ -270,9 +260,14 @@ void _dispatch_window_close(EventQueue* queue, SDL_Event event)
 }
 
 
-void _dispatch_window_resize(EventQueue* queue, SDL_Event event)
+static
+void
+dispatch_window_resize (EventQueue* queue, SDL_Event event)
 {
 	Event current;
+
+	if (queue->len >= EVENT_BUFFER_SIZE)
+		return;
 
 	current.type = RESIZE_EVENT;
 	current.timestamp = event.common.timestamp;
@@ -285,9 +280,14 @@ void _dispatch_window_resize(EventQueue* queue, SDL_Event event)
 }
 
 
-void _dispatch_window_repos(EventQueue* queue, SDL_Event event)
+static
+void
+dispatch_window_repos (EventQueue* queue, SDL_Event event)
 {
 	Event current;
+
+	if (queue->len >= EVENT_BUFFER_SIZE)
+		return;
 
 	current.type = REPOS_EVENT;
 	current.timestamp = event.common.timestamp;
@@ -300,19 +300,14 @@ void _dispatch_window_repos(EventQueue* queue, SDL_Event event)
 }
 
 
-EventQueue process_window(window_id_t w_id)
+EventQueue
+process_window (window_id_t w_id)
 {
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_id);
 
-	// Crude way of constant checking
-	// const char* err_str = SDL_GetError();
-	// if (err_str != NULL) {
-	// 	printf("error: %s\n", err_str);
-	// }
-
-	// Temp
 	SDL_GL_MakeCurrent(w->window, w->context);
 
+	// Temp
 	glClearColor(
 	    WINDOW_FILL_COLOR_R,
 	    WINDOW_FILL_COLOR_G,
@@ -325,9 +320,10 @@ EventQueue process_window(window_id_t w_id)
 
 	EventQueue queue = w->queue;
 
-	w->queue.events = (Event*)malloc(DISPATCH_BUFFER_SIZE * sizeof(Event));
+	w->queue.events = (Event*)malloc(EVENT_BUFFER_SIZE * sizeof(Event));
 	w->queue.len = 0;
 
+	// Process all events and clear the SDL queue
 	SDL_Event _;
 	while (SDL_PollEvent(&_)) {}
 
@@ -337,35 +333,33 @@ EventQueue process_window(window_id_t w_id)
 /*
 	Forms event queues to send
 */
-int event_queue_former(void* _, SDL_Event* event_ptr)
+int
+event_queue_former (void* _, SDL_Event* event_ptr)
 {
 	SDL_Event event = *event_ptr;
 
-	// Helper for getting window ids from event union fields
-	#define queue_from_type(_type) &(((WindowHandler*)mapGet(window_pool, event._type.windowID))->queue)
-
 	if (event.type == SDL_MOUSEMOTION) {
-		_dispatch_mouse_motion(queue_from_type(motion), event);
+		_dispatch_mouse_motion(queue_from_event_type(event, motion), event);
 	}
 
 	else if ((event.type == SDL_KEYDOWN) || (event.type == SDL_KEYUP)) {
-		_dispatch_keypress(queue_from_type(window), event);
+		dispatch_keypress(queue_from_event_type(event, window), event);
 	}
 
 	else if (event.type == SDL_MOUSEBUTTONUP) {
-		_dispatch_mouse_button(queue_from_type(button), event);
+		dispatch_mouse_button(queue_from_event_type(event, button), event);
 	}
 
 	else if (event.type == SDL_WINDOWEVENT) {
 		switch (event.window.event) {
 		case SDL_WINDOWEVENT_CLOSE:
-			_dispatch_window_close(queue_from_type(window), event);
+			dispatch_window_close(queue_from_event_type(event, window), event);
 			break;
 		case SDL_WINDOWEVENT_RESIZED:
-			_dispatch_window_resize(queue_from_type(window), event);
+			dispatch_window_resize(queue_from_event_type(event, window), event);
 			break;
 		case SDL_WINDOWEVENT_MOVED:
-			_dispatch_window_repos(queue_from_type(window), event);
+			dispatch_window_repos(queue_from_event_type(event, window), event);
 			break;
 		default:
 			break;
@@ -376,7 +370,8 @@ int event_queue_former(void* _, SDL_Event* event_ptr)
 }
 
 
-void _free_event_queue(EventQueue queue)
+void
+free_event_queue (EventQueue queue)
 {
 	free(queue.events);
 	// free(queue);

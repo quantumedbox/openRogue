@@ -1,10 +1,10 @@
 list of things that have to be done at some point:
 
+. get rid of relative imports
 . 'chance' submodule
 . wchar support in config file
 . reattachment of nodes and restructuring them accordingly
 . register the changes that are made by component integration to give ability to delete them
-. redo/fix event queuing
 . use CFFI for API calling
 . cmake lists
 . libtcod integration
@@ -32,3 +32,4 @@ done:
 
 . context constructors (building system window on /root/ children from UI classes)
 . scenes and /root/
+. event queuing

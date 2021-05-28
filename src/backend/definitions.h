@@ -20,6 +20,7 @@ typedef struct
 }
 Primitive;
 
+
 // Generic event for all controllers that describe actions in relative position
 typedef struct {
 	bitmask_t mouse_action;
@@ -32,6 +33,7 @@ typedef struct {
 	int32_t y_motion;
 }
 PointerEvent;
+
 
 // Generic event for all controllers that describe named actions
 typedef struct {
@@ -99,6 +101,7 @@ enum EventType {
 	REPOS_EVENT 	= 16,
 };
 
+
 enum MouseAction {
 	MOUSE_CLEAR 		= 0,
 	MOUSE_MOTION		= 1,
@@ -109,11 +112,13 @@ enum MouseAction {
 	MOUSE_WHEEL_DOWN 	= 32,
 };
 
+
 enum InputAction {
 	INPUT_CLEAR		= 0,
 	INPUT_KEYDOWN	= 1,
 	INPUT_KEYUP		= 2,
 };
+
 
 enum KeyMod {
 	KEYMOD_NONE			= 0,
