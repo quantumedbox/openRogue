@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+// TODO
+
 // error call implementation
 
 #define NEW_ERROR_TYPE(errtype, errmessage)	const char* _ERROR_##errtype = errmessage

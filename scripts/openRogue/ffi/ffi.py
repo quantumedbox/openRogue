@@ -61,7 +61,7 @@ class FFIInterface:
         self.close_window.argtypes = (c_void_p, )
 
         self.process_window = shared.process_window
-        self.process_window.restype = C_EventQueue
+        self.process_window.restype = POINTER(C_EventQueue)
         self.process_window.argtypes = (c_void_p, )
 
         self.resize_window = shared.resize_window
@@ -71,4 +71,4 @@ class FFIInterface:
         self.repos_window.argtypes = (c_void_p, c_int, c_int)
 
         self.free_event_queue = shared.free_event_queue
-        self.free_event_queue.argtypes = (C_EventQueue, )
+        self.free_event_queue.argtypes = (POINTER(C_EventQueue), )

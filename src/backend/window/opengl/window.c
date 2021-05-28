@@ -19,7 +19,7 @@ static int is_window_subsystem_initialized = false;
 
 
 // Helper for getting window ids from event union fields
-#define queue_from_event_type(event, type) &(((WindowHandler*)mapGet(window_pool, event.type.windowID))->queue)
+#define queue_from_event_type(event, type) ((WindowHandler*)mapGet(window_pool, event.type.windowID))->queue
 
 // ----------------------------------------------------------------- Global objects -- //
 
@@ -99,8 +99,9 @@ init_window (int width, int height, const char* title)
 	win_h->context = context;
 	win_h->id = SDL_GetWindowID(win);
 
-	win_h->queue.events = (Event*)malloc(EVENT_BUFFER_SIZE * sizeof(Event));
-	win_h->queue.len = 0;
+	win_h->queue = (EventQueue*)malloc(sizeof(EventQueue));
+	win_h->queue->events = (Event*)malloc(EVENT_BUFFER_SIZE * sizeof(Event));
+	win_h->queue->len = 0;
 
 	mapAdd(window_pool, win_h->id, (void*)win_h);
 
@@ -114,7 +115,8 @@ close_window (window_id_t w_id)
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_id);
 	mapDel(window_pool, w_id);
 
-	free(w->queue.events);
+	free(w->queue->events);
+	free(w->queue);
 
 	SDL_GL_DeleteContext(w->context);
 	SDL_DestroyWindow(w->window);
@@ -300,7 +302,7 @@ dispatch_window_repos (EventQueue* queue, SDL_Event event)
 }
 
 
-EventQueue
+EventQueue*
 process_window (window_id_t w_id)
 {
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_id);
@@ -318,14 +320,15 @@ process_window (window_id_t w_id)
 	glFlush();
 	SDL_GL_SwapWindow(w->window);
 
-	EventQueue queue = w->queue;
-
-	w->queue.events = (Event*)malloc(EVENT_BUFFER_SIZE * sizeof(Event));
-	w->queue.len = 0;
-
 	// Process all events and clear the SDL queue
 	SDL_Event _;
 	while (SDL_PollEvent(&_)) {}
+
+	EventQueue* queue = w->queue;
+
+	w->queue = (EventQueue*)malloc(sizeof(EventQueue));
+	w->queue->events = (Event*)malloc(EVENT_BUFFER_SIZE * sizeof(Event));
+	w->queue->len = 0;
 
 	return queue;
 }
@@ -337,6 +340,8 @@ int
 event_queue_former (void* _, SDL_Event* event_ptr)
 {
 	SDL_Event event = *event_ptr;
+
+	// TODO Check if window is present in window_pool
 
 	if (event.type == SDL_MOUSEMOTION) {
 		_dispatch_mouse_motion(queue_from_event_type(event, motion), event);
@@ -371,8 +376,8 @@ event_queue_former (void* _, SDL_Event* event_ptr)
 
 
 void
-free_event_queue (EventQueue queue)
+free_event_queue (EventQueue* queue)
 {
-	free(queue.events);
-	// free(queue);
+	free(queue->events);
+	free(queue);
 }
