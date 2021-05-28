@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-x c -std=c11 -Wall -Werror
+CFLAGS=-x c -std=c11 -Wall -Wextra #-Werror
 
 BACKEND_INCLUDES=-I src/backend
 
@@ -11,7 +11,7 @@ run:
 	$(CC) $(CFLAGS) src/loader/loader.c -o run.exe $(DEBUG)
 
 backend:
-	$(CC) $(CFLAGS) src/backend/backend.h -shared -fPIC -o backends/openRogue_SDL.dll $(DEBUG) $(BACKEND_INCLUDES) -lopengl32 -lglew32 -lSDL2 -fopenmp
+	$(CC) $(CFLAGS) src/backend/backend.h -shared -o backends/openRogue_SDL.dll $(DEBUG) $(BACKEND_INCLUDES) -lopengl32 -lglew32 -lSDL2 -fopenmp -lfreetype
 
 debug: DEBUG=-g
 release: DEBUG=

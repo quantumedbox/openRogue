@@ -6,6 +6,8 @@
 
 // TODO Unit tests
 
+// TODO Map func
+
 // TODO Optimize recurrent functions
 // TODO Iteration through items
 // TODO It's easy to leak memory in current implementation which is not good
@@ -72,6 +74,7 @@ Map;
 
 // ------------------------------------------------------------ Function signatures -- //
 
+
 Map* 	mapNew		();
 void 	mapAdd 		(Map*, key_t key, data_t);
 bool	mapHas		(Map*, key_t key);
@@ -81,24 +84,26 @@ void 	mapDestroy	(Map*);
 void 	mapClear	(Map*);
 void 	mapPrint 	(Map*);
 
-static 	Bucket* _mapNewBucket		();
-static  void 	_mapExtend			(Map*);
-static 	bool 	_mapHasKeyRecur		(Bucket*, key_t key);
-static 	void 	_mapAllocateBuckets	(Map*, size_t n);
-static 	bool 	_mapAddRecur		(Bucket*, key_t key, data_t);
-static  void 	_mapExtend			(Map*);
-static  void 	_mapClearStack		(Bucket*);
-static 	void 	_mapPrintRecur		(Bucket*);
+static 	Bucket* mapNewBucket		();
+static  void 	mapExtend			(Map*);
+static 	bool 	mapHasKeyRecur		(Bucket*, key_t key);
+static 	void 	mapAllocateBuckets	(Map*, size_t n);
+static 	bool 	mapAddRecur			(Bucket*, key_t key, data_t);
+static  void 	mapExtend			(Map*);
+static  void 	mapClearStack		(Bucket*);
+static 	void 	mapPrintRecur		(Bucket*);
 
-static  void 	_mapReallocateBucketStack	(Bucket* buckets, Bucket* stack, size_t cap);
-static  void 	_mapReallocateBucketRecur	(Bucket* stack,   Bucket* bucket);
+static  void 	mapReallocateBucketStack	(Bucket* buckets, Bucket* stack, size_t cap);
+static  void 	mapReallocateBucketRecur	(Bucket* stack, Bucket* bucket);
+
 
 // ----------------------------------------------------------------- Hash functions -- //
 
 /*
 	Returns integer value that represents a value of given null terminated string
 */
-size_t hash_string (char *s)
+size_t
+hash_string (char *s)
 {
 	const int p = 97;
 	const int m = 1e9 + 9;
@@ -120,11 +125,12 @@ size_t hash_string (char *s)
 	Allocates new map structure
 	You have to call mapDestroy() to free the memory
 */
-Map* mapNew()
+Map*
+mapNew()
 {
 	Map* new = (Map*)malloc(sizeof(Map));
 
-	_mapAllocateBuckets(new, MAP_INIT_CAPACITY);
+	mapAllocateBuckets(new, MAP_INIT_CAPACITY);
 
 	// pthread_mutex_init(&new->lock, NULL);
 
@@ -135,7 +141,7 @@ Map* mapNew()
 }
 
 
-static inline Bucket* _mapNewBucket()
+static inline Bucket* mapNewBucket()
 {
 	Bucket* new = (Bucket*)calloc(1, sizeof(Bucket));
 
@@ -143,7 +149,9 @@ static inline Bucket* _mapNewBucket()
 }
 
 
-static inline void _mapAllocateBuckets(Map* m, size_t n)
+static inline
+void
+mapAllocateBuckets(Map* m, size_t n)
 {
 	m->buckets = (Bucket*)calloc(n, sizeof(Bucket));
 	m->capacity = n;
@@ -154,7 +162,8 @@ static inline void _mapAllocateBuckets(Map* m, size_t n)
 	WARNING! If given key is already in the map then the data will be replaced.
 	If previous data was the reference to a heap-allocated segment - it will leak
 */
-void mapAdd(Map* m, key_t key, data_t data)
+void
+mapAdd(Map* m, key_t key, data_t data)
 {
 	// pthread_mutex_lock(&m->lock);
 
@@ -164,16 +173,16 @@ void mapAdd(Map* m, key_t key, data_t data)
 	{
 		m->len += 1;
 
-		Bucket* new = _mapNewBucket();
+		Bucket* new = mapNewBucket();
 		m->buckets[idx].next = new;
 		new->key 	= key;
 		new->data 	= data;
 	}
-	else if (_mapAddRecur(m->buckets[idx].next, key, data))
+	else if (mapAddRecur(m->buckets[idx].next, key, data))
 		m->len += 1;
 
 	if ((m->len < MAP_MAX_CAPACITY) && (((float)m->len / m->capacity) >= m->threshold))
-		_mapExtend(m);
+		mapExtend(m);
 
 	// pthread_mutex_unlock(&m->lock);
 }
@@ -183,7 +192,9 @@ void mapAdd(Map* m, key_t key, data_t data)
 	Returns false if there was an item under the given key already and it was replaced
 	WARNING! If replaced data was heap-allocated it leaks memory
 */
-static inline bool _mapAddRecur(Bucket* b, key_t key, data_t data)
+static inline
+bool
+mapAddRecur(Bucket* b, key_t key, data_t data)
 {
 	if (b->key == key) {
 		b->data = data;
@@ -193,7 +204,7 @@ static inline bool _mapAddRecur(Bucket* b, key_t key, data_t data)
 
 	else if (b->next == NULL)
 	{
-		Bucket* new = _mapNewBucket();
+		Bucket* new = mapNewBucket();
 		b->next 	= new;
 		new->key 	= key;
 		new->data 	= data;
@@ -201,13 +212,14 @@ static inline bool _mapAddRecur(Bucket* b, key_t key, data_t data)
 		return true;
 	}
 
-	return _mapAddRecur(b->next, key, data);
+	return mapAddRecur(b->next, key, data);
 }
 
 /*
 	Returns true if given key is present in the map, false if not
 */
-bool mapHas(Map* m, key_t key)
+bool
+mapHas(Map* m, key_t key)
 {
 	bool return_data = false;
 
@@ -216,7 +228,7 @@ bool mapHas(Map* m, key_t key)
 	uint32_t idx = key % m->capacity;
 
 	if (m->buckets[idx].next != NULL)
-		return_data = _mapHasKeyRecur(m->buckets[idx].next, key);
+		return_data = mapHasKeyRecur(m->buckets[idx].next, key);
 
 	// pthread_mutex_unlock(&m->lock);
 
@@ -224,7 +236,9 @@ bool mapHas(Map* m, key_t key)
 }
 
 
-static inline bool _mapHasKeyRecur(Bucket* b, key_t key)
+static inline
+bool
+mapHasKeyRecur(Bucket* b, key_t key)
 {
 	if (b->key == key)
 		return true;
@@ -232,13 +246,14 @@ static inline bool _mapHasKeyRecur(Bucket* b, key_t key)
 	else if (b->next == NULL)
 		return false;
 
-	return _mapHasKeyRecur(b->next, key);
+	return mapHasKeyRecur(b->next, key);
 }
 
 /*
 	Returns the void* data that is under given key or NULL if nothing to find
 */
-data_t mapGet(Map* m, key_t key)
+data_t
+mapGet(Map* m, key_t key)
 {
 	uint32_t idx = key % m->capacity;
 
@@ -258,7 +273,8 @@ data_t mapGet(Map* m, key_t key)
 	Deletes the item with a given key
 	WARNING! This does not free the allocated heap data of the item itself, only the inner data of map
 */
-void mapDel(Map* m, key_t key)
+void
+mapDel(Map* m, key_t key)
 {
 	uint32_t idx = key % m->capacity;
 
@@ -279,7 +295,9 @@ void mapDel(Map* m, key_t key)
 /*
 	Create new bucket array and relocate existing elems to it
 */
-static void _mapExtend(Map* m)
+static
+void
+mapExtend(Map* m)
 {
 	size_t old_capacity = m->capacity;
 
@@ -288,10 +306,10 @@ static void _mapExtend(Map* m)
 	Bucket* new_array = (Bucket*)calloc(m->capacity, sizeof(Bucket));
 
 	OPTIONAL_OMP_PARALLEL_FOR
-	for (register int i = 0; i < old_capacity; i++)
+	for (register size_t i = 0; i < old_capacity; i++)
 	{
 		if (m->buckets[i].next != NULL)
-			_mapReallocateBucketStack(new_array, m->buckets[i].next, m->capacity);
+			mapReallocateBucketStack(new_array, m->buckets[i].next, m->capacity);
 	}
 
 	free(m->buckets);
@@ -301,7 +319,9 @@ static void _mapExtend(Map* m)
 /*
 	Recursevly distribute all elements of bucket stack to the buckets array
 */
-static void _mapReallocateBucketStack(Bucket* buckets, Bucket* stack, size_t cap)
+static
+void
+mapReallocateBucketStack(Bucket* buckets, Bucket* stack, size_t cap)
 {
 	uint32_t idx = stack->key % cap;
 
@@ -312,30 +332,33 @@ static void _mapReallocateBucketStack(Bucket* buckets, Bucket* stack, size_t cap
 		stack->next = NULL;
 	}
 	else
-		_mapReallocateBucketRecur(buckets[idx].next, stack);
+		mapReallocateBucketRecur(buckets[idx].next, stack);
 
 	if (stack_next != NULL)
-		_mapReallocateBucketStack(buckets, stack_next, cap);
+		mapReallocateBucketStack(buckets, stack_next, cap);
 }
 
 /*
 	Attach bucket argument to the last element of bucket stack
 */
-static void _mapReallocateBucketRecur(Bucket* stack, Bucket* bucket)
+static
+void
+mapReallocateBucketRecur(Bucket* stack, Bucket* bucket)
 {
 	if (stack->next == NULL) {
 		stack->next = bucket;
 		bucket->next = NULL;
 	}
 	else
-		_mapReallocateBucketRecur(stack->next, bucket);
+		mapReallocateBucketRecur(stack->next, bucket);
 }
 
 /*
 	Free all allocated data that is associated with map
 	WARNING! Stored items are not freed by this function, you have to make sure that map is empty or you will leak memory
 */
-void mapDestroy(Map* m)
+void
+mapDestroy(Map* m)
 {
 	// mapClear(m);
 	free(m->buckets);
@@ -347,15 +370,16 @@ void mapDestroy(Map* m)
 	Deallocate all buckets and their elems
 	WARNING! This not frees the data associated with items, you could easily leak memory
 */
-void mapClear(Map* m)
+void
+mapClear(Map* m)
 {
 	// pthread_mutex_lock(&m->lock);
 
 	OPTIONAL_OMP_PARALLEL_FOR
-	for (register int i = 0; i < m->capacity; i++)
+	for (register size_t i = 0; i < m->capacity; i++)
 	{
 		if (m->buckets[i].next != NULL) {
-			_mapClearStack(m->buckets[i].next);
+			mapClearStack(m->buckets[i].next);
 			m->buckets[i].next = NULL;
 		}
 	}
@@ -365,27 +389,30 @@ void mapClear(Map* m)
 	if (m->capacity > MAP_INIT_CAPACITY)
 	{
 		free(m->buckets);
-		_mapAllocateBuckets(m, MAP_INIT_CAPACITY);
+		mapAllocateBuckets(m, MAP_INIT_CAPACITY);
 	}
 
 	// pthread_mutex_unlock(&m->lock);
 }
 
 
-static void _mapClearStack(Bucket* stack)
+static
+void
+mapClearStack(Bucket* stack)
 {
 	// Data could be not heap allocated
 	// Or could have references to another allocated data
 	// free(stack->data);
 
 	if (stack->next != NULL)
-		_mapClearStack(stack->next);
+		mapClearStack(stack->next);
 
 	free(stack);
 }
 
 
-void mapPrint(Map* m)
+void
+mapPrint(Map* m)
 {
 	fprintf(stdout, "hashmap object at %p\n", m);
 	fprintf(stdout, "len: %llu, threshold: %.2f, buckets count: %llu\n", m->len, m->threshold, m->capacity);
@@ -395,13 +422,15 @@ void mapPrint(Map* m)
 	{
 		if (m->buckets[i].next != NULL) {
 			fprintf(stdout, "---BUCKET %d\n", i);
-			_mapPrintRecur(m->buckets[i].next);
+			mapPrintRecur(m->buckets[i].next);
 		}
 	}
 }
 
 
-static void _mapPrintRecur(Bucket* b)
+static
+void
+mapPrintRecur(Bucket* b)
 {
 	fprintf(
 	    stdout, "(%p) key: %llu, data at: %p, next: %p\n",
@@ -412,5 +441,5 @@ static void _mapPrintRecur(Bucket* b)
 	);
 
 	if (b->next != NULL)
-		_mapPrintRecur(b->next);
+		mapPrintRecur(b->next);
 }

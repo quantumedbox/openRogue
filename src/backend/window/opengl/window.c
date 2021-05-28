@@ -8,10 +8,8 @@
 
 #include "window.h"
 #include "map.h"
-
-
-static int is_window_subsystem_initialized = false;
-
+#include "text/text.c"
+#include "error.h"
 
 // TODO Receiving errors on Python side
 
@@ -22,6 +20,9 @@ static int is_window_subsystem_initialized = false;
 #define queue_from_event_type(event, type) ((WindowHandler*)mapGet(window_pool, event.type.windowID))->queue
 
 // ----------------------------------------------------------------- Global objects -- //
+
+
+static int is_window_subsystem_initialized = false;
 
 
 // Stores window handlers by their id
@@ -35,11 +36,19 @@ static
 int
 init_window_subsystem ()
 {
-	SDL_Init(SDL_INIT_EVERYTHING);
+	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+		fprintf(stderr, "Error on SDL initialization:\n%s\n", SDL_GetError());
+		SIGNAL_ERROR();
+		return -1;
+	}
 
 	SDL_AddEventWatch(event_queue_former, NULL);
 
-	SDL_GL_LoadLibrary(NULL);
+	if (SDL_GL_LoadLibrary(NULL) != 0) {
+		fprintf(stderr, "Error on SDL OpenGL extenion initialization:\n%s\n", SDL_GetError());
+		SIGNAL_ERROR();
+		return -1;
+	}
 
 	window_pool = mapNew();
 
@@ -48,13 +57,13 @@ init_window_subsystem ()
 	return 0;
 }
 
-
 window_id_t
 init_window (int width, int height, const char* title)
 {
 	if (!is_window_subsystem_initialized) {
-		if (init_window_subsystem() == -1)
+		if (init_window_subsystem() == -1) {
 			return 0;
+		}
 	}
 
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, true);
@@ -75,23 +84,30 @@ init_window (int width, int height, const char* title)
 	                  );
 
 	if (!win) {
-		printf("Could not create OpenGL window: %s\n", SDL_GetError());
+		fprintf(stderr, "Could not create OpenGL window: %s\n", SDL_GetError());
+		SIGNAL_ERROR();
 		return 0;
 	}
 
 	SDL_GLContext context = SDL_GL_CreateContext(win);
 
+	if (!is_text_subsystem_initialized) {
+		if (init_text_subsystem() == -1)
+			return 0;
+	}
+
 	GLenum error;
 	if ((error = glewInit()) != GLEW_OK) {
-		printf("Error on GLEW initialization: %s\n", glewGetErrorString(error));
+		fprintf(stderr, "Error on GLEW initialization: %s\n", glewGetErrorString(error));
+		SIGNAL_ERROR();
 		return 0;
 	}
 
 	SDL_GL_SetSwapInterval(1);
 
-	// glEnable(GL_BLEND);
+	glEnable(GL_BLEND);
 	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUE_SRC_ALPHA);
-	// glDisable(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 
 	WindowHandler* win_h = (WindowHandler*)calloc(1, sizeof(WindowHandler));
