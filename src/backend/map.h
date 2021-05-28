@@ -103,7 +103,7 @@ static  void 	mapReallocateBucketRecur	(Bucket* stack, Bucket* bucket);
 	Returns integer value that represents a value of given null terminated string
 */
 size_t
-hash_string (char *s)
+hash_string (const char *s)
 {
 	const int p = 97;
 	const int m = 1e9 + 9;

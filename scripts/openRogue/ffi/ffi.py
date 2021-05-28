@@ -57,20 +57,20 @@ class FFIInterface:
     def __init__(self, shared):
         self._shared = shared
 
-        shared.init_window.restype = c_void_p
+        shared.init_window.restype = c_uint32
 
         self.close_window = shared.close_window
-        self.close_window.argtypes = (c_void_p, )
+        self.close_window.argtypes = (c_uint32, )
 
         self.process_window = shared.process_window
         self.process_window.restype = POINTER(C_EventQueue)
-        self.process_window.argtypes = (c_void_p, )
+        self.process_window.argtypes = (c_uint32, )
 
         self.resize_window = shared.resize_window
-        self.resize_window.argtypes = (c_void_p, c_int, c_int)
+        self.resize_window.argtypes = (c_uint32, c_int, c_int)
 
         self.repos_window = shared.repos_window
-        self.repos_window.argtypes = (c_void_p, c_int, c_int)
+        self.repos_window.argtypes = (c_uint32, c_int, c_int)
 
         self.free_event_queue = shared.free_event_queue
         self.free_event_queue.argtypes = (POINTER(C_EventQueue), )

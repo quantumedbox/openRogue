@@ -8,12 +8,7 @@
 #define WINDOW_FILL_COLOR_B 0.062
 
 // Size of staticly allocated event queue buffer
-#define EVENT_BUFFER_SIZE 1
-
-// Milliseconds in which events are considered to be valid
-#define EVENT_TIMEOUT 1024
-
-typedef uint32_t window_id_t;
+#define EVENT_BUFFER_SIZE 16
 
 //
 typedef struct {

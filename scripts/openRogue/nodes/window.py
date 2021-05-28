@@ -46,6 +46,8 @@ class WindowComponent(component.Component):
         """
         event_queue = self._api.process_window(self._window)
 
+        print("len", event_queue.contents.len)
+
         for i in range(event_queue.contents.len):
             event = event_queue.contents.events[i]
             if event.type == ffi.EventType.CLOSE_EVENT:

@@ -11,6 +11,9 @@
 #include "text/text.c"
 #include "error.h"
 
+
+// TODO Put event logic in a separate file
+
 // TODO Receiving errors on Python side
 
 // TODO Window map to store active windows in C side too if needed
