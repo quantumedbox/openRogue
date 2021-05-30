@@ -46,7 +46,8 @@ class WindowComponent(component.Component):
         """
         event_queue = self._api.process_window(self._window)
 
-        print("len", event_queue.contents.len)
+        # if event_queue.contents.len != 0:
+        #     print("queue len", event_queue.contents.len)
 
         for i in range(event_queue.contents.len):
             event = event_queue.contents.events[i]

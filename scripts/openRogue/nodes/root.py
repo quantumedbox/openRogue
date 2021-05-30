@@ -10,10 +10,10 @@ from .. import signal
 
 class Root(node.Node):
     """
-	Used as layer of integration of openRogue objects into system
-	It mimics the desktop in ways that allow children to be aware of their screen position and etc.
-	Every children of root that is derived from UI class is considered to be its own system window
-	"""
+    Used as layer of integration of openRogue objects into system
+    It mimics the desktop in ways that allow children to be aware of their screen position and etc.
+    Every children of root that is derived from UI class is considered to be its own system window
+    """
     __slots__ = (
         "size",
         "exit_without_window_children",
@@ -28,8 +28,8 @@ class Root(node.Node):
 
     def attach_child(self, name: str, child: 'Node'):
         """
-		Contextual constructor that implements system window component for every attached UI child
-		"""
+        Contextual constructor that implements system window component for every attached UI child
+        """
         child.name = name
         if issubclass(type(child), ui.NodeUI):
             implement_component(child, window.WindowComponent)
@@ -37,8 +37,8 @@ class Root(node.Node):
 
     def loop(self):
         """
-		Init game loop
-		"""
+        Init game loop
+        """
         while True:
             # Check if any of children implement window component and if not, - exit the loop
             if self.exit_without_window_children:

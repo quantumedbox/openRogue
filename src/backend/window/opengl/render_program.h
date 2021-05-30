@@ -49,22 +49,22 @@ load_shader_from_file (char *dir)
 
 
 static
-void
+const char*
 get_opengl_log (GLuint ptr,
-				GLenum status_type,
-				char* log)
+                GLenum status_type)
 {
 	int log_size;
 	glGetShaderiv(ptr, status_type, &log_size);
-	log = (char*)malloc(log_size);
+	const char* log = (char*)malloc(log_size);
 	glGetShaderInfoLog(ptr, log_size, NULL, log);
+	return log;
 }
 
 
 void
 compile_shader (GLuint *p_shader,
-				const char *shader_code,
-				GLenum shader_type)
+                const char *shader_code,
+                GLenum shader_type)
 {
 	*p_shader = glCreateShader(shader_type);
 	glShaderSource(*p_shader, 1, &shader_code, NULL);
@@ -74,17 +74,17 @@ compile_shader (GLuint *p_shader,
 	glGetShaderiv(*p_shader, GL_COMPILE_STATUS, &is_successful);
 	if (!is_successful)
 	{
-		char* log = '\0';
-		get_opengl_log(*p_shader, GL_COMPILE_STATUS, log);
+		const char* log = get_opengl_log(*p_shader, GL_COMPILE_STATUS);
 		fprintf(stderr, "error while compiling shader:\n%s\n", log);
+		free(log);
 	}
 }
 
 
 void
 link_shader_program (GLuint program,
-					unsigned char n,
-					...)
+                     unsigned char n,
+                     ...)
 {
 	va_list(args);
 	va_start(args, n);
@@ -96,16 +96,16 @@ link_shader_program (GLuint program,
 	GLint is_successful;
 	glGetProgramiv(program, GL_LINK_STATUS, &is_successful);
 	if (!is_successful) {
-		char* log = '\0';
-		get_opengl_log(program, GL_LINK_STATUS, log);
+		const char* log = get_opengl_log(program, GL_LINK_STATUS);
 		fprintf(stderr, "error while linking shader:\n%s\n", log);
+		free(log);
 	}
 }
 
 
 GLuint
 new_render_program (char* vertexDir,
-					char* fragmentDir)
+                    char* fragmentDir)
 {
 	GLuint vertexShader, fragmentShader;
 	char *vertexShaderCode = load_shader_from_file(vertexDir);

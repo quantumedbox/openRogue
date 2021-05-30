@@ -2,6 +2,7 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include FT_GLYPH_H
 #include <GL/glew.h>
 
 #include "text.h"
@@ -9,8 +10,18 @@
 #include "map.h"
 #include "error.h"
 
+// Textures: internalFormat = GL_ALPHA, type = GL_BITMAP
+// This way it's packed to 1px per 1 bit
 
 // QUESTION: From what should we set the size? Width or height? Or both?
+
+// Problem with that method is that a single language could be divided into several textures which is not ideal
+
+// It actually may be really expensive to calculate character ranges for small font sizes
+// Literal thousands of glyph should be buffered for that
+
+// We should limits the maximum amount of glyphs per texture
+// The most rational way is to limit them to widely supported texture size of 1024px
 
 // TODO Refcounts for usages of fonts, their ranges and sized of those ranges?
 
@@ -81,14 +92,63 @@ static FT_Library ft;
 
 static FontManager fm;
 
+static GLuint text_render_program;
+
+
+// -------------------------------------------------------------- Runtime constants -- //
+
+
 // Runtime const that is used for packing glyphs into the texture atlases
-static GLint MAX_TEXTURE_SIZE = 0;
+static GLint MAX_TEXTURE_SIZE;
+
+// Client side buffer of zeroes, used on texture initialization
+static GLuint PX_BUFFER;
+
+
+// ------------------------------------------------------------------------ Helpers -- //
+
+
+#ifndef DEBUG
+void
+check_opengl_state(char* description)
+{
+	GLenum err;
+	if ((err = glGetError()) != GL_NO_ERROR) {
+		fprintf(stderr, "OPENGL ERROR :: CODE 0x%x :: %s\n", err, description);
+	}
+}
+#endif
+
+#ifdef DEBUG
+// Turn off checking as it's not necessary with verbose callback
+#define check_opengl_state(_) //
+
+
+void GLAPIENTRY
+MessageCallback( GLenum source,
+                 GLenum type,
+                 GLuint id,
+                 GLenum severity,
+                 GLsizei length,
+                 const GLchar* message,
+                 const void* userParam )
+{
+	fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+	         ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
+	         type, severity, message );
+}
+#endif
 
 
 // -------------------------------------------------------------------- Realization -- //
 
 
 // What about making it inlined and check if it was initialized at the beginning?
+/*
+	@brief 	Initialize everything that is needed for text functionality
+	@warn 	OpenGL should be already initialized before this call
+	@return Returns non-zero value on error
+*/
 int
 init_text_subsystem ()
 {
@@ -98,11 +158,39 @@ init_text_subsystem ()
 		return -1;
 	}
 
+	// Buffering of texture that is filled with zeros for initializing new range textures
+	{
+		// Get hardware specific consts
+		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MAX_TEXTURE_SIZE);
+		fprintf(stdout, "-- max texture dimension: %dpx\n", MAX_TEXTURE_SIZE);
+
+		// Prepare zero init buffer
+		glGenBuffers(1, &PX_BUFFER);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, PX_BUFFER);
+
+		glBufferData(GL_PIXEL_UNPACK_BUFFER, FONT_TEXTURE_SIZE * FONT_TEXTURE_SIZE, NULL, GL_STATIC_DRAW);
+		check_opengl_state("Error on zero init data buffering\n");
+
+		GLbyte* px_data = (GLbyte*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+		if (!px_data) {
+			fprintf(stderr, "Could not allocate zero init pixel unpack buffer\n");
+			return -1;
+		}
+		memset(px_data, 0x00, FONT_TEXTURE_SIZE * FONT_TEXTURE_SIZE / sizeof(GLbyte));
+		if (!glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER))
+			fprintf(stderr, "Could not unmap zero init pixel unpack buffer\n");
+
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+	}
+
+	text_render_program = new_render_program("resources/shaders/text_vert.vs", "resources/shaders/text_frag.fs");
+
 	fm.fonts = mapNew();
 
-	// Get hardware specific consts
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MAX_TEXTURE_SIZE);
-	printf("-- max texture size: %dpx\n", MAX_TEXTURE_SIZE);
+	#ifdef DEBUG
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(MessageCallback, 0);
+	#endif
 
 	is_text_subsystem_initialized = true;
 
@@ -111,10 +199,11 @@ init_text_subsystem ()
 
 
 /*
-	Returns reference to a newly heap allocated FontSize
-	It has a refcount of 1 on creation
+	@brief 	Returns reference to a newly heap allocated FontSize
+			It has a refcount of 1 on creation
 */
-__forceinline
+static
+inline
 FontSize*
 new_font_size ()
 {
@@ -149,6 +238,7 @@ find_suitable_font (const char* desired)
 			fclose(dflt);
 			return NULL;
 		}
+		fclose(check);
 		fclose(dflt);
 		return DEFAULT_FONT;
 	}
@@ -161,10 +251,12 @@ find_suitable_font (const char* desired)
 /*
 	@brief 	Creates new font from file at the path argument
 			Returns NULL on critical error
+
+	@warn 	API caller should listen to ERRORCODE value for panics!
 */
-__forceinline
+static
 Font*
-new_font (const char* path, int size)
+new_font (const char* path, uint32_t size)
 {
 	const char* suitable = find_suitable_font(path);
 	if (suitable == NULL)
@@ -180,13 +272,21 @@ new_font (const char* path, int size)
 		return NULL;
 	}
 
-	FT_Set_Pixel_sizes(face, 0, size);
+	if (FT_Set_Pixel_Sizes(*face, 0, size) != 0)
+	{
+		fprintf(stderr, "Cannot set the font size of font at %s\n", suitable);
+		SIGNAL_ERROR();
+		free(face);
+		return NULL;
+	}
 
 	Font* new = (Font*)malloc(sizeof(Font));
 
 	new->type = FONT_SOURCE_FREETYPE;
 	new->source = face;
 	new->sizes = mapNew();
+
+	fprintf(stdout, "Created new font: %s\n", suitable);
 
 	return new;
 }
@@ -200,9 +300,11 @@ new_font (const char* path, int size)
 
 	@param 	path -- hint to a font file
 	@param 	size -- max height of a glyph, width is considered to be the same
+
+	@return Key identification for a font
 */
 size_t
-resolve_font (const char* path, int size)
+resolve_font (const char* path, uint32_t size)
 {
 	size_t path_hash = hash_string(path);
 
@@ -219,6 +321,7 @@ resolve_font (const char* path, int size)
 		Font* font_n = new_font(path, size);
 		if (font_n == NULL)
 			return 0;
+		mapAdd(fm.fonts, path_hash, font_n);
 		mapAdd(font_n->sizes, size, new_font_size());
 	}
 
@@ -228,19 +331,23 @@ resolve_font (const char* path, int size)
 /*
 	@brief 	Buffers a utf-32 string to a framebuffer for future drawing
 
+	@warn 	Bytes should be encoded in 'utf-32-le'
 	@warn 	API caller should listen to ERRORCODE value for panics!
 	@warn 	Manual freeing by free_buffer_strip() is required
 */
 void
 new_buffer_strip (size_t font_hash,
-                  int size,
-                  int x_offset,
-                  int y_offset,
-                  uint32_t utf_string,
-                  size_t string_len)
+                  uint32_t size,
+                  int32_t x_offset,
+                  int32_t y_offset,
+                  uint32_t* utf_string,
+                  uint32_t string_len)
 {
+	fprintf(stdout, "strip len: %d\n", string_len);
+
 	Font* font = mapGet(fm.fonts, font_hash);
 
+	// Should we really double-check ?
 	if (font == NULL) {
 		fprintf(stderr, "Cannot create buffer texture from unresolved font\n");
 		SIGNAL_ERROR();
@@ -255,38 +362,140 @@ new_buffer_strip (size_t font_hash,
 		return;
 	}
 
-	// TODO Case of zero len string
 	if (string_len == 0) {
-
+		// TODO Case of zero len string
 	}
 
-	// size is actually width and height but for now they're the same
-	int size_range = (MAX_TEXTURE_SIZE / size) * (MAX_TEXTURE_SIZE / size);
+	// Size is actually width and height but for now they're the same
+	// Int range_size = (MAX_TEXTURE_SIZE / size) * (MAX_TEXTURE_SIZE / size);
+	int range_size = (FONT_TEXTURE_SIZE / size) * (FONT_TEXTURE_SIZE / size);
 
+	// TODO Maybe we should directly operate on GL vertex buffer?
+	// Buffer of texture coordinates
 	float buffer[STRIP_BUFFER_SIZE * 2];
 	size_t buffer_len = 0;
-	int current_range = *utf_string % size_range;
+
+	// Negative values of range should signal that none of the possible ranges is binded
+	int current_range = -1;
 
 	while (string_len > 0)
 	{
-		// Change of range, draw everything that was buffered and bind a new texture 
-		if (*utf_string != current_range)
+		fprintf(stdout, "Current char: %d\n", *utf_string);
+		// Encountered a symbol that is not in currently binded texture
+		if (*utf_string / range_size != current_range)
 		{
+			// Draw everything that was buffered (if buffered at all)
 			if (buffer_len > 0)
 			{
+				fprintf(stdout, "Buffer draw!\n");
+
 				// TODO Draw
+
+				// Clear buffer
+				buffer_len = 0;
 			}
 
-			buffer_len = 0;
+			FontRange* range = mapGet(font_s->ranges, *utf_string / range_size);
 
-			// TODO Check if range was created already and if not, - make a new range
+			// If there's no such range - create a new one
+			if (range == NULL)
+			{
+				fprintf(stdout, "Created new range: %d\n", *utf_string / range_size);
 
-			FontRange* range = mapGet(font_s->ranges, size_range);
+				GLuint texture;
+				glGenTextures(1, &texture);
+				glBindTexture(GL_TEXTURE_2D, texture);
+
+				glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+				// glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, float{0.0f, 0.0f, 0.0f, 0.0f});
+
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+				// Fill newly created texture with zeros from PX_BUFFER
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, PX_BUFFER);
+				// TODO Check if we actually should divide on 8
+				// What about compression?
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, FONT_TEXTURE_SIZE / 8, FONT_TEXTURE_SIZE / 8, 0, GL_COLOR_INDEX, GL_BITMAP, NULL);
+				check_opengl_state("Creation of texture buffer");
+				glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+				// Write glyphs to glyps_data and then set subtexture to it
+				for (int i = 0; i < range_size; i++)
+				{
+					int err = FT_Load_Glyph(
+					              *(FT_Face*)font->source,
+					              FT_Get_Char_Index(*(FT_Face*)font->source, *utf_string),
+					              FT_LOAD_MONOCHROME);
+					// If there's a problem with loading a glyph (for example when it is not present), - just skip it
+					// TODO Maybe we should have some generic symbol that says that given character is not present in the font?
+					if (err != 0) {
+						continue;
+					}
+
+					FT_Glyph glyph;
+					if (FT_Get_Glyph((*(FT_Face*)font->source)->glyph, &glyph) != 0) {
+						fprintf(stderr, "Cannot get glyph\n");
+						continue;
+					}
+
+					if (FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_MONO, 0, true) != 0) {
+						fprintf(stderr, "Cannot transform glyph to a bitmap\n");
+						FT_Done_Glyph(glyph);
+						continue;
+					}
+					FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
+
+					glTexSubImage2D(
+						GL_TEXTURE_2D, 0,
+						(i % (FONT_TEXTURE_SIZE / size))*size / 8,
+						(i / (FONT_TEXTURE_SIZE / size))*size / 8,
+						bitmap_glyph->bitmap.width / 8,
+						bitmap_glyph->bitmap.rows / 8,
+						GL_COLOR_INDEX,
+						GL_BITMAP,
+						bitmap_glyph->bitmap.buffer);
+
+					FT_Done_Glyph(glyph);
+				}
+
+				float test_buff[] = {
+					-0.5, -0.5, 0.0,	0.0, 0.0,
+					+0.5, -0.5, 0.0,	1.0, 0.0,
+					+0.5, +0.5, 0.0,	1.0, 1.0,
+					-0.5, -0.5, 0.0,	0.0, 0.0,
+					+0.5, +0.5, 0.0,	1.0, 1.0,
+					-0.5, +0.5,	0.0,	0.0, 1.0,
+				};
+
+				// Create and store a new font range in a map
+				FontRange* range_new = (FontRange*)malloc(sizeof(FontRange));
+				range_new->texture = texture;
+				range_new->width = size;
+				range_new->height = size;
+
+				mapAdd(font_s->ranges, *utf_string / range_size, range_new);
+			}
+
+			// TODO Bind the texture to render program
+			current_range = *utf_string / range_size;
 		}
 
 		// TODO Buffer texture coords of a new glyph
 
-		utf_string++;
+		buffer_len++;
+		string_len--;
+
+		if (string_len == 0)
+		{
+			// TODO Draw
+		}
+		else
+			utf_string++;
 	}
 }
 

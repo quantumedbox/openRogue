@@ -14,13 +14,12 @@
 
 // TODO Put event logic in a separate file
 
-// TODO Receiving errors on Python side
-
-// TODO Window map to store active windows in C side too if needed
+// TODO It is possible to negate the need to allocate new event queues by having 2 event queues for every window that could be switched back and forth on demand
 
 
 // Helper for getting window ids from event union fields
 #define queue_from_event_type(event, type) ((WindowHandler*)mapGet(window_pool, event.type.windowID))->queue
+
 
 // ----------------------------------------------------------------- Global objects -- //
 
@@ -94,16 +93,16 @@ init_window (int width, int height, const char* title)
 
 	SDL_GLContext context = SDL_GL_CreateContext(win);
 
-	if (!is_text_subsystem_initialized) {
-		if (init_text_subsystem() == -1)
-			return 0;
-	}
-
 	GLenum error;
 	if ((error = glewInit()) != GLEW_OK) {
 		fprintf(stderr, "Error on GLEW initialization: %s\n", glewGetErrorString(error));
 		SIGNAL_ERROR();
 		return 0;
+	}
+
+	if (!is_text_subsystem_initialized) {
+		if (init_text_subsystem() == -1)
+			return 0;
 	}
 
 	SDL_GL_SetSwapInterval(1);

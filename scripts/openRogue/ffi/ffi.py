@@ -75,18 +75,39 @@ class FFIInterface:
         self.free_event_queue = shared.free_event_queue
         self.free_event_queue.argtypes = (POINTER(C_EventQueue), )
 
-    def init_window(self, width, height, title: str):
+    def init_window(self, width: int, height: int, title: str) -> 'hash':
         win = self._shared.init_window(width, height, title.encode())
         self._check_for_errors()
 
+        font = self._shared.resolve_font(b"resources/fonts/FSEX300.ttf",
+                                         c_uint32(32))
+
+        self._shared.argtypes = (
+            c_size_t,
+            c_uint32,
+            c_int32,
+            c_int32,
+            POINTER(c_uint32),
+            c_uint32,
+        )
+        # WTF? why does buffer not work
+        self._shared.new_buffer_strip(font, 32, 0, 0,
+                                      "qtest".encode(encoding="utf-32-le"),
+                                      len("qtest"))
+
+        # self._shared.new_buffer_strip(
+        #     font, 32, 0, 0, (c_uint32 * len("test")).from_buffer_copy(
+        #         "qwer".encode(encoding="utf-32")), len("test"))
+
         return win
 
+    # Maybe it's better to have function that retrieves state and possible error describtion?
     def _check_for_errors(self):
         """
         Halts python if API signaled non-zero code in its ERRORCODE exported variable
         """
         err = c_int.in_dll(self._shared, "ERRORCODE").value
         if err != 0:
-            print("Execution was halted because of signaled API error: %d" %
-                  err)
+            print("Execution was halted because of signaled API error: {}".
+                  format(err))
             exit()
