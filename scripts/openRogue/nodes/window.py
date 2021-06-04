@@ -46,6 +46,15 @@ class WindowComponent(component.Component):
         """
         event_queue = self._api.process_window(self._window)
 
+        font = self._api._shared.resolve_font(b"resources/fonts/FSEX300.ttf",
+                                              ffi.c_uint32(16))
+        # WTF? why does buffer not work
+        # buff = self._api._shared.new_buffer_strip(
+        #     font, 16, 0, 0, "aaяяκαλόჰეკი".encode(encoding="utf-32-le"),
+        #     len("aaяяκαλόჰეკი"))
+
+        # self._api._shared.render_strip(self._window, buff)
+
         # if event_queue.contents.len != 0:
         #     print("queue len", event_queue.contents.len)
 
@@ -53,6 +62,7 @@ class WindowComponent(component.Component):
             event = event_queue.contents.events[i]
             if event.type == ffi.EventType.CLOSE_EVENT:
                 self.close_window_behaviour()
+                return
 
             elif event.type == ffi.EventType.RESIZE_EVENT:
                 self.resize_window_behaviour(
@@ -63,7 +73,47 @@ class WindowComponent(component.Component):
                 self.repos_window_behaviour(
                     Vector(event.repos_event.x, event.repos_event.y))
 
-        self._api.free_event_queue(event_queue)
+        self._api.start_drawing(self._window)
+
+        text = "abcd тест δοκιμή ტესტი"
+
+        self._api.draw_text(font, ffi.c_uint32(64), 0, 0,
+                            text.encode(encoding="utf-32-le"),
+                            ffi.c_uint32(len(text)), 0xFFFFFFFF)
+
+        self._api.draw_text(font, ffi.c_uint32(24), 0, 64,
+                            text.encode(encoding="utf-32-le"),
+                            ffi.c_uint32(len(text)), 0xFFFF00FF)
+
+        self._api.draw_text(font, ffi.c_uint32(16), 0, 80,
+                            text.encode(encoding="utf-32-le"),
+                            ffi.c_uint32(len(text)), 0x00FFFFFF)
+
+        self._api.draw_text(
+            font, ffi.c_uint32(16), 0, 100,
+            "Как уже неоднократно упомянуто, реплицированные с зарубежных источников,"
+            .encode(encoding="utf-32-le"),
+            ffi.c_uint32(
+                len("Как уже неоднократно упомянуто, реплицированные с зарубежных источников,"
+                    )), 0xFFFFFFFF)
+
+        self._api.draw_text(
+            font, ffi.c_uint32(16), 0, 116,
+            "современные исследования подвергнуты целой серии независимых исследований."
+            .encode(encoding="utf-32-le"),
+            ffi.c_uint32(
+                len("современные исследования подвергнуты целой серии независимых исследований."
+                    )), 0xFFFFFFFF)
+
+        self._api.draw_text(
+            font, ffi.c_uint32(16), 0, 132,
+            "ы вынуждены отталкиваться от того, что экономическая повестка сегодняшнего дня предполагает независимые способы реализации экспериментов,"
+            .encode(encoding="utf-32-le"),
+            ffi.c_uint32(
+                len("ы вынуждены отталкиваться от того, что экономическая повестка сегодняшнего дня предполагает независимые способы реализации экспериментов,"
+                    )), 0xFFFFFFFF)
+
+        self._api.finish_drawing()
 
     def _free_window(self, *args):
         # Prevent double free after force deletion

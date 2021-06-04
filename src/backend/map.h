@@ -111,7 +111,7 @@ hash_string (const char *s)
 	size_t p_pow = 1;
 
 	unsigned int s_len = strlen(s);
-	for (char *ps = s; ps - s < s_len; ++ps) {
+	for (const char *ps = s; ps - s < s_len; ++ps) {
 		hash = (hash + (*ps - 31) * p_pow) % m;
 		p_pow = (p_pow * p) % m;
 	}

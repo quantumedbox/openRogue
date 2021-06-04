@@ -10,8 +10,21 @@ typedef uint32_t window_id_t;
 //
 typedef uint32_t bitmask_t;
 
-#define MASK_SET_BIT(mask, bit) 	mask |= bit
-#define MASK_ZERO_BIT(mask, bit)	mask ^= bit
+#define mask_set_bit(mask, bit) mask |= bit
+#define mask_zero_bit(mask, bit) mask ^= bit
+
+typedef uint32_t hex_t;
+
+#define hex_r_float(hex) ((hex & 0xFF000000) >> 24) / 255.f
+#define hex_g_float(hex) ((hex & 0xFF0000) >> 16) / 255.f
+#define hex_b_float(hex) ((hex & 0xFF00) >> 8) / 255.f
+#define hex_a_float(hex) (hex & 0xFF) / 255.f
+
+// Helper for setting the shader uniform 4f values
+#define hex_uniform4f(hex) hex_r_float(hex), hex_g_float(hex), hex_b_float(hex), hex_a_float(hex)
+
+// Helper for setting the shader uniform 3f values, without alpha transparency
+#define hex_uniform3f(hex) hex_r_float(hex), hex_g_float(hex), hex_b_float(hex)
 
 // TODO Unified sindow creation hints
 

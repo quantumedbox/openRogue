@@ -8,6 +8,9 @@
 // //
 // #define DEFAULT_FONT_WIDTH 32
 
+
+// TODO Caller font_texture_size override
+
 #ifndef FONT_TEXTURE_SIZE
 #define FONT_TEXTURE_SIZE 1024
 #endif
@@ -22,24 +25,25 @@
 #define DEFAULT_FONT "resources/fonts/FSEX300.ttf"
 #endif
 
-
+#ifndef ENCODING
 #define ENCODING "utf-32-le"
+#endif
 
 // Should return C-string containing the hint in which encoding rendering text should be passed
 const char*
 get_encoding ()
 {
-	return ENCODING;
+    return ENCODING;
 }
 
 // Function by which all fonts should be acquired
-key_t 	resolve_font 	(const char* path,
-                         uint32_t size);
+key_t   resolve_font    ( const char* path );
 
-// Create a new string texture for the future rendering
-void	new_buffer_strip (size_t font_hash,
+// Render the string
+int     draw_text       ( size_t font_hash,
                           uint32_t size,
                           int32_t x_offset,
                           int32_t y_offset,
                           uint32_t* utf_string,
-                          uint32_t string_len);
+                          uint32_t string_len,
+                          hex_t color );

@@ -7,15 +7,15 @@ from typing import Callable, Type
 
 class Component:
     """
-	Dummy class for distinguishing component classes
-	"""
+    Dummy class for distinguishing component classes
+    """
     pass
 
 
 def implement_component(obj: object, component: Component) -> object:
     """
-	Constructs new class with SysWindow as additional base and copies all data from obj instance to a new one
-	"""
+    Constructs new class with SysWindow as additional base and copies all data from obj instance to a new one
+    """
     obj.__class__ = type("%s, %s" % (type(obj).__name__, component.__name__),
                          (type(obj), component), {})
     component.__init__(obj)
@@ -24,8 +24,8 @@ def implement_component(obj: object, component: Component) -> object:
 
 class Pipe:
     """
-	Callable ordered function queue
-	"""
+    Callable ordered function queue
+    """
     __slots__ = ("queue", )
 
     # TODO Registration of changes that were made by components
@@ -53,9 +53,9 @@ def deploy_back(obj: 'subclass of Component',
                 func: Callable,
                 propf="setter") -> None:
     """
-	Helper for deploying Pipe components to object's function attribute
-	Property arg is used to describe which property functions should be piped
-	"""
+    Helper for deploying Pipe components to object's function attribute
+    'propf' is used to describe which property functions should be piped
+    """
     a = getattr(obj.__class__, attr)
     # If attribute is property then we have to set new class attribute
     # It's fine because component instances have unique constructed classes
@@ -96,9 +96,9 @@ def deploy_front(obj: 'subclass of Component',
                  func: Callable,
                  propf="setter") -> None:
     """
-	Helper for deploying Pipe components to object's function attribute
-	Property arg is used to describe which property functions should be piped
-	"""
+    Helper for deploying Pipe components to object's function attribute
+    'propf' arg is used to describe which property functions should be piped
+    """
     a = getattr(obj.__class__, attr)
     # If attribute is property then we have to set new class attribute
     # It's fine because component instances have unique constructed classes
