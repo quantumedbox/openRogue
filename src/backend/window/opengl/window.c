@@ -15,8 +15,8 @@
 
 // ??? Is it possible that event_queue_former could be called from sdl at the same time api caller swaps queues ???
 
-// TODO start_drawing(window_id_t) 	function that prepares window and its context for future drawing commands
-// TODO end_drawing(window_id_t) 	function that signals that drawing for a given window is finished and the contents of buffer could be showed
+// TODO start_drawing(key_t) 	function that prepares window and its context for future drawing commands
+// TODO end_drawing(key_t) 	function that signals that drawing for a given window is finished and the contents of buffer could be showed
 
 // TODO Put event logic in a separate file
 
@@ -30,27 +30,30 @@
 // ----------------------------------------------------------------- Global objects -- //
 
 
-static bool is_window_subsystem_initialized = false;
-
-static bool is_opengl_context_created = false;
-
 static SDL_GLContext opengl_context;
+
+// Global index counter for giving unique keys for each window
+static key_t new_winodw_key;
 
 // Stores window handlers by their id
 Map* window_pool = NULL;
 
 // Active render window that is bound
-WindowHandler* current_drawing_window;
-
-// The ortho matrix of current window
-// Mostly used for setting the window size properly
-mat4 current_window_projection;
+key_t current_drawing_window;
 
 
 // -------------------------------------------------------------------- Realization -- //
 
 
 int event_queue_former(void*, SDL_Event*);
+
+
+static
+key_t
+get_new_window_key()
+{
+	return ++new_winodw_key;
+}
 
 
 static
@@ -63,8 +66,6 @@ init_window_subsystem()
 		return -1;
 	}
 
-	SDL_AddEventWatch(event_queue_former, NULL);
-
 	if (SDL_GL_LoadLibrary(NULL) != 0) {
 		fprintf(stderr, "Error on SDL OpenGL extenion initialization:\n%s\n", SDL_GetError());
 		SIGNAL_ERROR();
@@ -73,16 +74,16 @@ init_window_subsystem()
 
 	window_pool = mapNew();
 
-	is_window_subsystem_initialized = true;
-
 	return 0;
 }
 
 
-window_id_t
+key_t
 init_window( int width, int height, const char* title )
 {
-	if (!is_window_subsystem_initialized) {
+	key_t win_key = get_new_window_key();
+
+	if (win_key == 1) {
 		if (init_window_subsystem() == -1) {
 			return 0;
 		}
@@ -113,7 +114,7 @@ init_window( int width, int height, const char* title )
 	}
 
 	// Make sure that only one OpenGL context is created
-	if (!is_opengl_context_created)
+	if (win_key == 1)
 	{
 		SDL_GLContext context = SDL_GL_CreateContext(win);
 
@@ -160,17 +161,20 @@ init_window( int width, int height, const char* title )
 
 	win_h->current_queue = 0;
 
-	mapAdd(window_pool, win_h->id, (void*)win_h);
+	mapAdd(window_pool, win_key, (void*)win_h);
 
-	return win_h->id;
+	if (win_key == 1)
+		SDL_AddEventWatch(event_queue_former, NULL);
+
+	return win_key;
 }
 
 
 void
-close_window( window_id_t w_id )
+close_window( key_t w_key )
 {
-	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_id);
-	mapDel(window_pool, w_id);
+	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
+	mapDel(window_pool, w_key);
 
 	free(w->queue0->events);
 	free(w->queue0);
@@ -185,18 +189,18 @@ close_window( window_id_t w_id )
 
 
 void
-resize_window( window_id_t w_id, int width, int height )
+resize_window( key_t w_key, int width, int height )
 {
-	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_id);
+	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
 
 	SDL_SetWindowSize(w->window, width, height);
 }
 
 
 void
-repos_window( window_id_t w_id, int x, int y )
+repos_window( key_t w_key, int x, int y )
 {
-	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_id);
+	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
 
 	SDL_SetWindowPosition(w->window, x, y);
 }
@@ -373,9 +377,9 @@ dispatch_window_repos( EventQueue* queue, SDL_Event event )
 	@return Reference to EventQueue struct
 */
 EventQueue*
-process_window( window_id_t w_id )
+process_window( key_t w_key )
 {
-	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_id);
+	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
 
 	// Process all events and clear the SDL queue
 	SDL_Event _;
@@ -447,15 +451,15 @@ event_queue_former( void* _, SDL_Event* event_ptr )
 	Prepares the window for drawing
 */
 void
-start_drawing( window_id_t w_id )
+start_drawing( key_t w_key )
 {
-	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_id);
+	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
 	if (w == NULL)
 		return;
 
 	SDL_GL_MakeCurrent(w->window, opengl_context);
 
-	current_drawing_window = w;
+	current_drawing_window = w_key;
 
 	int width, height;
 	SDL_GetWindowSize(w->window, &width, &height);
@@ -465,7 +469,7 @@ start_drawing( window_id_t w_id )
 	w->width = width;
 	w->height = height;
 
-	float aspect = (float)width / (float)height;
+	// float aspect = (float)width / (float)height;
 
 	// Setup the projection
 	// glm_ortho(-(float)width / 2, (float)width / 2,
@@ -473,10 +477,12 @@ start_drawing( window_id_t w_id )
 	//           0.1f, 100.0f,
 	//           current_window_projection);
 
-	glm_ortho(0.0, (float)width,
-	          0.0, (float)height,
-	          -100.0f, 100.0f,
-	          current_window_projection);
+	// glm_ortho(0.0, (float)width,
+	//           0.0, (float)height,
+	//           -100.0f, 100.0f,
+	//           current_window_projection);
+
+	glOrtho(-0.5, (float)(width - 1) + 0.5, (float)(height - 1) + 0.5, -0.5, 0.0, 1.0);
 }
 
 /*
@@ -487,8 +493,12 @@ start_drawing( window_id_t w_id )
 void
 finish_drawing()
 {
+	WindowHandler* w = (WindowHandler*)mapGet(window_pool, current_drawing_window);
+	if (w == NULL)
+		return;
+
 	glFlush();
-	SDL_GL_SwapWindow(current_drawing_window->window);
+	SDL_GL_SwapWindow(w->window);
 
 	glClearColor(
 	    WINDOW_FILL_COLOR_R,
@@ -497,4 +507,6 @@ finish_drawing()
 	    1.0
 	);
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	current_drawing_window = 0;
 }

@@ -49,29 +49,29 @@ const size_t n_dirs = sizeof(dirs_to_lookup) / sizeof(*dirs_to_lookup);
 char* ENGINEMODULE = NULL;
 
 
-char*
-nix_path_to_windows_path (const char* path)
-{
-	char* n;
-	// discrad relative './'
-	if (strstr(path, "./") == path) {
-		n = (char*)calloc(strlen(&path[2]) + 1, sizeof(char));
-		strcpy(n, &path[2]);
-	} else {
-		n = (char*)calloc(strlen(path) + 1, sizeof(char));
-		strcpy(n, path);
-	}
-	// swap '/' to '\'
-	char* p = strtok(n, "/");
-	while (p != NULL) {
-		char* next = strtok(NULL, "/");
-		if (next != NULL) {
-			p[strlen(p)] = '\\';
-		}
-		p = next;
-	}
-	return n;
-}
+// char*
+// nix_path_to_windows_path (const char* path)
+// {
+// 	char* n;
+// 	// discrad relative './'
+// 	if (strstr(path, "./") == path) {
+// 		n = (char*)calloc(strlen(&path[2]) + 1, sizeof(char));
+// 		strcpy(n, &path[2]);
+// 	} else {
+// 		n = (char*)calloc(strlen(path) + 1, sizeof(char));
+// 		strcpy(n, path);
+// 	}
+// 	// swap '/' to '\'
+// 	char* p = strtok(n, "/");
+// 	while (p != NULL) {
+// 		char* next = strtok(NULL, "/");
+// 		if (next != NULL) {
+// 			p[strlen(p)] = '\\';
+// 		}
+// 		p = next;
+// 	}
+// 	return n;
+// }
 
 
 // returned value should be freed

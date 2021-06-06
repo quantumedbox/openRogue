@@ -31,7 +31,9 @@ const char** get_feature_list ()
 typedef struct {
 	SDL_Window* window;
 	// SDL_GLContext context; // Now GL context is global for all windows of single thread
-	window_id_t id;
+
+	// SDL Window ID
+	uint32_t id;
 
 	// Switching queues
 	// At given time only one of them should be writable and another - readable
@@ -52,7 +54,7 @@ WindowHandler;
 
 /*
 */
-window_id_t init_window(int width, int height, const char* title);
+key_t init_window(int width, int height, const char* title);
 
 /*
 */
@@ -60,23 +62,23 @@ void update_window();
 
 /*
 */
-void close_window(window_id_t);
+void close_window(key_t);
 
 /*
 */
-EventQueue* process_window(window_id_t);
+EventQueue* process_window(key_t);
 
 /*
 */
-void resize_window(window_id_t, int width, int height);
+void resize_window(key_t, int width, int height);
 
 /*
 */
-void repos_window(window_id_t, int x, int y);
+void repos_window(key_t, int x, int y);
 
 /*
 */
-void start_drawing(window_id_t);
+void start_drawing(key_t);
 
 /*
 */

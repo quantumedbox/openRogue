@@ -11,6 +11,9 @@
 #include "map.h"
 #include "error.h"
 
+
+// TODO Try using glSubBufferData to modify the predefined global buffer
+
 // TODO Garbage collector-like that keeps track of usages per each texture in a certain time window
 
 // TODO We don't need buffered textures that much. Maybe in the future if there would be such need
@@ -120,9 +123,9 @@ static GLuint text_render_program;
 // static GLuint text_render_vbo;
 
 
-extern WindowHandler* current_drawing_window;
+extern key_t current_drawing_window;
 
-extern mat4 current_window_projection;
+extern Map* window_pool;
 
 
 // -------------------------------------------------------------- Runtime constants -- //
@@ -399,36 +402,11 @@ draw_text( size_t font_hash,
 	if (string_len == 0)
 		return 0;
 
+	WindowHandler* window = (WindowHandler*)mapGet(window_pool, current_drawing_window);
+	if (window == NULL)
+		return 0;
+
 	glUseProgram(text_render_program);
-
-	// glBindVertexArray(text_render_vao);
-	// glBindBuffer(GL_ARRAY_BUFFER, text_render_vbo);
-
-	// Manage the render program and projection matrix of drawing window
-	{
-		static uint32_t current_window_uniform_matrix = -1;
-
-		if (current_window_uniform_matrix != current_drawing_window->id)
-		{
-			GLint projection_position = glGetUniformLocation(text_render_program, "projection");
-			if (projection_position == -1)
-			{
-				fprintf(stderr, "Cannot get \"projection\" from text render program\n");
-				// return -1;
-			}
-			glUniformMatrix4fv(projection_position, 1, GL_FALSE, current_window_projection[0]);
-
-			// GLint viewport_size_position = glGetUniformLocation(text_render_program, "viewport_size");
-			// if (viewport_size_position == -1)
-			// {
-			// 	fprintf(stderr, "Cannot get \"viewport_size\" from text render program\n");
-			// 	// return -1;
-			// }
-			// glUniform2f(viewport_size_position, (float)current_drawing_window->width, (float)current_drawing_window->height);
-
-			current_window_uniform_matrix = current_drawing_window->id;
-		}
-	}
 
 	GLint color_modifier_position = glGetUniformLocation(text_render_program, "color_modifier");
 	if (color_modifier_position == -1)
@@ -518,7 +496,7 @@ draw_text( size_t font_hash,
 					int err = FT_Load_Glyph(
 					              *(FT_Face*)font->source,
 					              FT_Get_Char_Index(*(FT_Face*)font->source, (*utf_string / range_size) * range_size + i),
-					              FT_LOAD_DEFAULT);
+					              FT_LOAD_RENDER);
 					// If there's a problem with loading a glyph (for example when it is not present), - just skip it
 					// TODO Maybe we should have some generic symbol that says that given character is not present in the font?
 					if (err != 0) {
@@ -535,7 +513,7 @@ draw_text( size_t font_hash,
 						int err = FT_Load_Glyph(
 						              *(FT_Face*)font->source,
 						              FT_Get_Char_Index(*(FT_Face*)font->source, '?'),
-						              FT_LOAD_DEFAULT);
+						              FT_LOAD_RENDER);
 						if (err != 0)
 							continue;
 
@@ -546,7 +524,7 @@ draw_text( size_t font_hash,
 						}
 					}
 
-					if (FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, 0, true) != 0)
+					if (FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_LCD, 0, true) != 0)
 					{
 						FT_Done_Glyph(glyph);
 						continue;
@@ -557,7 +535,7 @@ draw_text( size_t font_hash,
 					glTexSubImage2D(
 					    GL_TEXTURE_2D, 0,
 					    (i % (FONT_TEXTURE_SIZE / spacing))*spacing + face->glyph->bitmap_left,
-					    FONT_TEXTURE_SIZE - (i / (FONT_TEXTURE_SIZE / spacing))*spacing - face->glyph->bitmap_top,
+					    FONT_TEXTURE_SIZE - (i / (FONT_TEXTURE_SIZE / spacing))*spacing - face->glyph->bitmap_top - spacing/2,
 					    bitmap_glyph->bitmap.width,
 					    bitmap_glyph->bitmap.rows,
 					    GL_RED,
@@ -590,16 +568,16 @@ draw_text( size_t font_hash,
 		{
 			uint32_t idx = buffer_len * 6 * 4;
 
-			// Casted to float to contain all of the data in a single array with UV coords
-			float pos_left = x_offset + i * size;
-			float pos_right = x_offset + (i + 1) * size;
-			float pos_top = current_drawing_window->height - y_offset;
-			float pos_bottom = current_drawing_window->height - y_offset - size;
+			// Sorry to everyone who's reading this shit
+			float pos_left = (float)(x_offset + i * size) / window->width -1.0;
+			float pos_right = (float)(x_offset + (i + 1) * size) / window->width - 1.0;
+			float pos_top = (float)(window->height - y_offset) / window->height;
+			float pos_bottom = (float)(window->height - y_offset - size) / window->height;
 
 			float tex_left = (*utf_string % (FONT_TEXTURE_SIZE / spacing)) * ((float)spacing / FONT_TEXTURE_SIZE);
-			float tex_right = (*utf_string % (FONT_TEXTURE_SIZE / spacing) + 1) * ((float)spacing / FONT_TEXTURE_SIZE);
+			float tex_right = (*utf_string % (FONT_TEXTURE_SIZE / spacing) + 1) * ((float)spacing / FONT_TEXTURE_SIZE) - ((float)spacing / FONT_TEXTURE_SIZE) / 2;
 			float tex_top = 1.0 - ((*utf_string % range_size) / (FONT_TEXTURE_SIZE / spacing) + 1) * ((float)spacing / FONT_TEXTURE_SIZE);
-			float tex_bottom = 1.0 - ((*utf_string % range_size) / (FONT_TEXTURE_SIZE / spacing)) * ((float)spacing / FONT_TEXTURE_SIZE);
+			float tex_bottom = 1.0 - ((*utf_string % range_size) / (FONT_TEXTURE_SIZE / spacing)) * ((float)spacing / FONT_TEXTURE_SIZE) - ((float)spacing / FONT_TEXTURE_SIZE) / 2;
 
 			buffer[idx + 0] = pos_left;
 			buffer[idx + 1] = pos_top;

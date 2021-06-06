@@ -46,8 +46,14 @@ class WindowComponent(component.Component):
         """
         event_queue = self._api.process_window(self._window)
 
-        font = self._api._shared.resolve_font(b"resources/fonts/FSEX300.ttf",
-                                              ffi.c_uint32(16))
+        font = self._api._shared.resolve_font(b"resources/fonts/FSEX300.ttf", )
+
+        font2 = self._api._shared.resolve_font(
+            b"resources/fonts/SourceCodePro-Light.ttf")
+
+        font3 = self._api._shared.resolve_font(
+            b"resources/fonts/DelaGothicOne-Regular.ttf")
+
         # WTF? why does buffer not work
         # buff = self._api._shared.new_buffer_strip(
         #     font, 16, 0, 0, "aaяяκαλόჰეკი".encode(encoding="utf-32-le"),
@@ -77,20 +83,20 @@ class WindowComponent(component.Component):
 
         text = "abcd тест δοκιμή ტესტი"
 
-        self._api.draw_text(font, ffi.c_uint32(64), 0, 0,
+        self._api.draw_text(font2, ffi.c_uint32(256), 0, 256,
                             text.encode(encoding="utf-32-le"),
-                            ffi.c_uint32(len(text)), 0xFFFFFFFF)
+                            ffi.c_uint32(len(text)), 0xFFF2FaFF)
 
-        self._api.draw_text(font, ffi.c_uint32(24), 0, 64,
+        self._api.draw_text(font, ffi.c_uint32(24), 0, 0,
                             text.encode(encoding="utf-32-le"),
                             ffi.c_uint32(len(text)), 0xFFFF00FF)
 
-        self._api.draw_text(font, ffi.c_uint32(16), 0, 80,
+        self._api.draw_text(font, ffi.c_uint32(16), 0, 24,
                             text.encode(encoding="utf-32-le"),
                             ffi.c_uint32(len(text)), 0x00FFFFFF)
 
         self._api.draw_text(
-            font, ffi.c_uint32(16), 0, 100,
+            font, ffi.c_uint32(48), 0, 100,
             "Как уже неоднократно упомянуто, реплицированные с зарубежных источников,"
             .encode(encoding="utf-32-le"),
             ffi.c_uint32(
@@ -98,7 +104,7 @@ class WindowComponent(component.Component):
                     )), 0xFFFFFFFF)
 
         self._api.draw_text(
-            font, ffi.c_uint32(16), 0, 116,
+            font, ffi.c_uint32(48), 0, 140,
             "современные исследования подвергнуты целой серии независимых исследований."
             .encode(encoding="utf-32-le"),
             ffi.c_uint32(
@@ -106,12 +112,16 @@ class WindowComponent(component.Component):
                     )), 0xFFFFFFFF)
 
         self._api.draw_text(
-            font, ffi.c_uint32(16), 0, 132,
+            font, ffi.c_uint32(48), 0, 180,
             "ы вынуждены отталкиваться от того, что экономическая повестка сегодняшнего дня предполагает независимые способы реализации экспериментов,"
             .encode(encoding="utf-32-le"),
             ffi.c_uint32(
                 len("ы вынуждены отталкиваться от того, что экономическая повестка сегодняшнего дня предполагает независимые способы реализации экспериментов,"
                     )), 0xFFFFFFFF)
+
+        self._api.draw_text(font3, ffi.c_uint32(80), 0, 600,
+                            "テストテストテストテストテスト".encode(encoding="utf-32-le"),
+                            ffi.c_uint32(len("テストテストテストテストテスト")), 0xFFFAAFAF)
 
         self._api.finish_drawing()
 

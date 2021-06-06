@@ -5,7 +5,9 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-typedef uint32_t window_id_t;
+// typedef uint32_t window_id_t;
+
+typedef size_t key_t;
 
 //
 typedef uint32_t bitmask_t;
