@@ -13,6 +13,8 @@
 #include "error.h"
 
 
+// TODO Positioning of new windows depending on existing ones. Maybe require the caller to specify positions and rely on ui positioning?
+
 // ??? Is it possible that event_queue_former could be called from sdl at the same time api caller swaps queues ???
 
 // TODO start_drawing(key_t) 	function that prepares window and its context for future drawing commands
@@ -62,31 +64,8 @@ init_window_subsystem()
 {
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		fprintf(stderr, "Error on SDL initialization:\n%s\n", SDL_GetError());
-		SIGNAL_ERROR();
+		// SIGNAL_ERROR();
 		return -1;
-	}
-
-	if (SDL_GL_LoadLibrary(NULL) != 0) {
-		fprintf(stderr, "Error on SDL OpenGL extenion initialization:\n%s\n", SDL_GetError());
-		SIGNAL_ERROR();
-		return -1;
-	}
-
-	window_pool = mapNew();
-
-	return 0;
-}
-
-
-key_t
-init_window( int width, int height, const char* title )
-{
-	key_t win_key = get_new_window_key();
-
-	if (win_key == 1) {
-		if (init_window_subsystem() == -1) {
-			return 0;
-		}
 	}
 
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, true);
@@ -95,7 +74,36 @@ init_window( int width, int height, const char* title )
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	// SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
+	if (SDL_GL_LoadLibrary(NULL) != 0) {
+		fprintf(stderr, "Error on SDL OpenGL extenion initialization:\n%s\n", SDL_GetError());
+		// SIGNAL_ERROR();
+		return -1;
+	}
+
+	window_pool = mapNew();
+
+	return 0;
+}
+
+/*
+	Create new window
+	This function is entry for an API and thus, by calling it first time initializes everything
+	On failure it should reverse all states to back they were
+	Failure itself is signaled by 0 returned value
+*/
+key_t
+init_window( int width, int height, const char* title )
+{
+	key_t win_key = get_new_window_key();
+
+	if (win_key == 1) {
+		if (init_window_subsystem() == -1) {
+			new_winodw_key = 0;
+			return 0;
+		}
+	}
 
 	if (title == 0) {
 		title = DEFAULT_WINDOW_NAME;
@@ -109,23 +117,42 @@ init_window( int width, int height, const char* title )
 
 	if (!win) {
 		fprintf(stderr, "Could not create OpenGL window: %s\n", SDL_GetError());
-		SIGNAL_ERROR();
+		// SIGNAL_ERROR();
+		if (win_key == 1) {
+			SDL_Quit();
+			new_winodw_key = 0;
+		}
 		return 0;
 	}
 
 	// Make sure that only one OpenGL context is created
 	if (win_key == 1)
 	{
-		SDL_GLContext context = SDL_GL_CreateContext(win);
+		opengl_context = SDL_GL_CreateContext(win);
 
 		GLenum error;
 		if ((error = glewInit()) != GLEW_OK) {
 			fprintf(stderr, "Error on GLEW initialization: %s\n", glewGetErrorString(error));
-			SIGNAL_ERROR();
+			// SIGNAL_ERROR();
+			SDL_GL_DeleteContext(opengl_context);
+			SDL_Quit();
+			new_winodw_key = 0;
 			return 0;
 		}
 
-		SDL_GL_SetSwapInterval(1);
+		SDL_GL_MakeCurrent(win, opengl_context);
+
+		glHint(GL_CLIP_VOLUME_CLIPPING_HINT_EXT, GL_FASTEST);
+		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+		glHint(GL_TEXTURE_COMPRESSION_HINT, GL_FASTEST);
+		glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+		glHint(GL_FRAGMENT_SHADER_DERIVATIVE_HINT, GL_NICEST);
+
+		// -1 for adaptive vsync, if isn't supported - use regular one
+		if(SDL_GL_SetSwapInterval(-1) == -1) {
+			SDL_GL_SetSwapInterval(1);
+		}
 
 		glEnable(GL_BLEND);
 		glEnable(GL_ALPHA_TEST);
@@ -134,42 +161,42 @@ init_window( int width, int height, const char* title )
 		glDisable(GL_CULL_FACE);
 
 		// SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-		// glEnable(GL_MULTISAMPLE);
+		glEnable(GL_MULTISAMPLE);
 
-		opengl_context = context;
-	}
-
-	if (!is_text_subsystem_initialized) {
-		if (init_text_subsystem() == -1)
+		if (init_text_subsystem() == -1) {
+			SDL_GL_DeleteContext(opengl_context);
+			SDL_Quit();
+			new_winodw_key = 0;
 			return 0;
+		}
 	}
 
-	SDL_GL_MakeCurrent(win, opengl_context);
+	WindowHandler* handler = (WindowHandler*)calloc(1, sizeof(WindowHandler));
+	handler->window = win;
+	// handler->context = context;
+	handler->id = SDL_GetWindowID(win);
 
-	WindowHandler* win_h = (WindowHandler*)calloc(1, sizeof(WindowHandler));
-	win_h->window = win;
-	// win_h->context = context;
-	win_h->id = SDL_GetWindowID(win);
+	handler->queue1 = (EventQueue*)malloc(sizeof(EventQueue));
+	handler->queue1->events = (Event*)malloc(EVENT_BUFFER_SIZE * sizeof(Event));
+	handler->queue1->len = 0;
 
-	win_h->queue1 = (EventQueue*)malloc(sizeof(EventQueue));
-	win_h->queue1->events = (Event*)malloc(EVENT_BUFFER_SIZE * sizeof(Event));
-	win_h->queue1->len = 0;
+	handler->queue0 = (EventQueue*)malloc(sizeof(EventQueue));
+	handler->queue0->events = (Event*)malloc(EVENT_BUFFER_SIZE * sizeof(Event));
+	handler->queue0->len = 0;
 
-	win_h->queue0 = (EventQueue*)malloc(sizeof(EventQueue));
-	win_h->queue0->events = (Event*)malloc(EVENT_BUFFER_SIZE * sizeof(Event));
-	win_h->queue0->len = 0;
+	handler->current_queue = 0;
 
-	win_h->current_queue = 0;
+	mapAdd(window_pool, win_key, handler);
 
-	mapAdd(window_pool, win_key, (void*)win_h);
-
-	if (win_key == 1)
+	if (win_key == 1) {
 		SDL_AddEventWatch(event_queue_former, NULL);
+	}
 
 	return win_key;
 }
 
-
+// ??? Should we exit all systems when all windows are closed ?
+// It should be a valid concern if we allow swapping APIs at runtime
 void
 close_window( key_t w_key )
 {
@@ -402,7 +429,7 @@ process_window( key_t w_key )
 }
 
 /*
-	Forms event queues for called to process
+	@brief 	SDL event watcher that is used for queuing multiple windows at a time
 */
 int
 event_queue_former( void* _, SDL_Event* event_ptr )
@@ -448,7 +475,7 @@ event_queue_former( void* _, SDL_Event* event_ptr )
 }
 
 /*
-	Prepares the window for drawing
+	@brief 	Prepares the window for drawing
 */
 void
 start_drawing( key_t w_key )
@@ -461,13 +488,9 @@ start_drawing( key_t w_key )
 
 	current_drawing_window = w_key;
 
-	int width, height;
-	SDL_GetWindowSize(w->window, &width, &height);
+	SDL_GetWindowSize(w->window, &w->width, &w->height);
 
-	glViewport(0, 0, width, height);
-
-	w->width = width;
-	w->height = height;
+	glViewport(0, 0, w->width, w->height);
 
 	// float aspect = (float)width / (float)height;
 
@@ -482,13 +505,12 @@ start_drawing( key_t w_key )
 	//           -100.0f, 100.0f,
 	//           current_window_projection);
 
-	glOrtho(-0.5, (float)(width - 1) + 0.5, (float)(height - 1) + 0.5, -0.5, 0.0, 1.0);
+	// glOrtho(-0.5, (float)(width - 1) + 0.5, (float)(height - 1) + 0.5, -0.5, 0.0, 1.0);
 }
 
 /*
-	Update the current drawing window with what is in context
-
-	Actual clearing of the buffer happens by this function and not by start_drawing() to allow additional drawing
+	@brief 	Update the current drawing window with what is in context
+			Actual clearing of the buffer happens by this function and not by start_drawing()
 */
 void
 finish_drawing()

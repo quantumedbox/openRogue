@@ -29,6 +29,8 @@ class WindowComponent(component.Component):
 
         self._window = self._api.init_window(self.size.width, self.size.height,
                                              self.name)
+
+        print("window key:", self._window)
         #
         component.deploy_front(self, "free", self._free_window)
         #
@@ -53,16 +55,6 @@ class WindowComponent(component.Component):
 
         font3 = self._api._shared.resolve_font(
             b"resources/fonts/DelaGothicOne-Regular.ttf")
-
-        # WTF? why does buffer not work
-        # buff = self._api._shared.new_buffer_strip(
-        #     font, 16, 0, 0, "aaяяκαλόჰეკი".encode(encoding="utf-32-le"),
-        #     len("aaяяκαλόჰეკი"))
-
-        # self._api._shared.render_strip(self._window, buff)
-
-        # if event_queue.contents.len != 0:
-        #     print("queue len", event_queue.contents.len)
 
         for i in range(event_queue.contents.len):
             event = event_queue.contents.events[i]

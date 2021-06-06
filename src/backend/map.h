@@ -86,9 +86,9 @@ void 	mapPrint 	(Map*);
 
 static 	Bucket* mapNewBucket		();
 static  void 	mapExtend			(Map*);
-static 	bool 	mapHasKeyRecur		(Bucket*, key_t key);
+// static 	bool 	mapHasKeyRecur		(Bucket*, key_t key);
 static 	void 	mapAllocateBuckets	(Map*, size_t n);
-static 	bool 	mapAddRecur			(Bucket*, key_t key, data_t);
+// static 	bool 	mapAddRecur			(Bucket*, key_t key, data_t);
 static  void 	mapExtend			(Map*);
 static  void 	mapClearStack		(Bucket*);
 static 	void 	mapPrintRecur		(Bucket*);
@@ -169,20 +169,45 @@ mapAdd(Map* m, key_t key, data_t data)
 
 	uint32_t idx = key % m->capacity;
 
-	if (m->buckets[idx].next == NULL)
+	// if (m->buckets[idx].next == NULL)
+	// {
+	// 	m->len += 1;
+
+	// 	Bucket* new = mapNewBucket();
+	// 	m->buckets[idx].next = new;
+	// 	new->key 	= key;
+	// 	new->data 	= data;
+	// }
+	// else if (mapAddRecur(m->buckets[idx].next, key, data))
+		// m->len += 1;
+
+	Bucket* b = &m->buckets[idx];
+
+	while(true)
 	{
-		m->len += 1;
+		if (b->next == NULL)
+		{
+			Bucket* new = mapNewBucket();
+			new->key 	= key;
+			new->data 	= data;
+			b->next 	= new;
 
-		Bucket* new = mapNewBucket();
-		m->buckets[idx].next = new;
-		new->key 	= key;
-		new->data 	= data;
+			m->len++;
+
+			if ((m->len < MAP_MAX_CAPACITY) && (((float)m->len / m->capacity) >= m->threshold))
+				mapExtend(m);
+			
+			return;
+		}
+
+		if (b->next->key == key)
+		{
+			b->next->data = data;
+			return;
+		}
+
+		b = b->next;
 	}
-	else if (mapAddRecur(m->buckets[idx].next, key, data))
-		m->len += 1;
-
-	if ((m->len < MAP_MAX_CAPACITY) && (((float)m->len / m->capacity) >= m->threshold))
-		mapExtend(m);
 
 	// pthread_mutex_unlock(&m->lock);
 }
@@ -192,28 +217,28 @@ mapAdd(Map* m, key_t key, data_t data)
 	Returns false if there was an item under the given key already and it was replaced
 	WARNING! If replaced data was heap-allocated it leaks memory
 */
-static inline
-bool
-mapAddRecur(Bucket* b, key_t key, data_t data)
-{
-	if (b->key == key) {
-		b->data = data;
+// static inline
+// bool
+// mapAddRecur(Bucket* b, key_t key, data_t data)
+// {
+// 	if (b->key == key) {
+// 		b->data = data;
 
-		return false;
-	}
+// 		return false;
+// 	}
 
-	else if (b->next == NULL)
-	{
-		Bucket* new = mapNewBucket();
-		b->next 	= new;
-		new->key 	= key;
-		new->data 	= data;
+// 	else if (b->next == NULL)
+// 	{
+// 		Bucket* new = mapNewBucket();
+// 		b->next 	= new;
+// 		new->key 	= key;
+// 		new->data 	= data;
 
-		return true;
-	}
+// 		return true;
+// 	}
 
-	return mapAddRecur(b->next, key, data);
-}
+// 	return mapAddRecur(b->next, key, data);
+// }
 
 /*
 	Returns true if given key is present in the map, false if not
@@ -221,33 +246,37 @@ mapAddRecur(Bucket* b, key_t key, data_t data)
 bool
 mapHas(Map* m, key_t key)
 {
-	bool return_data = false;
-
-	// pthread_mutex_lock(&m->lock);
-
 	uint32_t idx = key % m->capacity;
 
-	if (m->buckets[idx].next != NULL)
-		return_data = mapHasKeyRecur(m->buckets[idx].next, key);
+	Bucket* b = m->buckets[idx].next;
 
-	// pthread_mutex_unlock(&m->lock);
+	while(b != NULL)
+	{
+		if (b->key == key)
+			return true;
 
-	return return_data;
+		b = b->next;
+	}
+
+	return false;
 }
 
 
-static inline
-bool
-mapHasKeyRecur(Bucket* b, key_t key)
-{
-	if (b->key == key)
-		return true;
+// static inline
+// bool
+// mapHasKeyRecur(Bucket* b, key_t key)
+// {
+// 	do
+// 	{
+// 		if (b->key == key)
+// 			return true;
 
-	else if (b->next == NULL)
-		return false;
+// 		b = b->next;
+// 	}
+// 	while(b != NULL);
 
-	return mapHasKeyRecur(b->next, key);
-}
+// 	return false;
+// }
 
 /*
 	Returns the void* data that is under given key or NULL if nothing to find
@@ -305,7 +334,8 @@ mapExtend(Map* m)
 
 	Bucket* new_array = (Bucket*)calloc(m->capacity, sizeof(Bucket));
 
-	OPTIONAL_OMP_PARALLEL_FOR
+	// It definitely could raise race condition as all threads are adding to the same bucket array
+	// OPTIONAL_OMP_PARALLEL_FOR
 	for (register size_t i = 0; i < old_capacity; i++)
 	{
 		if (m->buckets[i].next != NULL)
@@ -360,7 +390,7 @@ mapReallocateBucketRecur(Bucket* stack, Bucket* bucket)
 void
 mapDestroy(Map* m)
 {
-	// mapClear(m);
+	mapClear(m);
 	free(m->buckets);
 	// pthread_mutex_destroy(&m->lock);
 	free(m);
@@ -421,7 +451,7 @@ mapPrint(Map* m)
 	for (int i = m->capacity; i--;)
 	{
 		if (m->buckets[i].next != NULL) {
-			fprintf(stdout, "---BUCKET %d\n", i);
+			fprintf(stdout, "-- BUCKET %d\n", i);
 			mapPrintRecur(m->buckets[i].next);
 		}
 	}
@@ -443,3 +473,75 @@ mapPrintRecur(Bucket* b)
 	if (b->next != NULL)
 		mapPrintRecur(b->next);
 }
+
+
+// TODO Check for memory leakage
+/*
+	Compile this file as executable for testing
+*/
+// int main(void)
+// {
+// 	Map* map = mapNew();
+
+// 	#define TEST_VALUE 98765
+
+// 	int* test = (int*)malloc(sizeof(int));
+// 	*test = TEST_VALUE;
+
+// 	// Basic functionality test
+// 	mapAdd(map, 'A', test);
+// 	if (!mapHas(map, 'A')) {
+// 		fprintf(stderr, "mapHas -- failure\n");
+// 	} else {
+// 		fprintf(stderr, "mapHas -- check\n");
+// 	}
+
+// 	if (TEST_VALUE != *(int*)mapGet(map, 'A')) {
+// 		fprintf(stderr, "mapGet -- failure\n");
+// 	} else {
+// 		fprintf(stderr, "mapGet -- check\n");
+// 	}
+
+// 	mapAdd(map, 'A', NULL);
+// 	if (mapGet(map, 'A') != NULL) {
+// 		fprintf(stderr, "mapGet after readding -- failure\n");
+// 	} else {
+// 		fprintf(stderr, "mapGet after readding -- check\n");
+// 	}
+
+// 	mapClear(map);
+// 	free(test);
+
+// 	// Test by adding a vast array of items
+// 	#define N_TEST_VALUES 1024
+
+// 	int test_array[N_TEST_VALUES];
+
+// 	for (int i = 0; i < N_TEST_VALUES; i++)
+// 	{
+// 		test_array[i] = rand();
+// 		mapAdd(map, i, &test_array[i]);
+// 	}
+
+// 	for (int i = 0; i < N_TEST_VALUES; i++)
+// 	{
+// 		if (!(int*)mapGet(map, i)) {
+// 			fprintf(stderr, "mapGet on a vast set -- failure\n");
+// 			goto N_TEST_FAILURE;
+// 		} else {
+// 			mapDel(map, i);
+// 			if ((int*)mapGet(map, i)) {
+// 				fprintf(stderr, "mapDel on a vast set -- failure\n");
+// 				goto N_TEST_FAILURE;
+// 			}
+// 		}
+// 	}
+// 	fprintf(stderr, "mapGet on a vast set -- check\n");
+// 	fprintf(stderr, "mapDel on a vast set -- check\n");
+
+// N_TEST_FAILURE:
+
+// 	mapDestroy(map);
+
+// 	fprintf(stdout, "Test finished\n");
+// }

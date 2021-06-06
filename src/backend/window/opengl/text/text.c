@@ -110,17 +110,15 @@ FontRange;
 // ----------------------------------------------------------------- Global objects -- //
 
 
-static bool is_text_subsystem_initialized = false;
-
 static FT_Library ft;
 
 static FontManager fm;
 
 static GLuint text_render_program;
 
-// static GLuint text_render_vao;
+static GLuint text_render_vao;
 
-// static GLuint text_render_vbo;
+static GLuint text_render_vbo;
 
 
 extern key_t current_drawing_window;
@@ -205,19 +203,22 @@ init_text_subsystem()
 	glDebugMessageCallback(MessageCallback, 0);
 	#endif
 
-	// glGenVertexArrays(1, &text_render_vao);
-	// glBindVertexArray(text_render_vao);
+	glGenVertexArrays(1, &text_render_vao);
+	glBindVertexArray(text_render_vao);
 
-	// glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
 
-	// glGenBuffers(1, &text_render_vbo);
-	// glBindBuffer(GL_ARRAY_BUFFER, text_render_vbo);
-	// glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-	// glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glGenBuffers(1, &text_render_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, text_render_vbo);
+	glBufferData(GL_ARRAY_BUFFER, STRIP_BUFFER_SIZE * sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
 
-	// glBindVertexArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, (void*)0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, (void*)(sizeof(GLint) * 2));
 
-	is_text_subsystem_initialized = true;
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glBindVertexArray(0);
 
 	return 0;
 }
@@ -225,7 +226,7 @@ init_text_subsystem()
 
 /*
 	@brief 	Returns reference to a newly heap allocated FontSize
-			It has a refcount of 1 on creation
+			It has "used" mark to allow escaping GC
 */
 static
 inline
@@ -233,7 +234,7 @@ FontSize*
 new_font_size()
 {
 	FontSize* new = (FontSize*)malloc(sizeof(FontSize));
-	new->was_used = false;
+	new->was_used = true;
 	new->ranges = mapNew();
 
 	return new;
@@ -319,10 +320,10 @@ new_font( const char* path )
 
 	@return Key identification for a font
 */
-size_t
+key_t
 resolve_font( const char* path )
 {
-	size_t path_hash = hash_string(path);
+	key_t path_hash = hash_string(path);
 
 	Font* font = mapGet(fm.fonts, path_hash);
 	if (font == NULL)
@@ -337,41 +338,21 @@ resolve_font( const char* path )
 }
 
 
-// TODO Do it in a proper way
 static
 void
 draw_text_buffer( float* buffer, size_t buffer_len )
 {
-	GLuint vao, vbo;
+	glBindVertexArray(text_render_vao);
 
-	// Generating them over and over is stupid as fuck
-	glGenVertexArrays(1, &vao);
+	glBindBuffer(GL_ARRAY_BUFFER, text_render_vbo);
 
-	glBindVertexArray(vao);
-
-	glGenBuffers(1, &vbo);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-	glBufferData(GL_ARRAY_BUFFER, buffer_len * sizeof(float) * 6 * 4, buffer, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, (void*)0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, (void*)(sizeof(GLint) * 2));
+	glBufferSubData(GL_ARRAY_BUFFER, 0, buffer_len * sizeof(float) * 6 * 4, buffer);
 
 	glDrawArrays(GL_TRIANGLES, 0, buffer_len * 6);
-
-	glDisableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glBindVertexArray(0);
-
-	glDeleteBuffers(1, &vbo);
-
-	glDeleteVertexArrays(1, &vao);
 }
 
 
@@ -391,7 +372,7 @@ draw_text_buffer( float* buffer, size_t buffer_len )
 	@return Non-zero value on error, otherwise 0
 */
 int
-draw_text( size_t font_hash,
+draw_text( key_t font_hash,
            uint32_t size,
            int32_t x_offset,
            int32_t y_offset,
