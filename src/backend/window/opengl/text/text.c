@@ -6,7 +6,9 @@
 #include FT_GLYPH_H
 #include <GL/glew.h>
 
+#include "backend.h"
 #include "text.h"
+#include "window/opengl/window.h"
 #include "window/opengl/render_program.h"
 #include "map.h"
 #include "error.h"
@@ -141,6 +143,14 @@ static GLint MAX_TEXTURE_SIZE;
 // ------------------------------------------------------------------------ Helpers -- //
 
 
+// Should return C-string containing the hint in which encoding rendering text should be passed
+const char*
+get_encoding ()
+{
+    return ENCODING;
+}
+
+
 #ifndef DEBUG
 void
 check_opengl_state( char* description )
@@ -189,7 +199,6 @@ init_text_subsystem()
 {
 	if (FT_Init_FreeType(&ft)) {
 		fprintf(stderr, "Could not initialize freetype\n");
-		SIGNAL_ERROR();
 		return -1;
 	}
 
@@ -258,7 +267,6 @@ find_suitable_font( const char* desired )
 		if ((dflt = fopen(DEFAULT_FONT, "r")) == NULL)
 		{
 			fprintf(stderr, "Cannot open desired font nor default one\n");
-			SIGNAL_ERROR();
 
 			fclose(check);
 			fclose(dflt);
@@ -293,7 +301,6 @@ new_font( const char* path )
 	if (FT_New_Face(ft, suitable, 0, face) != 0)
 	{
 		fprintf(stderr, "Cannot load font at %s\n", suitable);
-		SIGNAL_ERROR();
 		free(face);
 		return NULL;
 	}

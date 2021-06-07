@@ -7,9 +7,10 @@
 #include <SDL2/SDL.h>
 #include <cglm/cglm.h>
 
+#include "backend.h"
 #include "window.h"
 #include "map.h"
-#include "text/text.c"
+#include "text/text.h"
 #include "error.h"
 
 
@@ -44,10 +45,28 @@ Map* window_pool = NULL;
 key_t current_drawing_window;
 
 
-// -------------------------------------------------------------------- Realization -- //
+// --------------------------------------------------------------------------- Misc -- //
 
 
 int event_queue_former(void*, SDL_Event*);
+
+
+// TODO
+// Idea is that APIs could give the information about their functionalities
+// The fact that it is done via strings gives it the ability to have non-standard features without modifying headers or engines
+const char* FEATURE_LIST[] = {
+	"shaders",
+	"...",
+};
+
+// TODO It is kinda bad to return char**, maybe we should do something else?
+const char** get_feature_list ()
+{
+	return FEATURE_LIST;
+}
+
+
+// -------------------------------------------------------------------- Realization -- //
 
 
 static

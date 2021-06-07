@@ -1,3 +1,4 @@
+#pragma once
 
 // How many characters are packed into the single texture
 // #define CHARACTERS_IN_RANGE 128
@@ -29,12 +30,10 @@
 #define ENCODING "utf-32-le"
 #endif
 
-// Should return C-string containing the hint in which encoding rendering text should be passed
-const char*
-get_encoding ()
-{
-    return ENCODING;
-}
+
+const char* get_encoding();
+
+int    init_text_subsystem();
 
 // Function by which all fonts should be acquired
 key_t   resolve_font    ( const char* path );

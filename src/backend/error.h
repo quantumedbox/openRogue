@@ -1,5 +1,5 @@
-#pragma once
+// #pragma once
 
-int ERRORCODE = 0;
+// int ERRORCODE = 0;
 
-#define SIGNAL_ERROR() ERRORCODE = -1;
+// #define SIGNAL_ERROR() ERRORCODE = -1;

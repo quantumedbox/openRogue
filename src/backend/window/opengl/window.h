@@ -1,4 +1,8 @@
-#include <threads.h>
+#pragma once
+
+#include <SDL2/SDL.h>
+
+#include "threads.h"
 
 #define OPENGL_MINOR_VER 3
 #define OPENGL_MAJOR_VER 4
@@ -13,19 +17,7 @@
 #define EVENT_BUFFER_SIZE 16
 
 
-// TODO
-// Idea is that APIs could give the information about their functionalities
-// The fact that it is done via strings gives it the ability to have non-standard features without modifying headers or engines
-const char* FEATURE_LIST[] = {
-	"shaders",
-	"...",
-};
-
-// TODO It is kinda bad to return char**, maybe we should do something else?
-const char** get_feature_list ()
-{
-	return FEATURE_LIST;
-}
+const char** get_feature_list();
 
 /*
 */
