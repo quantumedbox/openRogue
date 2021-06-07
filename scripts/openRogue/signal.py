@@ -11,13 +11,12 @@ Use cases:
 
 from typing import Callable
 
-
 # Global signal map for lists of callable objects
 _SIGNALS = {}
 
 
 def impl_signal(s: str, f: Callable) -> None:
-	"""
+    """
 	Add a callback function to a named signal event
 	This preferably should be called in module's __init__
 
@@ -25,27 +24,27 @@ def impl_signal(s: str, f: Callable) -> None:
 	impl_signal("get_hello_world", lambda: "Hello, World!")
 	impl_signal("say_hello_world", lambda: print("Hello, World!"))
 	"""
-	if s in _SIGNALS:
-		_SIGNALS[s].append(f)
-	else:
-		_SIGNALS[s] = [f]
+    if s in _SIGNALS:
+        _SIGNALS[s].append(f)
+    else:
+        _SIGNALS[s] = [f]
 
 
 def signal(s: str) -> None:
-	"""
+    """
 	Execute callbacks for s event without the consideration of return values
 
 	Example:
 	signal("say_hello_world")
 	"""
-	if s not in _SIGNALS:
-		return
-	for c in _SIGNALS[s]:
-		c()
+    if s not in _SIGNALS:
+        return
+    for c in _SIGNALS[s]:
+        c()
 
 
 def signal_dispatch(s: str, d: Callable) -> None:
-	"""
+    """
 	Execute callbacks for s event and call d with return of each callback as argument
 	WARNING: d should have exactly 1 argument in its signature
 
@@ -54,7 +53,7 @@ def signal_dispatch(s: str, d: Callable) -> None:
 	signal_dispatch("get_hello_world", lambda x: hello_list.append(x))
 	print(*hello_list)
 	"""
-	if s not in _SIGNALS:
-		return
-	for c in _SIGNALS[s]:
-		d(c())
+    if s not in _SIGNALS:
+        return
+    for c in _SIGNALS[s]:
+        d(c())

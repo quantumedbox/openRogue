@@ -69,3 +69,13 @@ int     draw_text       ( key_t font_hash,
                           uint32_t* utf_string,
                           uint32_t string_len,
                           hex_t color );
+
+/*
+    @brief  Draw specified rectangle
+*/
+EXPORT_SYMBOL
+void    draw_rect       ( int32_t x_offset,
+                          int32_t y_offset,
+                          int32_t width,
+                          int32_t height,
+                          hex_t color );

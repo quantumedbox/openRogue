@@ -51,7 +51,7 @@ WindowHandler;
 	@brief 	Create new window
 			This function is entry for an API and thus, by calling it for the first time it initializes everything
 			On failure it should reverse all states to back they were
-	
+
 	@return Hash key of newly created window of 0 on failure
 */
 EXPORT_SYMBOL
@@ -63,7 +63,7 @@ EXPORT_SYMBOL
 void close_window(key_t);
 
 /*
-	@brief	Main way of processing window events
+	@brief	Main way of getting and processing window events
 			It returns one of the window queues
 
 	@warn 	You cannot process both queues,
@@ -72,7 +72,7 @@ void close_window(key_t);
 	@return Reference to EventQueue struct or NULL if window key is not valid
 */
 EXPORT_SYMBOL
-EventQueue* process_window(key_t);
+EventQueue* get_window_events(key_t);
 
 /*
 */

@@ -8,7 +8,7 @@
 
 class Vector:
     """
-	"""
+    """
     __slots__ = ("_x", "_y")
 
     def __init__(self, x, y):

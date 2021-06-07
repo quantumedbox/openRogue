@@ -17,6 +17,6 @@ print(sys.version)
 config_reader.update_config()
 
 if sys.version_info[0] != 3:
-	raise RuntimeError("Given openRogue implementation requires Python 3")
+    raise RuntimeError("Given openRogue implementation requires Python 3")
 
 print("initializing openRogue...")

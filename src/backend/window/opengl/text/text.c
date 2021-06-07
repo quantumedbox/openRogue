@@ -16,6 +16,14 @@
 
 // TODO Garbage collector-like that keeps track of usages per each texture in a certain time window
 
+// TODO Whitespace optimization
+
+// TODO Function to render text vertically ?
+
+// TODO Setting custom texture spacing
+
+// TODO Setting custom text rendering spacing
+
 
 // -------------------------------------------------------------------- Definitions -- //
 
@@ -101,7 +109,7 @@ static GLint MAX_TEXTURE_SIZE;
 const char*
 get_encoding ()
 {
-    return ENCODING;
+	return ENCODING;
 }
 
 
@@ -479,26 +487,26 @@ draw_text( key_t font_hash,
 			uint32_t idx = buffer_len * 6 * 4;
 
 			// Sorry to everyone who's reading this shit
-			float pos_left = (float)(x_offset + i * size) / window->width - 1.0;
-			float pos_right = (float)(x_offset + (i + 1) * size) / window->width - 1.0;
-			float pos_top = (float)(window->height - y_offset) / window->height;
-			float pos_bottom = (float)(window->height - y_offset - size) / window->height;
+			float pos_left = ((float)x_offset + (i * 0.75) * size) / (window->width / 2) - 1.0f;
+			float pos_right = ((float)x_offset + (i * 0.75 + 1) * size) / (window->width / 2) - 1.0f;
+			float pos_top = ((float)window->height - y_offset) / (window->height / 2) - 1.0f;
+			float pos_bottom = ((float)window->height - y_offset - size) / (window->height / 2) - 1.0f;
 
 			float tex_left = (*utf_string % (FONT_TEXTURE_SIZE / spacing)) * \
-							((float)spacing / FONT_TEXTURE_SIZE);
+			                 ((float)spacing / FONT_TEXTURE_SIZE);
 
 			float tex_right = (*utf_string % (FONT_TEXTURE_SIZE / spacing) + 1) * \
-							((float)spacing / FONT_TEXTURE_SIZE) - \
-							((float)spacing / FONT_TEXTURE_SIZE) / 2;
+			                  ((float)spacing / FONT_TEXTURE_SIZE) - \
+			                  ((float)spacing / FONT_TEXTURE_SIZE) / 4;
 
 			float tex_top = 1.0 - ((*utf_string % range_size) / \
-							(FONT_TEXTURE_SIZE / spacing) + 1) * \
-							((float)spacing / FONT_TEXTURE_SIZE);
+			                       (FONT_TEXTURE_SIZE / spacing) + 1) * \
+			                ((float)spacing / FONT_TEXTURE_SIZE);
 
 			float tex_bottom = 1.0 - ((*utf_string % range_size) / \
-							(FONT_TEXTURE_SIZE / spacing)) * \
-							((float)spacing / FONT_TEXTURE_SIZE) - \
-							((float)spacing / FONT_TEXTURE_SIZE) / 2;
+			                          (FONT_TEXTURE_SIZE / spacing)) * \
+			                   ((float)spacing / FONT_TEXTURE_SIZE) - \
+			                   ((float)spacing / FONT_TEXTURE_SIZE) / 4;
 
 			buffer[idx + 0] = pos_left;
 			buffer[idx + 1] = pos_top;
@@ -554,5 +562,39 @@ static
 void
 font_usage_collector()
 {
+	// TODO
+}
 
+// TODO Maybe use special quad render program / VBO
+EXPORT_SYMBOL
+void
+draw_rect( int32_t x_offset,
+           int32_t y_offset,
+           int32_t width,
+           int32_t height,
+           hex_t color )
+{
+	WindowHandler* window = (WindowHandler*)mapGet(window_pool, current_drawing_window);
+	if (!window) return;
+
+	glUseProgram(0);
+
+	// TODO
+
+	// glBegin(GL_TRIANGLES);
+	// glColor4f(hex_uniform4f(color));
+	glRectf((float)x_offset / window->width,
+		1.0 - (float)y_offset / window->height,
+		(float)(x_offset + width) / window->width,
+		1.0 - (float)(y_offset + height) / window->height);
+
+	glRectf(-1.0, -1.0, 1.0, 1.0);
+
+	// glVertex2f((float)x_offset / window->width, 1.0 - (float)y_offset / window->height);
+	// glVertex2f((float)(x_offset + width) / window->width, 1.0 - (float)(y_offset + height) / window->height);
+	// glVertex2f((float)(x_offset + width) / window->width, 1.0 - (float)y_offset / window->height);
+	// glVertex2f((float)x_offset / window->width, 1.0 - (float)y_offset / window->height);
+	// glVertex2f((float)(x_offset + width) / window->width, 1.0 - (float)(y_offset) / window->height);
+	// glVertex2f((float)(x_offset + width) / window->width, 1.0 - (float)(y_offset + height) / window->height);
+	// glEnd();
 }

@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-x c -std=c11 -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-variable
+CFLAGS=-x c -std=c11 -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unused-variable
 
 BACKEND_INCLUDES=-I src/backend
 BACKEND_DEFINES=

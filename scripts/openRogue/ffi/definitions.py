@@ -12,7 +12,7 @@ class C_PointerEvent(Structure):
 
 
 # class C_CloseEvent(Structure):
-# 	_fields_ = []
+#   _fields_ = []
 
 
 class C_InputEvent(Structure):

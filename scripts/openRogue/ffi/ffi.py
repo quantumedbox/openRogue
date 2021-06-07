@@ -2,6 +2,7 @@
 Integration with C backend
 """
 
+# TODO API swapping mechanism
 # TODO Needs serious work
 # For now idea is to make FFIInterface object that does the communications with shared objects
 # That way we could actually have multiple APIs at the same time
@@ -16,7 +17,7 @@ from openRogue.config_reader import get_config
 class FFIManager:
     """
     """
-    __slots__ = ("interfaces", )
+    __slots__ = ("interfaces", "current_api")
 
     def __init__(self):
         """
@@ -25,9 +26,11 @@ class FFIManager:
         self.interfaces = {}
         backend_api = get_config("backend_api")
         self.register(backend_api, "default")
+        self.current_api = "default"
 
     def resolve(self, name: str) -> object:
         """
+        Get API handler that is register by certain name
         """
         if name in self.interfaces:
             return self.interfaces[name]
@@ -52,6 +55,20 @@ class FFIManager:
         cffi = CDLL(full_path, use_errno=True)
         self.interfaces[name] = FFIInterface(cffi)
 
+    def swap_current_api(name: str, path=None) -> str:
+        """
+        Set new current API that is used for creating windows
+        This function returns previously active api name to restore previous api if needed
+        """
+        # TODO
+        if name not in self.interfaces:
+            if path is not None:
+                self.register(path, name)
+            else:
+                return self.current_api
+
+        # ...
+
 
 class FFIInterface:
     """
@@ -59,10 +76,11 @@ class FFIInterface:
     __slots__ = (
         "_shared",
         "close_window",
-        "process_window",
+        "get_window_events",
         "resize_window",
         "repos_window",
         "draw_text",
+        "draw_rect",
         "start_drawing",
         "finish_drawing",
     )
@@ -75,9 +93,9 @@ class FFIInterface:
         self.close_window = shared.close_window
         self.close_window.argtypes = c_uint32,
 
-        self.process_window = shared.process_window
-        self.process_window.restype = POINTER(C_EventQueue)
-        self.process_window.argtypes = c_uint32,
+        self.get_window_events = shared.get_window_events
+        self.get_window_events.restype = POINTER(C_EventQueue)
+        self.get_window_events.argtypes = c_uint32,
 
         self.resize_window = shared.resize_window
         self.resize_window.argtypes = c_uint32, c_int, c_int
@@ -86,6 +104,8 @@ class FFIInterface:
         self.repos_window.argtypes = c_uint32, c_int, c_int
 
         self.draw_text = shared.draw_text
+
+        self.draw_rect = shared.draw_rect
 
         self.start_drawing = shared.start_drawing
         self.start_drawing.argtypes = c_uint32,

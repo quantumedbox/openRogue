@@ -30,21 +30,21 @@ COMPILERS = ["tcc", "gcc", "cl"]
 DEFALUT_DLLS_PATH = "./dlls"
 
 # class jitFunc:
-# 	"""
-# 	Function handler, that transforms python args to C types automatically
-# 	"""
-# 	def __init__(self, func: str, argtypes: list):
-# 		self.func = func
-# 		# func.argtypes = argtypes
+#   """
+#   Function handler, that transforms python args to C types automatically
+#   """
+#   def __init__(self, func: str, argtypes: list):
+#       self.func = func
+#       # func.argtypes = argtypes
 
-# 	def __call__(self, *args) -> Any:
-# 		return self.func(*args)
+#   def __call__(self, *args) -> Any:
+#       return self.func(*args)
 
 
 def find_compiler() -> Union[str, None]:
     """
-	Helper for retrieving available compiler
-	"""
+    Helper for retrieving available compiler
+    """
     if "-cc" in sys.argv:
         return sys.argv[sys.argv.index("-cc") + 1]
 
@@ -67,7 +67,7 @@ def find_compiler() -> Union[str, None]:
 
 def get_execution_kwargs(compiler: str) -> {}:
     """
-	"""
+    """
     encoding = "utf-8"
     if compiler == "cl":
         encoding = "cp866"
@@ -87,7 +87,7 @@ def get_execution_kwargs(compiler: str) -> {}:
 
 def get_compiler_specific_args(compiler: str, src: str, target: str) -> list:
     """
-	"""
+    """
     compiler = compiler[compiler.rfind('/') +
                         1] if '/' in compiler else compiler
 
@@ -111,8 +111,8 @@ def get_compiler_specific_args(compiler: str, src: str, target: str) -> list:
 
 def compile(entry: str, src: str):  # -> jitFunc:
     """
-	Compiles given C source string to a DLL and then creates a python ffi handler to call given 'name' function
-	"""
+    Compiles given C source string to a DLL and then creates a python ffi handler to call given 'name' function
+    """
 
     # resolve path that should contain compiled dlls
     dll_path = ""
@@ -137,7 +137,7 @@ def compile(entry: str, src: str):  # -> jitFunc:
 
     compiler = find_compiler()
     assert compiler is not None, """Cannot find suitable C compiler in config or path.\n
-	Set 'c_compiler' option in config, pass the -cc argument with path to compiler or configure your system $PATH to include it"""
+    Set 'c_compiler' option in config, pass the -cc argument with path to compiler or configure your system $PATH to include it"""
 
     # run compiler with specific arguments
     r = subprocess.run(
@@ -173,24 +173,24 @@ def compile(entry: str, src: str):  # -> jitFunc:
 
 if __name__ == "__main__":
     """
-	Run this file as module to test it
-	"""
+    Run this file as module to test it
+    """
     func = compile(entry="calc_fib",
                    src=r"""
-		unsigned int calc_fib(unsigned int n) {
-			if (n <= 1) return n;
+        unsigned int calc_fib(unsigned int n) {
+            if (n <= 1) return n;
 
-			unsigned int prev = 0;
-			unsigned int cur = 1;
+            unsigned int prev = 0;
+            unsigned int cur = 1;
 
-			for (n -= 1; n--;) {
-				unsigned int sum = prev + cur;
-				prev = cur;
-				cur = sum;
-			}
-			return cur;
-		}
-		""")
+            for (n -= 1; n--;) {
+                unsigned int sum = prev + cur;
+                prev = cur;
+                cur = sum;
+            }
+            return cur;
+        }
+        """)
 
     print(func(0))
     print(func(1))

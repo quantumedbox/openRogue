@@ -437,7 +437,7 @@ dispatch_window_repos( EventQueue* queue, SDL_Event event )
 // TODO Rename to something more fitting
 EXPORT_SYMBOL
 EventQueue*
-process_window( key_t w_key )
+get_window_events( key_t w_key )
 {
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
 	if (!w) return NULL;
@@ -541,6 +541,11 @@ start_drawing( key_t w_key )
 
 	glViewport(0, 0, w->width, w->height);
 
+   glMatrixMode(GL_PROJECTION);
+   glLoadIdentity();
+   glOrtho(0, w->width, 0, w->height, 0.0, 1.0);
+   glMatrixMode(GL_MODELVIEW);
+
 	// float aspect = (float)width / (float)height;
 
 	// Setup the projection
@@ -554,7 +559,7 @@ start_drawing( key_t w_key )
 	//           -100.0f, 100.0f,
 	//           current_window_projection);
 
-	// glOrtho(-0.5, (float)(width - 1) + 0.5, (float)(height - 1) + 0.5, -0.5, 0.0, 1.0);
+	// glOrtho(-0.5, (float)(w->width - 1) + 0.5, (float)(w->height - 1) + 0.5, -0.5, 0.0, 1.0);
 }
 
 
@@ -575,7 +580,7 @@ finish_drawing()
 	    WINDOW_FILL_COLOR_B,
 	    1.0
 	);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	current_drawing_window = 0;
 }

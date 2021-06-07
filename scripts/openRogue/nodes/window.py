@@ -46,15 +46,15 @@ class WindowComponent(component.Component):
     def _update_window(self, *args):
         """
         """
-        event_queue = self._api.process_window(self._window)
+        event_queue = self._api.get_window_events(self._window)
 
-        font = self._api._shared.resolve_font(b"resources/fonts/FSEX300.ttf", )
+        # font = self._api._shared.resolve_font(b"resources/fonts/FSEX300.ttf", )
 
-        font2 = self._api._shared.resolve_font(
-            b"resources/fonts/SourceCodePro-Light.ttf")
+        # font2 = self._api._shared.resolve_font(
+        #     b"resources/fonts/SourceCodePro-Light.ttf")
 
-        font3 = self._api._shared.resolve_font(
-            b"resources/fonts/DelaGothicOne-Regular.ttf")
+        # font3 = self._api._shared.resolve_font(
+        #     b"resources/fonts/DelaGothicOne-Regular.ttf")
 
         for i in range(event_queue.contents.len):
             event = event_queue.contents.events[i]
@@ -71,55 +71,57 @@ class WindowComponent(component.Component):
                 self.repos_window_behaviour(
                     Vector(event.repos_event.x, event.repos_event.y))
 
-        self._api.start_drawing(self._window)
+        # self._api.start_drawing(self._window)
 
-        text = "abcd тест δοκιμή ტესტი"
+        # text = "abcd тест δοκιμή ტესტი"
 
-        self._api.draw_text(font2, ffi.c_uint32(256), 0, 256,
-                            text.encode(encoding="utf-32-le"),
-                            ffi.c_uint32(len(text)), 0xFFF2FaFF)
+        # self._api.draw_text(font2, ffi.c_uint32(256), 0, 256,
+        #                     text.encode(encoding="utf-32-le"),
+        #                     ffi.c_uint32(len(text)), 0xFFF2FaFF)
 
-        self._api.draw_text(font, ffi.c_uint32(24), 0, 0,
-                            text.encode(encoding="utf-32-le"),
-                            ffi.c_uint32(len(text)), 0xFFFF00FF)
+        # self._api.draw_text(font, ffi.c_uint32(24), 0, 0,
+        #                     text.encode(encoding="utf-32-le"),
+        #                     ffi.c_uint32(len(text)), 0xFFFF00FF)
 
-        self._api.draw_text(font, ffi.c_uint32(16), 0, 24,
-                            text.encode(encoding="utf-32-le"),
-                            ffi.c_uint32(len(text)), 0x00FFFFFF)
+        # self._api.draw_text(font, ffi.c_uint32(16), 0, 24,
+        #                     text.encode(encoding="utf-32-le"),
+        #                     ffi.c_uint32(len(text)), 0x00FFFFFF)
 
-        self._api.draw_text(font, ffi.c_uint32(12), 0, 40,
-                            text.encode(encoding="utf-32-le"),
-                            ffi.c_uint32(len(text)), 0x00FFAAFF)
+        # self._api.draw_text(font, ffi.c_uint32(12), 0, 40,
+        #                     text.encode(encoding="utf-32-le"),
+        #                     ffi.c_uint32(len(text)), 0x00FFAAFF)
 
-        self._api.draw_text(
-            font, ffi.c_uint32(48), 0, 100,
-            "Как уже неоднократно упомянуто, реплицированные с зарубежных источников,"
-            .encode(encoding="utf-32-le"),
-            ffi.c_uint32(
-                len("Как уже неоднократно упомянуто, реплицированные с зарубежных источников,"
-                    )), 0xFFFFFFFF)
+        # self._api.draw_text(
+        #     font, ffi.c_uint32(48), 0, 100,
+        #     "Как уже неоднократно упомянуто, реплицированные с зарубежных источников,"
+        #     .encode(encoding="utf-32-le"),
+        #     ffi.c_uint32(
+        #         len("Как уже неоднократно упомянуто, реплицированные с зарубежных источников,"
+        #             )), 0xFFFFFFFF)
 
-        self._api.draw_text(
-            font, ffi.c_uint32(48), 0, 148,
-            "современные исследования подвергнуты целой серии независимых исследований."
-            .encode(encoding="utf-32-le"),
-            ffi.c_uint32(
-                len("современные исследования подвергнуты целой серии независимых исследований."
-                    )), 0xFFFFFFFF)
+        # self._api.draw_text(
+        #     font, ffi.c_uint32(48), 0, 148,
+        #     "современные исследования подвергнуты целой серии независимых исследований."
+        #     .encode(encoding="utf-32-le"),
+        #     ffi.c_uint32(
+        #         len("современные исследования подвергнуты целой серии независимых исследований."
+        #             )), 0xFFFFFFFF)
 
-        self._api.draw_text(
-            font, ffi.c_uint32(48), 0, 196,
-            "ы вынуждены отталкиваться от того, что экономическая повестка сегодняшнего дня предполагает независимые способы реализации экспериментов,"
-            .encode(encoding="utf-32-le"),
-            ffi.c_uint32(
-                len("ы вынуждены отталкиваться от того, что экономическая повестка сегодняшнего дня предполагает независимые способы реализации экспериментов,"
-                    )), 0xFFFFFFFF)
+        # self._api.draw_text(
+        #     font, ffi.c_uint32(48), 0, 196,
+        #     "ы вынуждены отталкиваться от того, что экономическая повестка сегодняшнего дня предполагает независимые способы реализации экспериментов,"
+        #     .encode(encoding="utf-32-le"),
+        #     ffi.c_uint32(
+        #         len("ы вынуждены отталкиваться от того, что экономическая повестка сегодняшнего дня предполагает независимые способы реализации экспериментов,"
+        #             )), 0xFFFFFFFF)
 
-        self._api.draw_text(font3, ffi.c_uint32(80), 0, 600,
-                            "テストテストテストテストテスト".encode(encoding="utf-32-le"),
-                            ffi.c_uint32(len("テストテストテストテストテスト")), 0xFFFAAFAF)
+        # self._api.draw_text(font3, ffi.c_uint32(80), 0, 600,
+        #                     "テストテストテストテストテスト".encode(encoding="utf-32-le"),
+        #                     ffi.c_uint32(len("テストテストテストテストテスト")), 0xFFFAAFAF)
 
-        self._api.finish_drawing()
+        # self._api.draw_rect(0, 0, 100, 100, 0xFFFFFF)
+
+        # self._api.finish_drawing()
 
     def _free_window(self, *args):
         # Prevent double free after force deletion

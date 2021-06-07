@@ -3,14 +3,14 @@ Localization submodule
 
 Usage example:
 
-	entity_desc = lang.Bit(
-		eng="my entity description",
-		rus="описание сущности моей",
-	)
+    entity_desc = lang.Bit(
+        eng="my entity description",
+        rus="описание сущности моей",
+    )
 
-	print(entity_desc)
-	lang.set_language("run")
-	print(entity_desc)
+    print(entity_desc)
+    lang.set_language("run")
+    print(entity_desc)
 
 """
 import sys
@@ -38,9 +38,9 @@ _ALIASES = {
 
 class Bit:
     """
-	String mimic
-	Receives **kwargs of languages and their data in Unicode string
-	"""
+    String mimic
+    Receives **kwargs of languages and their data in Unicode string
+    """
     __slots__ = ("_data", )
 
     def __init__(self, **kwargs):
@@ -62,14 +62,14 @@ class Bit:
 
 def _init_language() -> None:
     """
-	Initialize language by the system locale
-	"""
+    Initialize language by the system locale
+    """
     set_language(get_system_locale())
 
 
 def set_language(lang: str) -> None:
     """
-	"""
+    """
     if lang in _ALIASES:
         lang = _ALIASES[lang]
 
@@ -80,8 +80,8 @@ def set_language(lang: str) -> None:
 
 def get_locale() -> str:
     """
-	Get current binded locale
-	"""
+    Get current binded locale
+    """
     if _LINGUA is None:
         raise Exception("Language locale wasn't set")
     return _LINGUA
@@ -89,7 +89,7 @@ def get_locale() -> str:
 
 def get_system_locale() -> str:
     """
-	"""
+    """
     if sys.platform == "win32":
         windll = ctypes.windll.kernel32
         local_code = windll.GetUserDefaultUILanguage()

@@ -11,8 +11,8 @@ from types import ModuleType
 
 class ModuleInfo:
     """
-	Standard way of describing and getting information about modules through signals
-	"""
+    Standard way of describing and getting information about modules through signals
+    """
     __slots__ = ('name', 'version', 'description', 'path')
 
     def __init__(self, name: str, version: str, description: str, path: str):
@@ -28,10 +28,10 @@ class ModuleInfo:
 # Maybe make the version as integer ?
 def register_module(name: str, version: str):
     """
-	Module registry functionality
-	Doc string of the module is used as description text
-	! Should be called from __init__
-	"""
+    Module registry functionality
+    Doc string of the module is used as description text
+    ! Should be called from __init__
+    """
     caller = get_caller_module()
     signal.impl_signal(
         "module_info",
@@ -40,8 +40,8 @@ def register_module(name: str, version: str):
 
 def get_modules_info() -> list:
     """
-	Returns ModuleInfo list with info about all registered objects
-	"""
+    Returns ModuleInfo list with info about all registered objects
+    """
     modules = []
     signal.signal_dispatch("module_info", lambda x: modules.append(x))
     return modules
@@ -49,7 +49,7 @@ def get_modules_info() -> list:
 
 def get_caller_module() -> ModuleType:
     """
-	Returns module from which caller function was called
-	! May be a lot of possible problems with that
-	"""
+    Returns module from which caller function was called
+    ! May be a lot of possible problems with that
+    """
     return inspect.getmodule(inspect.stack()[2][0])
