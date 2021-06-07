@@ -12,6 +12,8 @@
 
 typedef size_t key_t;
 
+#define NONE_KEY 0
+
 //
 typedef uint32_t bitmask_t;
 

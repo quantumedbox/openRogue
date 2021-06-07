@@ -79,9 +79,7 @@ void 	mapPrint 	(Map*);
 
 static 	Bucket* mapNewBucket		();
 static  void 	mapExtend			(Map*);
-// static 	bool 	mapHasKeyRecur		(Bucket*, key_t key);
 static 	void 	mapAllocateBuckets	(Map*, size_t n);
-// static 	bool 	mapAddRecur			(Bucket*, key_t key, data_t);
 static  void 	mapExtend			(Map*);
 static  void 	mapClearStack		(Bucket*);
 static 	void 	mapPrintRecur		(Bucket*);

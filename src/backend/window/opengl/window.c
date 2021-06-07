@@ -106,12 +106,7 @@ init_window_subsystem()
 	return 0;
 }
 
-/*
-	Create new window
-	This function is entry for an API and thus, by calling it first time initializes everything
-	On failure it should reverse all states to back they were
-	Failure itself is signaled by 0 returned value
-*/
+
 EXPORT_SYMBOL
 key_t
 init_window( int width, int height, const char* title )
@@ -121,7 +116,7 @@ init_window( int width, int height, const char* title )
 	if (win_key == 1) {
 		if (init_window_subsystem() == -1) {
 			new_winodw_key = 0;
-			return 0;
+			return NONE_KEY;
 		}
 	}
 
@@ -142,7 +137,7 @@ init_window( int width, int height, const char* title )
 			SDL_Quit();
 			new_winodw_key = 0;
 		}
-		return 0;
+		return NONE_KEY;
 	}
 
 	// Make sure that only one OpenGL context is created
@@ -157,7 +152,7 @@ init_window( int width, int height, const char* title )
 			SDL_GL_DeleteContext(opengl_context);
 			SDL_Quit();
 			new_winodw_key = 0;
-			return 0;
+			return NONE_KEY;
 		}
 
 		SDL_GL_MakeCurrent(win, opengl_context);
@@ -187,7 +182,7 @@ init_window( int width, int height, const char* title )
 			SDL_GL_DeleteContext(opengl_context);
 			SDL_Quit();
 			new_winodw_key = 0;
-			return 0;
+			return NONE_KEY;
 		}
 	}
 
@@ -440,15 +435,6 @@ dispatch_window_repos( EventQueue* queue, SDL_Event event )
 
 
 // TODO Rename to something more fitting
-/*
-	@brief	Main way of processing window events
-			It returns one of the window queues
-
-	@warn 	You cannot process both queues,
-			make sure that only one of them are in python space
-
-	@return Reference to EventQueue struct or NULL if window key is not valid
-*/
 EXPORT_SYMBOL
 EventQueue*
 process_window( key_t w_key )
@@ -538,9 +524,7 @@ event_queue_former( void* _, SDL_Event* event_ptr )
 	return 0;
 }
 
-/*
-	@brief 	Prepares the window for drawing
-*/
+
 EXPORT_SYMBOL
 void
 start_drawing( key_t w_key )
@@ -573,10 +557,7 @@ start_drawing( key_t w_key )
 	// glOrtho(-0.5, (float)(width - 1) + 0.5, (float)(height - 1) + 0.5, -0.5, 0.0, 1.0);
 }
 
-/*
-	@brief 	Update the current drawing window with what is in context
-			Actual clearing of the buffer happens by this function and not by start_drawing()
-*/
+
 EXPORT_SYMBOL
 void
 finish_drawing()

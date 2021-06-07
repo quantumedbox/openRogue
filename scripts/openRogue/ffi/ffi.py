@@ -49,7 +49,7 @@ class FFIManager:
                 raise NameError("Cannot find {} backend".format(path))
 
         full_path = os.path.abspath('./backends/' + path)
-        cffi = CDLL(full_path)
+        cffi = CDLL(full_path, use_errno=True)
         self.interfaces[name] = FFIInterface(cffi)
 
 
@@ -91,16 +91,6 @@ class FFIInterface:
         self.start_drawing.argtypes = c_uint32,
 
         self.finish_drawing = shared.finish_drawing
-
-        # TODO
-        # shared.new_buffer_strip.argtypes = (
-        #     c_size_t,
-        #     c_uint32,
-        #     c_int32,
-        #     c_int32,
-        #     POINTER(c_uint32),
-        #     c_uint32,
-        # )
 
     def init_window(self, width: int, height: int, title: str) -> 'hash':
         win = self._shared.init_window(width, height, title.encode())

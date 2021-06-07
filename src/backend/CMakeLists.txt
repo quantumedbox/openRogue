@@ -19,10 +19,8 @@ set(LIBRARY_OUTPUT_PATH ${OUTPUT_DIRECTORY})
 set(LINKER_LIBS "opengl32")
 
 
-include_directories(${INCLUDE_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/include)
-
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}
+					${INCLUDE_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/include)
 
 add_library(SDL_Backend SHARED ${SOURCES})
 
@@ -39,6 +37,11 @@ if(CMAKE_C_COMPILER_ID MATCHES MSVC)
 		set(CMAKE_LIBRARY_PATH ${LINK_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/msvc64/lib)
 	endif()
 endif()
+
+# if(CMAKE_C_COMPILER_ID MATCHES GCC)
+# 	set(CMAKE_C_FLAGS_DEBUG -Wall -Wextra -Wpedantic -Werror
+# 							-g -Wno-unused-parameter -Wno-unused-variable)
+# endif()
 
 
 find_library(SDL2_LIB sdl2)

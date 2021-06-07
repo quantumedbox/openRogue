@@ -78,7 +78,7 @@ mapAdd(Map* m, key_t key, data_t data)
 {
 	// pthread_mutex_lock(&m->lock);
 
-	uint32_t idx = key % m->capacity;
+	key_t idx = key % m->capacity;
 
 	// if (m->buckets[idx].next == NULL)
 	// {
@@ -157,7 +157,7 @@ mapAdd(Map* m, key_t key, data_t data)
 bool
 mapHas(Map* m, key_t key)
 {
-	uint32_t idx = key % m->capacity;
+	key_t idx = key % m->capacity;
 
 	Bucket* b = m->buckets[idx].next;
 
@@ -195,7 +195,7 @@ mapHas(Map* m, key_t key)
 data_t
 mapGet(Map* m, key_t key)
 {
-	uint32_t idx = key % m->capacity;
+	key_t idx = key % m->capacity;
 
 	Bucket* base = &m->buckets[idx];
 	while (base->next != NULL)
@@ -216,7 +216,7 @@ mapGet(Map* m, key_t key)
 void
 mapDel(Map* m, key_t key)
 {
-	uint32_t idx = key % m->capacity;
+	key_t idx = key % m->capacity;
 
 	Bucket* base = &m->buckets[idx];
 	while (base->next != NULL)
@@ -264,7 +264,7 @@ static
 void
 mapReallocateBucketStack(Bucket* buckets, Bucket* stack, size_t cap)
 {
-	uint32_t idx = stack->key % cap;
+	key_t idx = stack->key % cap;
 
 	Bucket* stack_next = stack->next;
 

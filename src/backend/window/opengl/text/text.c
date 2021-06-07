@@ -14,42 +14,11 @@
 #include "error.h"
 
 
-// TODO Try using glSubBufferData to modify the predefined global buffer
-
 // TODO Garbage collector-like that keeps track of usages per each texture in a certain time window
 
-// TODO We don't need buffered textures that much. Maybe in the future if there would be such need
-
-// NOPE!
-// Textures: internalFormat = GL_ALPHA, type = GL_BITMAP
-// This way it's packed to 1px per 1 bit
-
-// QUESTION: From what should we set the size? Width or height? Or both?
-
-// Problem with that method is that a single language could be divided into several textures which is not ideal
-
-// It actually may be really expensive to calculate character ranges for small font sizes
-// Literal thousands of glyph should be buffered for that
-
-// We should limits the maximum amount of glyphs per texture
-// The most rational way is to limit them to widely supported texture size of 1024px
-
-// TODO Refcounts for usages of fonts, their ranges and sized of those ranges?
-
-// N of characters per page should be dissected from face metrics and maximum texture size
-// What about using texture arrays for packing more characters in a single texture?
-// Form a buffer of multiple characters if part of string is in the same character range, we should reduce the amount of texture switching and draw calls
 
 // -------------------------------------------------------------------- Definitions -- //
 
-/*
-	Stores and manages loaded fonts
-*/
-// typedef struct
-// {
-// 	Map* fonts;
-// }
-// FontManager;
 
 /*
 */
@@ -74,7 +43,6 @@ typedef struct
 }
 Font;
 
-// ??? Should be self-aware about its size ???
 /*
 	Stores refcounts to a given font size and map to buffered char ranges
 */
@@ -97,17 +65,6 @@ typedef struct
 }
 FontRange;
 
-/*
-	Holds associated with strip buffer data for drawing and freeing purposes
-*/
-// typedef struct
-// {
-// 	GLuint vao;
-// 	GLuint vbo;
-// 	GLuint texture;
-// }
-// StripBuffer;
-
 
 // ----------------------------------------------------------------- Global objects -- //
 
@@ -116,6 +73,10 @@ static FT_Library ft;
 
 static Map* font_pool;
 
+extern key_t current_drawing_window;
+
+extern Map* window_pool;
+
 static GLuint text_render_program;
 
 static GLuint text_render_vao;
@@ -123,21 +84,14 @@ static GLuint text_render_vao;
 static GLuint text_render_vbo;
 
 
-extern key_t current_drawing_window;
-
-extern Map* window_pool;
-
-
 // -------------------------------------------------------------- Runtime constants -- //
 
 
 // TODO Maybe give the ability to API caller to set size of textures ?
+// TODO Relocate to special module for communicating such metrics
 
 // Runtime const that is used for packing glyphs into the texture atlases
 static GLint MAX_TEXTURE_SIZE;
-
-// Client side buffer of zeroes, used on texture initialization
-// static GLuint PX_BUFFER;
 
 
 // ------------------------------------------------------------------------ Helpers -- //
@@ -187,13 +141,6 @@ MessageCallback( GLenum source,
 
 
 // What about making it inlined and check if it was initialized at the beginning?
-/*
-	@brief 	Initialize everything that is needed for text functionality
-
-	@warn 	OpenGL should be already initialized before this call
-
-	@return Returns non-zero value on error
-*/
 int
 init_text_subsystem()
 {
@@ -317,16 +264,6 @@ new_font( const char* path )
 }
 
 
-/*
-	@brief 	Returns the valid font hash
-			Makes sure that given font at path is loaded
-
-	@warn 	API caller should listen to ERRORCODE value for panics!
-
-	@param 	path -- hint to a font file
-
-	@return Key identification for a font
-*/
 EXPORT_SYMBOL
 key_t
 resolve_font( const char* path )
@@ -338,7 +275,7 @@ resolve_font( const char* path )
 	{
 		Font* font_n = new_font(path);
 		if (font_n == NULL)
-			return 0;
+			return NONE_KEY;
 		mapAdd(font_pool, path_hash, font_n);
 	}
 
@@ -364,20 +301,6 @@ draw_text_buffer( float* buffer, size_t buffer_len )
 }
 
 
-/*
-	@brief 	Renders given string to the current drawing window with specified font at the offset position
-
-	@warn 	Bytes should be encoded in 'utf-32-le'
-
-	@param 	font_hash	-- Represents a loaded font from resolve_font() function
-			size 		-- Height of the font
-			x_offset	-- Offset pixels relative to top-left corner
-			y_offset	-- Offset pixels relative to top-left corner
-			utf_string	-- Bytes of string data that should be rendered
-			string_len	-- Number of characters in the string
-
-	@return Non-zero value on error, otherwise 0
-*/
 EXPORT_SYMBOL
 int
 draw_text( key_t font_hash,
@@ -393,7 +316,7 @@ draw_text( key_t font_hash,
 
 	WindowHandler* window = (WindowHandler*)mapGet(window_pool, current_drawing_window);
 	if (window == NULL)
-		return 0;
+		return -1;
 
 	glUseProgram(text_render_program);
 
@@ -422,11 +345,10 @@ draw_text( key_t font_hash,
 	FT_Face face = (*(FT_Face*)font->source);
 
 	// How much glyphs contained in a single texture
-	// Spacing between characters is exaggerated because of the need to accommodate the baseline transformations
+	// Spacing between characters is exaggerated because of the need to accommodate the bearings
 	uint32_t spacing = floor(size * 1.25);
 	uint32_t range_size = pow((int32_t)floor(FONT_TEXTURE_SIZE / spacing), 2);
 
-	// TODO Maybe we should directly operate on GL vertex buffer?
 	// VBO constructor -- 6 vertices with 4 floats with each
 	float buffer[TEXT_BUFFER_SIZE * 6 * 4];
 	size_t buffer_len = 0;
@@ -445,7 +367,6 @@ draw_text( key_t font_hash,
 				draw_text_buffer(buffer, buffer_len);
 				buffer_len = 0;
 			}
-
 			// Try to get desired character range
 			FontRange* range = mapGet(font_s->ranges, *utf_string / range_size);
 
@@ -558,10 +479,10 @@ draw_text( key_t font_hash,
 			uint32_t idx = buffer_len * 6 * 4;
 
 			// Sorry to everyone who's reading this shit
-			float pos_left = (float)(x_offset + i * spacing) / window->width - 1.0;
-			float pos_right = (float)(x_offset + (i + 1) * spacing) / window->width - 1.0;
+			float pos_left = (float)(x_offset + i * size) / window->width - 1.0;
+			float pos_right = (float)(x_offset + (i + 1) * size) / window->width - 1.0;
 			float pos_top = (float)(window->height - y_offset) / window->height;
-			float pos_bottom = (float)(window->height - y_offset - spacing) / window->height;
+			float pos_bottom = (float)(window->height - y_offset - size) / window->height;
 
 			float tex_left = (*utf_string % (FONT_TEXTURE_SIZE / spacing)) * \
 							((float)spacing / FONT_TEXTURE_SIZE);

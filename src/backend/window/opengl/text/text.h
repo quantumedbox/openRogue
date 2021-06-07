@@ -1,17 +1,6 @@
 #pragma once
 
-// How many characters are packed into the single texture
-// #define CHARACTERS_IN_RANGE 128
-
-// //
-// #define DEFAULT_FONT_HEIGHT 32
-
-// //
-// #define DEFAULT_FONT_WIDTH 32
-
-
-// TODO Caller font_texture_size override
-
+// Default texture size in both dimensions
 #ifndef FONT_TEXTURE_SIZE
 #define FONT_TEXTURE_SIZE 1024
 #endif
@@ -30,18 +19,50 @@
 #define ENCODING "utf-32-le"
 #endif
 
+/*
+    @brief  Initialize everything that is needed for text functionality
 
-const char* get_encoding();
+    @warn   OpenGL should be already initialized before this call
 
+    @return Returns non-zero value on error
+*/
 int    init_text_subsystem();
 
-// Function by which all fonts should be acquired
+/*
+    @brief  Returns string that hints towards encoding in which all drawing strings should be
+*/
+EXPORT_SYMBOL
+const char* get_encoding();
+
+/*
+    @brief  Returns the valid font hash
+            Makes sure that given font at path is loaded
+
+    @warn   API caller should listen to ERRORCODE value for panics!
+
+    @param  path -- hint to a font file
+
+    @return Key identification for a font
+*/
 EXPORT_SYMBOL
 key_t   resolve_font    ( const char* path );
 
-// Render the string
+/*
+    @brief  Renders given string to the current drawing window with specified font at the offset position
+
+    @warn   Bytes should be encoded in 'utf-32-le'
+
+    @param  font_hash   -- Represents a loaded font from resolve_font() function
+            size        -- Height of the font
+            x_offset    -- Offset pixels relative to top-left corner
+            y_offset    -- Offset pixels relative to top-left corner
+            utf_string  -- Bytes of string data that should be rendered
+            string_len  -- Number of characters in the string
+
+    @return Non-zero value on error, otherwise 0
+*/
 EXPORT_SYMBOL
-int     draw_text       ( size_t font_hash,
+int     draw_text       ( key_t font_hash,
                           uint32_t size,
                           int32_t x_offset,
                           int32_t y_offset,
