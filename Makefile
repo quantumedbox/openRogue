@@ -15,7 +15,7 @@ backend:
 	$(CC) $(CFLAGS) src/backend/backend.h -shared -o backends/openRogue_SDL.dll $(BACKEND_INCLUDES) -lopengl32 -lglew32 -lSDL2 -fopenmp -lfreetype
 
 debug: CFLAGS += -g -DDEBUG=1
-release: CFLAGS += -O3
+release: CFLAGS += -O3 -msse2 -mavx2
 
 debug: run backend
 release: run backend

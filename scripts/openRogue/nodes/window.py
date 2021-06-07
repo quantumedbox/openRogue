@@ -87,6 +87,10 @@ class WindowComponent(component.Component):
                             text.encode(encoding="utf-32-le"),
                             ffi.c_uint32(len(text)), 0x00FFFFFF)
 
+        self._api.draw_text(font, ffi.c_uint32(12), 0, 40,
+                            text.encode(encoding="utf-32-le"),
+                            ffi.c_uint32(len(text)), 0x00FFAAFF)
+
         self._api.draw_text(
             font, ffi.c_uint32(48), 0, 100,
             "Как уже неоднократно упомянуто, реплицированные с зарубежных источников,"
@@ -96,7 +100,7 @@ class WindowComponent(component.Component):
                     )), 0xFFFFFFFF)
 
         self._api.draw_text(
-            font, ffi.c_uint32(48), 0, 140,
+            font, ffi.c_uint32(48), 0, 148,
             "современные исследования подвергнуты целой серии независимых исследований."
             .encode(encoding="utf-32-le"),
             ffi.c_uint32(
@@ -104,7 +108,7 @@ class WindowComponent(component.Component):
                     )), 0xFFFFFFFF)
 
         self._api.draw_text(
-            font, ffi.c_uint32(48), 0, 180,
+            font, ffi.c_uint32(48), 0, 196,
             "ы вынуждены отталкиваться от того, что экономическая повестка сегодняшнего дня предполагает независимые способы реализации экспериментов,"
             .encode(encoding="utf-32-le"),
             ffi.c_uint32(

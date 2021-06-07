@@ -13,8 +13,6 @@
 // TODO It's easy to leak memory in current implementation which is not good
 // TODO Consideration for easy deallocation of custom data types
 
-// TODO Possibly use smart pointers ?
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>

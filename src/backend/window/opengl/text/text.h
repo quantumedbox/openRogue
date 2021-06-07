@@ -16,8 +16,8 @@
 #endif
 
 // Max amount of characters per strip
-#ifndef STRIP_BUFFER_SIZE
-#define STRIP_BUFFER_SIZE 128
+#ifndef TEXT_BUFFER_SIZE
+#define TEXT_BUFFER_SIZE 128
 #endif
 
 // Maybe it's better to have it in config ?

@@ -43,11 +43,11 @@
 /*
 	Stores and manages loaded fonts
 */
-typedef struct
-{
-	Map* fonts;
-}
-FontManager;
+// typedef struct
+// {
+// 	Map* fonts;
+// }
+// FontManager;
 
 /*
 */
@@ -112,7 +112,7 @@ FontRange;
 
 static FT_Library ft;
 
-static FontManager fm;
+static Map* font_pool;
 
 static GLuint text_render_program;
 
@@ -195,7 +195,7 @@ init_text_subsystem()
 
 	text_render_program = new_render_program("resources/shaders/text.vert", "resources/shaders/text.frag");
 
-	fm.fonts = mapNew();
+	font_pool = mapNew();
 	// strip_buffer_map = mapNew();
 
 	#ifdef DEBUG
@@ -211,7 +211,7 @@ init_text_subsystem()
 
 	glGenBuffers(1, &text_render_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, text_render_vbo);
-	glBufferData(GL_ARRAY_BUFFER, STRIP_BUFFER_SIZE * sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, TEXT_BUFFER_SIZE * sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, (void*)0);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, (void*)(sizeof(GLint) * 2));
@@ -325,13 +325,13 @@ resolve_font( const char* path )
 {
 	key_t path_hash = hash_string(path);
 
-	Font* font = mapGet(fm.fonts, path_hash);
+	Font* font = mapGet(font_pool, path_hash);
 	if (font == NULL)
 	{
 		Font* font_n = new_font(path);
 		if (font_n == NULL)
 			return 0;
-		mapAdd(fm.fonts, path_hash, font_n);
+		mapAdd(font_pool, path_hash, font_n);
 	}
 
 	return path_hash;
@@ -354,7 +354,6 @@ draw_text_buffer( float* buffer, size_t buffer_len )
 
 	glBindVertexArray(0);
 }
-
 
 
 /*
@@ -397,7 +396,7 @@ draw_text( key_t font_hash,
 	}
 	glUniform4f(color_modifier_position, hex_uniform4f(color));
 
-	Font* font = mapGet(fm.fonts, font_hash);
+	Font* font = mapGet(font_pool, font_hash);
 
 	if (font == NULL) {
 		fprintf(stderr, "Cannot create buffer texture from unresolved font\n");
@@ -420,7 +419,7 @@ draw_text( key_t font_hash,
 
 	// TODO Maybe we should directly operate on GL vertex buffer?
 	// VBO constructor -- 6 vertices with 4 floats with each
-	float buffer[STRIP_BUFFER_SIZE * 6 * 4];
+	float buffer[TEXT_BUFFER_SIZE * 6 * 4];
 	size_t buffer_len = 0;
 
 	// Negative values of range should signal that none of the possible ranges is binded
@@ -459,8 +458,8 @@ draw_text( key_t font_hash,
 
 				// glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, float{0.0f, 0.0f, 0.0f, 0.0f});
 
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
 				check_opengl_state("Creation of texture buffer");
@@ -516,7 +515,7 @@ draw_text( key_t font_hash,
 					glTexSubImage2D(
 					    GL_TEXTURE_2D, 0,
 					    (i % (FONT_TEXTURE_SIZE / spacing))*spacing + face->glyph->bitmap_left,
-					    FONT_TEXTURE_SIZE - (i / (FONT_TEXTURE_SIZE / spacing))*spacing - face->glyph->bitmap_top - spacing/2,
+					    FONT_TEXTURE_SIZE - (i / (FONT_TEXTURE_SIZE / spacing))*spacing - face->glyph->bitmap_top - spacing / 2,
 					    bitmap_glyph->bitmap.width,
 					    bitmap_glyph->bitmap.rows,
 					    GL_RED,
@@ -545,20 +544,31 @@ draw_text( key_t font_hash,
 		}
 
 		// Glyph buffering
-		if (buffer_len < STRIP_BUFFER_SIZE)
+		if (buffer_len < TEXT_BUFFER_SIZE)
 		{
 			uint32_t idx = buffer_len * 6 * 4;
 
 			// Sorry to everyone who's reading this shit
-			float pos_left = (float)(x_offset + i * size) / window->width -1.0;
-			float pos_right = (float)(x_offset + (i + 1) * size) / window->width - 1.0;
+			float pos_left = (float)(x_offset + i * spacing) / window->width - 1.0;
+			float pos_right = (float)(x_offset + (i + 1) * spacing) / window->width - 1.0;
 			float pos_top = (float)(window->height - y_offset) / window->height;
-			float pos_bottom = (float)(window->height - y_offset - size) / window->height;
+			float pos_bottom = (float)(window->height - y_offset - spacing) / window->height;
 
-			float tex_left = (*utf_string % (FONT_TEXTURE_SIZE / spacing)) * ((float)spacing / FONT_TEXTURE_SIZE);
-			float tex_right = (*utf_string % (FONT_TEXTURE_SIZE / spacing) + 1) * ((float)spacing / FONT_TEXTURE_SIZE) - ((float)spacing / FONT_TEXTURE_SIZE) / 2;
-			float tex_top = 1.0 - ((*utf_string % range_size) / (FONT_TEXTURE_SIZE / spacing) + 1) * ((float)spacing / FONT_TEXTURE_SIZE);
-			float tex_bottom = 1.0 - ((*utf_string % range_size) / (FONT_TEXTURE_SIZE / spacing)) * ((float)spacing / FONT_TEXTURE_SIZE) - ((float)spacing / FONT_TEXTURE_SIZE) / 2;
+			float tex_left = (*utf_string % (FONT_TEXTURE_SIZE / spacing)) * \
+							((float)spacing / FONT_TEXTURE_SIZE);
+
+			float tex_right = (*utf_string % (FONT_TEXTURE_SIZE / spacing) + 1) * \
+							((float)spacing / FONT_TEXTURE_SIZE) - \
+							((float)spacing / FONT_TEXTURE_SIZE) / 2;
+
+			float tex_top = 1.0 - ((*utf_string % range_size) / \
+							(FONT_TEXTURE_SIZE / spacing) + 1) * \
+							((float)spacing / FONT_TEXTURE_SIZE);
+
+			float tex_bottom = 1.0 - ((*utf_string % range_size) / \
+							(FONT_TEXTURE_SIZE / spacing)) * \
+							((float)spacing / FONT_TEXTURE_SIZE) - \
+							((float)spacing / FONT_TEXTURE_SIZE) / 2;
 
 			buffer[idx + 0] = pos_left;
 			buffer[idx + 1] = pos_top;
@@ -604,4 +614,14 @@ draw_text( key_t font_hash,
 	}
 
 	return 0;
+}
+
+
+/*
+	@brief 	Should be invoked periodically to free resources that were not used in drawing since previous invocation of this function
+*/
+void
+font_usage_collector()
+{
+
 }

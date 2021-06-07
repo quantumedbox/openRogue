@@ -1,3 +1,5 @@
+#include <threads.h>
+
 #define OPENGL_MINOR_VER 3
 #define OPENGL_MAJOR_VER 4
 
@@ -25,7 +27,6 @@ const char** get_feature_list ()
 	return FEATURE_LIST;
 }
 
-
 /*
 */
 typedef struct {
@@ -47,6 +48,9 @@ typedef struct {
 
 	uint32_t time_delta;
 	uint32_t prev_timestamp;
+
+	// Used for preventing sigegiv from SDL EventWatch thread
+	mutex_t lock;
 }
 WindowHandler;
 

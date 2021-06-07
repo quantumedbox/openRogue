@@ -186,6 +186,8 @@ init_window( int width, int height, const char* title )
 
 	handler->current_queue = 0;
 
+	mutex_init(handler->lock);
+
 	mapAdd(window_pool, win_key, handler);
 
 	if (win_key == 1) {
@@ -201,6 +203,10 @@ void
 close_window( key_t w_key )
 {
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
+	if (!w) return;
+
+	mutex_lock(w->lock);
+
 	mapDel(window_pool, w_key);
 
 	free(w->queue0->events);
@@ -211,6 +217,13 @@ close_window( key_t w_key )
 
 	// SDL_GL_DeleteContext(w->context);
 	SDL_DestroyWindow(w->window);
+
+	mutex_unlock(w->lock);
+
+	// There's possibility of other mutexes waiting for window
+	// Should somehow secure them by second map checking or smt
+	mutex_destroy(w->lock);
+
 	free(w);
 }
 
@@ -219,8 +232,13 @@ void
 resize_window( key_t w_key, int width, int height )
 {
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
+	if (!w) return;
+
+	// mutex_lock(w->lock);
 
 	SDL_SetWindowSize(w->window, width, height);
+
+	// mutex_unlock(w->lock);
 }
 
 
@@ -228,8 +246,13 @@ void
 repos_window( key_t w_key, int x, int y )
 {
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
+	if (!w) return;
+
+	// mutex_lock(w->lock);
 
 	SDL_SetWindowPosition(w->window, x, y);
+
+	// mutex_unlock(w->lock);
 }
 
 
@@ -401,24 +424,30 @@ dispatch_window_repos( EventQueue* queue, SDL_Event event )
 	@warn 	You cannot process both queues,
 			make sure that only one of them are in python space
 
-	@return Reference to EventQueue struct
+	@return Reference to EventQueue struct or NULL if window key is not valid
 */
 EventQueue*
 process_window( key_t w_key )
 {
+
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
+	if (!w) return NULL;
 
 	// Process all events and clear the SDL queue
 	SDL_Event _;
 	while (SDL_PollEvent(&_)) {}
 
+	mutex_lock(w->lock);
+
 	if (w->current_queue == 0) {
 		w->current_queue = 1;
 		w->queue1->len = 0;
+		mutex_unlock(w->lock);
 		return w->queue0;
 	} else {
 		w->current_queue = 0;
 		w->queue0->len = 0;
+		mutex_unlock(w->lock);
 		return w->queue1;
 	}
 
@@ -436,25 +465,34 @@ event_queue_former( void* _, SDL_Event* event_ptr )
 {
 	SDL_Event event = *event_ptr;
 
-	// TODO Check if window is present in window_pool
-
 	if (event.type == SDL_MOUSEMOTION) {
 		WindowHandler* w = (WindowHandler*)mapGet(window_pool, event.motion.windowID);
+		if (!w) return 0;
+		mutex_lock(w->lock);
 		dispatch_mouse_motion(w->current_queue ? w->queue1 : w->queue0, event);
+		mutex_unlock(w->lock);
 	}
 
 	else if ((event.type == SDL_KEYDOWN) || (event.type == SDL_KEYUP)) {
 		WindowHandler* w = (WindowHandler*)mapGet(window_pool, event.motion.windowID);
+		if (!w) return 0;
+		mutex_lock(w->lock);
 		dispatch_keypress(w->current_queue ? w->queue1 : w->queue0, event);
+		mutex_unlock(w->lock);
 	}
 
 	else if (event.type == SDL_MOUSEBUTTONUP) {
 		WindowHandler* w = (WindowHandler*)mapGet(window_pool, event.button.windowID);
+		if (!w) return 0;
+		mutex_lock(w->lock);
 		dispatch_mouse_button(w->current_queue ? w->queue1 : w->queue0, event);
+		mutex_unlock(w->lock);
 	}
 
 	else if (event.type == SDL_WINDOWEVENT) {
 		WindowHandler* w = (WindowHandler*)mapGet(window_pool, event.window.windowID);
+		if (!w) return 0;
+		mutex_lock(w->lock);
 
 		switch (event.window.event) {
 		case SDL_WINDOWEVENT_CLOSE:
@@ -469,6 +507,8 @@ event_queue_former( void* _, SDL_Event* event_ptr )
 		default:
 			break;
 		}
+
+		mutex_unlock(w->lock);
 	}
 
 	return 0;
