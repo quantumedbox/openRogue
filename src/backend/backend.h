@@ -1,10 +1,12 @@
 // C API for various low-level functionalities which should be done outside of python
 
 // TODO REDO
-#pragma once
+// #pragma once
 
 #include <inttypes.h>
 #include <stdbool.h>
+
+#include "system.h"
 
 // typedef uint32_t window_id_t;
 

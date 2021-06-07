@@ -35,8 +35,20 @@ class FFIManager:
 
     def register(self, path: str, name: str):
         """
+        Register new API backend interface from 'path' that is in standart "backends" folder
         """
-        full_path = os.path.abspath(path)
+
+        # TODO Maybe just use ctypes.util.find_library ?
+
+        shared_object_format = '.dll' if os.name == 'nt' else '.so'
+
+        if not os.path.isfile('./backends/' + path + shared_object_format):
+            if os.path.isfile('./backends/lib' + path + shared_object_format):
+                path = 'lib' + path
+            else:
+                raise NameError("Cannot find {} backend".format(path))
+
+        full_path = os.path.abspath('./backends/' + path)
         cffi = CDLL(full_path)
         self.interfaces[name] = FFIInterface(cffi)
 
@@ -92,17 +104,5 @@ class FFIInterface:
 
     def init_window(self, width: int, height: int, title: str) -> 'hash':
         win = self._shared.init_window(width, height, title.encode())
-        self._check_for_errors()
 
         return win
-
-    # Maybe it's better to have function that retrieves state and possible error describtion?
-    def _check_for_errors(self):
-        """
-        Halts python if API signaled non-zero code in its ERRORCODE exported variable
-        """
-        err = c_int.in_dll(self._shared, "ERRORCODE").value
-        if err != 0:
-            print("Execution was halted because of signaled API error: {}".
-                  format(err))
-            exit()

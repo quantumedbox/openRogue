@@ -36,9 +36,11 @@ const char* get_encoding();
 int    init_text_subsystem();
 
 // Function by which all fonts should be acquired
+EXPORT_SYMBOL
 key_t   resolve_font    ( const char* path );
 
 // Render the string
+EXPORT_SYMBOL
 int     draw_text       ( size_t font_hash,
                           uint32_t size,
                           int32_t x_offset,

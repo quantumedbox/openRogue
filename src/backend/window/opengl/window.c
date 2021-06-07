@@ -5,7 +5,7 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
-#include <cglm/cglm.h>
+// #include <cglm/cglm.h>
 
 #include "backend.h"
 #include "window.h"
@@ -112,6 +112,7 @@ init_window_subsystem()
 	On failure it should reverse all states to back they were
 	Failure itself is signaled by 0 returned value
 */
+EXPORT_SYMBOL
 key_t
 init_window( int width, int height, const char* title )
 {
@@ -218,6 +219,7 @@ init_window( int width, int height, const char* title )
 
 // ??? Should we exit all systems when all windows are closed ?
 // It should be a valid concern if we allow swapping APIs at runtime
+EXPORT_SYMBOL
 void
 close_window( key_t w_key )
 {
@@ -247,6 +249,7 @@ close_window( key_t w_key )
 }
 
 
+EXPORT_SYMBOL
 void
 resize_window( key_t w_key, int width, int height )
 {
@@ -261,6 +264,7 @@ resize_window( key_t w_key, int width, int height )
 }
 
 
+EXPORT_SYMBOL
 void
 repos_window( key_t w_key, int x, int y )
 {
@@ -445,10 +449,10 @@ dispatch_window_repos( EventQueue* queue, SDL_Event event )
 
 	@return Reference to EventQueue struct or NULL if window key is not valid
 */
+EXPORT_SYMBOL
 EventQueue*
 process_window( key_t w_key )
 {
-
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
 	if (!w) return NULL;
 
@@ -479,6 +483,7 @@ process_window( key_t w_key )
 /*
 	@brief 	SDL event watcher that is used for queuing multiple windows at a time
 */
+static
 int
 event_queue_former( void* _, SDL_Event* event_ptr )
 {
@@ -536,6 +541,7 @@ event_queue_former( void* _, SDL_Event* event_ptr )
 /*
 	@brief 	Prepares the window for drawing
 */
+EXPORT_SYMBOL
 void
 start_drawing( key_t w_key )
 {
@@ -571,6 +577,7 @@ start_drawing( key_t w_key )
 	@brief 	Update the current drawing window with what is in context
 			Actual clearing of the buffer happens by this function and not by start_drawing()
 */
+EXPORT_SYMBOL
 void
 finish_drawing()
 {

@@ -327,6 +327,7 @@ new_font( const char* path )
 
 	@return Key identification for a font
 */
+EXPORT_SYMBOL
 key_t
 resolve_font( const char* path )
 {
@@ -377,6 +378,7 @@ draw_text_buffer( float* buffer, size_t buffer_len )
 
 	@return Non-zero value on error, otherwise 0
 */
+EXPORT_SYMBOL
 int
 draw_text( key_t font_hash,
            uint32_t size,
@@ -627,6 +629,7 @@ draw_text( key_t font_hash,
 /*
 	@brief 	Should be invoked periodically to free resources that were not used in drawing since previous invocation of this function
 */
+static
 void
 font_usage_collector()
 {

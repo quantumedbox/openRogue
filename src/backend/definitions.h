@@ -47,11 +47,11 @@ typedef struct {
 InputEvent;
 
 
-typedef struct
-{
-	// Don't have any data
-}
-CloseEvent;
+// typedef struct
+// {
+// 	// Don't have any data
+// }
+// CloseEvent;
 
 
 typedef struct
@@ -73,7 +73,7 @@ ReposEvent;
 typedef struct {
 	bitmask_t type;
 	uint32_t timestamp;
-	// uint32_t windowid; // events should always be dispatched by window
+	// uint32_t windowid; // events should always be dispatched by event window
 	union {
 		PointerEvent pointer_event;
 		InputEvent input_event;

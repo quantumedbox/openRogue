@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 project(SDL_Backend C)
 
+# TODO Release and debug flags
+
 set(LIBRARY_OUTPUT_DIRECTORY)
 
 set(CMAKE_C_STANDARD 11)
@@ -14,17 +16,27 @@ set(SOURCES window/opengl/window.c
 
 set(LIBRARY_OUTPUT_PATH ${OUTPUT_DIRECTORY})
 
-# set(INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR})
+set(LINKER_LIBS "opengl32")
+
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(SDL_Backend SHARED ${SOURCES})
 
 set_target_properties(SDL_Backend PROPERTIES
-	LIBRARY_OUTPUT_NAME "openRogue_SDL"
-	# OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}
+	RUNTIME_OUTPUT_NAME "openRogue_SDL"
 	CMAKE_LIBRARY_OUTPUT_PATH ${OUTPUT_DIRECTORY})
-	# LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
+
+
+if(CMAKE_C_COMPILER_ID MATCHES MSVC)
+	# list(APPEND LINKER_LIBS kernel32)
+
+	if(CMAKE_SIZEOF_VOID_P MATCHES 8)
+		include_directories(${INCLUDE_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/msvc64/include)
+		link_directories(${LINK_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/msvc64/lib)
+		set(CMAKE_LIBRARY_PATH ${LINK_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/msvc64/lib)
+	endif()
+endif()
 
 
 find_library(SDL2_LIB sdl2)
@@ -39,24 +51,11 @@ if(NOT GLEW_LIB)
 	message(SEND_ERROR "Cannot resolve GLEW lib")
 endif()
 
-find_library(FREETYPE_LIB freetype)
+find_library(FREETYPE_LIB freetype freetyped)
 
 if(NOT FREETYPE_LIB)
 	message(SEND_ERROR "Cannot resolve freetype lib")
 endif()
-
-# find_library(OPENGL_LIB opengl32)
-
-# if(NOT OPENGL_LIB)
-# 	message(SEND_ERROR "Cannot resolve opengl lib")
-# endif()
-
-# # Should be optional in the future
-# find_library(OPENMP_LIB openmp)
-
-# if(NOT OPENMP_LIB)
-# 	message(SEND_ERROR "Cannot resolve openmp lib")
-# endif()
 
 
 target_link_libraries(SDL_Backend ${WindowSubmodule}
@@ -64,5 +63,4 @@ target_link_libraries(SDL_Backend ${WindowSubmodule}
 								  ${SDL2_LIB}
 								  ${GLEW_LIB}
 								  ${FREETYPE_LIB}
-								  opengl32)
-								  # openmp)
+								  ${LINKER_LIBS})

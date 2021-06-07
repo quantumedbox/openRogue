@@ -7,11 +7,11 @@
 // Needs testing
 // TODO Error checking
 
-#ifdef __MSVC__
+#ifdef _MSC_VER
 #include <windows.h>
 #define mutex_t HANDLE
-#define mutex_init(mutex) mutex = pthread_mutex_init(NULL, FALSE, NULL)
-#define mutex_lock(mutex) dwWaitResult(mutex, INFINITE)
+#define mutex_init(mutex) mutex = CreateMutex(NULL, FALSE, NULL)
+#define mutex_lock(mutex) WaitForSingleObject(mutex, INFINITE)
 #define mutex_unlock(mutex) ReleaseMutex(mutex)
 #define mutex_destroy(mutex) CloseHandle(mutex)
 #endif

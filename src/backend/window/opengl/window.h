@@ -9,14 +9,15 @@
 
 #define DEFAULT_WINDOW_NAME "openRogue"
 
-#define WINDOW_FILL_COLOR_R 0.2
-#define WINDOW_FILL_COLOR_G 0
-#define WINDOW_FILL_COLOR_B 0.062
+#define WINDOW_FILL_COLOR_R 0.2F
+#define WINDOW_FILL_COLOR_G 0.0F
+#define WINDOW_FILL_COLOR_B 0.062F
 
 // Size of staticly allocated event queue buffer
 #define EVENT_BUFFER_SIZE 16
 
 
+EXPORT_SYMBOL
 const char** get_feature_list();
 
 /*
@@ -50,34 +51,42 @@ WindowHandler;
 
 /*
 */
+EXPORT_SYMBOL
 key_t init_window(int width, int height, const char* title);
 
 /*
 */
+EXPORT_SYMBOL
 void update_window();
 
 /*
 */
+EXPORT_SYMBOL
 void close_window(key_t);
 
 /*
 */
+EXPORT_SYMBOL
 EventQueue* process_window(key_t);
 
 /*
 */
+EXPORT_SYMBOL
 void resize_window(key_t, int width, int height);
 
 /*
 */
+EXPORT_SYMBOL
 void repos_window(key_t, int x, int y);
 
 /*
 */
+EXPORT_SYMBOL
 void start_drawing(key_t);
 
 /*
 */
+EXPORT_SYMBOL
 void finish_drawing();
 
 /*
