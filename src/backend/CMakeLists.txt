@@ -19,6 +19,9 @@ set(LIBRARY_OUTPUT_PATH ${OUTPUT_DIRECTORY})
 set(LINKER_LIBS "opengl32")
 
 
+include_directories(${INCLUDE_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/include)
+
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(SDL_Backend SHARED ${SOURCES})
@@ -32,7 +35,6 @@ if(CMAKE_C_COMPILER_ID MATCHES MSVC)
 	# list(APPEND LINKER_LIBS kernel32)
 
 	if(CMAKE_SIZEOF_VOID_P MATCHES 8)
-		include_directories(${INCLUDE_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/msvc64/include)
 		link_directories(${LINK_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/msvc64/lib)
 		set(CMAKE_LIBRARY_PATH ${LINK_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/msvc64/lib)
 	endif()

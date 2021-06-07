@@ -48,7 +48,7 @@ key_t current_drawing_window;
 // --------------------------------------------------------------------------- Misc -- //
 
 
-int event_queue_former(void*, SDL_Event*);
+static int event_queue_former(void*, SDL_Event*);
 
 
 // TODO
