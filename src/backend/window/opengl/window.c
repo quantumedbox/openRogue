@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define GLEW_STATIC
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 // #include <cglm/cglm.h>
@@ -16,19 +15,7 @@
 
 // TODO Positioning of new windows depending on existing ones. Maybe require the caller to specify positions and rely on ui positioning?
 
-// ??? Is it possible that event_queue_former could be called from sdl at the same time api caller swaps queues ???
-
-// TODO start_drawing(key_t) 	function that prepares window and its context for future drawing commands
-// TODO end_drawing(key_t) 	function that signals that drawing for a given window is finished and the contents of buffer could be showed
-
 // TODO Put event logic in a separate file
-
-// TODO It is possible to negate the need to allocate new event queues by having 2 event queues for every window that could be switched back and forth on demand
-
-
-// Helper for getting window ids from event union fields
-// #define queue_from_event_type(event, type) ((WindowHandler*)mapGet(window_pool, event.type.windowID))->queue
-
 
 // ----------------------------------------------------------------- Global objects -- //
 
@@ -60,6 +47,7 @@ const char* FEATURE_LIST[] = {
 };
 
 // TODO It is kinda bad to return char**, maybe we should do something else?
+EXPORT_SYMBOL
 const char** get_feature_list ()
 {
 	return FEATURE_LIST;
@@ -201,7 +189,7 @@ init_window( int width, int height, const char* title )
 
 	handler->current_queue = 0;
 
-	mutex_init(handler->lock);
+	rogue_mutex_init(handler->lock);
 
 	mapAdd(window_pool, win_key, handler);
 
@@ -221,7 +209,7 @@ close_window( key_t w_key )
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
 	if (!w) return;
 
-	mutex_lock(w->lock);
+	rogue_mutex_lock(w->lock);
 
 	mapDel(window_pool, w_key);
 
@@ -234,11 +222,11 @@ close_window( key_t w_key )
 	// SDL_GL_DeleteContext(w->context);
 	SDL_DestroyWindow(w->window);
 
-	mutex_unlock(w->lock);
+	rogue_mutex_unlock(w->lock);
 
 	// There's possibility of other mutexes waiting for window
 	// Should somehow secure them by second map checking or smt
-	mutex_destroy(w->lock);
+	rogue_mutex_destroy(w->lock);
 
 	free(w);
 }
@@ -251,11 +239,11 @@ resize_window( key_t w_key, int width, int height )
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
 	if (!w) return;
 
-	// mutex_lock(w->lock);
+	// rogue_mutex_lock(w->lock);
 
 	SDL_SetWindowSize(w->window, width, height);
 
-	// mutex_unlock(w->lock);
+	// rogue_mutex_unlock(w->lock);
 }
 
 
@@ -266,11 +254,11 @@ repos_window( key_t w_key, int x, int y )
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
 	if (!w) return;
 
-	// mutex_lock(w->lock);
+	// rogue_mutex_lock(w->lock);
 
 	SDL_SetWindowPosition(w->window, x, y);
 
-	// mutex_unlock(w->lock);
+	// rogue_mutex_unlock(w->lock);
 }
 
 
@@ -446,17 +434,17 @@ get_window_events( key_t w_key )
 	SDL_Event _;
 	while (SDL_PollEvent(&_)) {}
 
-	mutex_lock(w->lock);
+	rogue_mutex_lock(w->lock);
 
 	if (w->current_queue == 0) {
 		w->current_queue = 1;
 		w->queue1->len = 0;
-		mutex_unlock(w->lock);
+		rogue_mutex_unlock(w->lock);
 		return w->queue0;
 	} else {
 		w->current_queue = 0;
 		w->queue0->len = 0;
-		mutex_unlock(w->lock);
+		rogue_mutex_unlock(w->lock);
 		return w->queue1;
 	}
 
@@ -478,31 +466,31 @@ event_queue_former( void* _, SDL_Event* event_ptr )
 	if (event.type == SDL_MOUSEMOTION) {
 		WindowHandler* w = (WindowHandler*)mapGet(window_pool, event.motion.windowID);
 		if (!w) return 0;
-		mutex_lock(w->lock);
+		rogue_mutex_lock(w->lock);
 		dispatch_mouse_motion(w->current_queue ? w->queue1 : w->queue0, event);
-		mutex_unlock(w->lock);
+		rogue_mutex_unlock(w->lock);
 	}
 
 	else if ((event.type == SDL_KEYDOWN) || (event.type == SDL_KEYUP)) {
 		WindowHandler* w = (WindowHandler*)mapGet(window_pool, event.motion.windowID);
 		if (!w) return 0;
-		mutex_lock(w->lock);
+		rogue_mutex_lock(w->lock);
 		dispatch_keypress(w->current_queue ? w->queue1 : w->queue0, event);
-		mutex_unlock(w->lock);
+		rogue_mutex_unlock(w->lock);
 	}
 
 	else if (event.type == SDL_MOUSEBUTTONUP) {
 		WindowHandler* w = (WindowHandler*)mapGet(window_pool, event.button.windowID);
 		if (!w) return 0;
-		mutex_lock(w->lock);
+		rogue_mutex_lock(w->lock);
 		dispatch_mouse_button(w->current_queue ? w->queue1 : w->queue0, event);
-		mutex_unlock(w->lock);
+		rogue_mutex_unlock(w->lock);
 	}
 
 	else if (event.type == SDL_WINDOWEVENT) {
 		WindowHandler* w = (WindowHandler*)mapGet(window_pool, event.window.windowID);
 		if (!w) return 0;
-		mutex_lock(w->lock);
+		rogue_mutex_lock(w->lock);
 
 		switch (event.window.event) {
 		case SDL_WINDOWEVENT_CLOSE:
@@ -518,7 +506,7 @@ event_queue_former( void* _, SDL_Event* event_ptr )
 			break;
 		}
 
-		mutex_unlock(w->lock);
+		rogue_mutex_unlock(w->lock);
 	}
 
 	return 0;
@@ -530,14 +518,20 @@ void
 start_drawing( key_t w_key )
 {
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
-	if (w == NULL)
-		return;
+	if (!w) return;
 
 	SDL_GL_MakeCurrent(w->window, opengl_context);
 
 	current_drawing_window = w_key;
 
 	SDL_GetWindowSize(w->window, &w->width, &w->height);
+
+	// Align the viewport size to be even for the consistent pixel alignment
+	if (w->width % 2 != 0)
+		w->width--;
+
+	if (w->height % 2 != 0)
+		w->height--;
 
 	glViewport(0, 0, w->width, w->height);
 
@@ -548,15 +542,9 @@ start_drawing( key_t w_key )
 
 	// float aspect = (float)width / (float)height;
 
-	// Setup the projection
-	// glm_ortho(-(float)width / 2, (float)width / 2,
-	//           -(float)height / 2 * aspect, (float)height / 2 * aspect,
-	//           0.1f, 100.0f,
-	//           current_window_projection);
-
 	// glm_ortho(0.0, (float)width,
 	//           0.0, (float)height,
-	//           -100.0f, 100.0f,
+	//           0.0f, 100.0f,
 	//           current_window_projection);
 
 	// glOrtho(-0.5, (float)(w->width - 1) + 0.5, (float)(w->height - 1) + 0.5, -0.5, 0.0, 1.0);
@@ -568,8 +556,7 @@ void
 finish_drawing()
 {
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, current_drawing_window);
-	if (w == NULL)
-		return;
+	if (!w) return;
 
 	glFlush();
 	SDL_GL_SwapWindow(w->window);

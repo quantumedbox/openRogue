@@ -18,9 +18,11 @@ set(LIBRARY_OUTPUT_PATH ${OUTPUT_DIRECTORY})
 
 set(LINKER_LIBS "opengl32")
 
+set(DEPS_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../deps)
+
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
-					${INCLUDE_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/include)
+					${DEPS_PATH}/include)
 
 add_library(SDL_Backend SHARED ${SOURCES})
 
@@ -28,21 +30,32 @@ set_target_properties(SDL_Backend PROPERTIES
 	RUNTIME_OUTPUT_NAME "openRogue_SDL"
 	CMAKE_LIBRARY_OUTPUT_PATH ${OUTPUT_DIRECTORY})
 
-
+# MSVC specific setting
 if(CMAKE_C_COMPILER_ID MATCHES MSVC)
-	list(APPEND LINKER_LIBS kernel32)
-
 	if(CMAKE_SIZEOF_VOID_P MATCHES 8)
-		link_directories(${LINK_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/msvc64/lib)
-		set(CMAKE_LIBRARY_PATH ${LINK_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/msvc64/lib)
+		link_directories(${LINK_DIRECTORIES} ${DEPS_PATH}/msvc64)
 	endif()
 endif()
 
-# if(CMAKE_C_COMPILER_ID MATCHES GCC)
-# 	set(CMAKE_C_FLAGS_DEBUG -Wall -Wextra -Wpedantic -Werror
-# 							-g -Wno-unused-parameter -Wno-unused-variable)
-# endif()
+# MinGW/GNU specific settings
+if(CMAKE_C_COMPILER_ID MATCHES GNU)
+	add_definitions(-DGLEW_STATIC)
+	link_directories(${LINK_DIRECTORIES} ${DEPS_PATH}/mingw64)
+	set(CMAKE_C_FLAGS_DEBUG -Wall -Wextra -Wpedantic -Werror
+							-g -Wno-unused-parameter -Wno-unused-variable)
+endif()
 
+
+if(WIN32)
+	# Needed for static linking of SDL2
+	list(APPEND LINKER_LIBS imagehlp dinput8
+							dxguid dxerr8
+							user32 gdi32
+							winmm imm32
+							ole32 oleaut32
+							shell32 version
+							uuid setupapi)
+endif()
 
 find_library(SDL2_LIB sdl2)
 

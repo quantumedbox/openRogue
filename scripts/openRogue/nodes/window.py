@@ -46,7 +46,7 @@ class WindowComponent(component.Component):
         """
         event_queue = self._api.get_window_events(self._window)
 
-        # font = self._api._shared.resolve_font(b"resources/fonts/FSEX300.ttf", )
+        font = self._api._shared.resolve_font(b"resources/fonts/FSEX300.ttf")
 
         # font2 = self._api._shared.resolve_font(
         #     b"resources/fonts/SourceCodePro-Light.ttf")
@@ -69,7 +69,7 @@ class WindowComponent(component.Component):
                 self.repos_window_behaviour(
                     Vector(event.repos_event.x, event.repos_event.y))
 
-        # self._api.start_drawing(self._window)
+        self._api.start_drawing(self._window)
 
         # text = "abcd тест δοκιμή ტესტი"
 
@@ -89,13 +89,12 @@ class WindowComponent(component.Component):
         #                     text.encode(encoding="utf-32-le"),
         #                     ffi.c_uint32(len(text)), 0x00FFAAFF)
 
-        # self._api.draw_text(
-        #     font, ffi.c_uint32(48), 0, 100,
-        #     "Как уже неоднократно упомянуто, реплицированные с зарубежных источников,"
-        #     .encode(encoding="utf-32-le"),
-        #     ffi.c_uint32(
-        #         len("Как уже неоднократно упомянуто, реплицированные с зарубежных источников,"
-        #             )), 0xFFFFFFFF)
+        self._api.draw_text(
+            font, ffi.c_uint32(16), 0, 100,
+            "Небольщой текст для небольшого теста".encode(
+                encoding="utf-32-le"),
+            ffi.c_uint32(len("Небольщой текст для небольшого теста")),
+            0xFFFFFFFF)
 
         # self._api.draw_text(
         #     font, ffi.c_uint32(48), 0, 148,
@@ -119,7 +118,7 @@ class WindowComponent(component.Component):
 
         # self._api.draw_rect(0, 0, 100, 100, 0xFFFFFF)
 
-        # self._api.finish_drawing()
+        self._api.finish_drawing()
 
     def _free_window(self, *args):
         # Prevent double free after force deletion

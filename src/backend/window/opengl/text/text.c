@@ -310,7 +310,7 @@ draw_text_buffer( float* buffer, size_t buffer_len )
 	glBindVertexArray(0);
 }
 
-
+// TODO Could be a lot better or at least more nicely structured
 EXPORT_SYMBOL
 int
 draw_text( key_t font_hash,
@@ -325,7 +325,7 @@ draw_text( key_t font_hash,
 		return 0;
 
 	WindowHandler* window = (WindowHandler*)mapGet(window_pool, current_drawing_window);
-	if (window == NULL)
+	if (!window)
 		return -1;
 
 	glUseProgram(text_render_program);
@@ -586,9 +586,9 @@ draw_rect( int32_t x_offset,
 	// glBegin(GL_TRIANGLES);
 	// glColor4f(hex_uniform4f(color));
 	glRectf((float)x_offset / window->width,
-		1.0 - (float)y_offset / window->height,
-		(float)(x_offset + width) / window->width,
-		1.0 - (float)(y_offset + height) / window->height);
+	        1.0 - (float)y_offset / window->height,
+	        (float)(x_offset + width) / window->width,
+	        1.0 - (float)(y_offset + height) / window->height);
 
 	glRectf(-1.0, -1.0, 1.0, 1.0);
 

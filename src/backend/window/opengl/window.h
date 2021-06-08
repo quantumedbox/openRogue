@@ -40,11 +40,12 @@ typedef struct {
 	int width;
 	int height;
 
+	// ??? Should they be here ? or it's better to have global counter
 	uint32_t time_delta;
 	uint32_t prev_timestamp;
 
 	// Used for preventing sigegiv from SDL EventWatch thread
-	mutex_t lock;
+	rogue_mutex_t lock;
 }
 WindowHandler;
 
