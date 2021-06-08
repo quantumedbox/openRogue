@@ -30,7 +30,7 @@ set_target_properties(SDL_Backend PROPERTIES
 
 
 if(CMAKE_C_COMPILER_ID MATCHES MSVC)
-	# list(APPEND LINKER_LIBS kernel32)
+	list(APPEND LINKER_LIBS kernel32)
 
 	if(CMAKE_SIZEOF_VOID_P MATCHES 8)
 		link_directories(${LINK_DIRECTORIES} ${CMAKE_CURRENT_SOURCE_DIR}/../../deps/msvc64/lib)

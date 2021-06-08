@@ -29,8 +29,6 @@ class WindowComponent(component.Component):
 
         self._window = self._api.init_window(self.size.width, self.size.height,
                                              self.name)
-
-        print("window key:", self._window)
         #
         component.deploy_front(self, "free", self._free_window)
         #

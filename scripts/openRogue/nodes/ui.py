@@ -12,13 +12,18 @@ from typing import Union, Iterable
 
 
 class NodeUI(node.Node):
+
+    __slots__ = ("x", "y", "width", "height", "align", "stretch", "is_shown",
+                 "_size", "_pos")
+
     def __init__(self,
                  x=0,
                  y=0,
                  width=120,
                  height=80,
-                 align="upperleft",
-                 stretch="h"):
+                 align="ul",
+                 stretch="h",
+                 is_shown=True):
         # Are short args preferable?
         """
         Possible align args: "upperleft", "upperright", "bottomleft", "bottomright", "ul", "ur", "bl", "br"
@@ -26,10 +31,11 @@ class NodeUI(node.Node):
         """
         node.Node.__init__(self)
         self.event_ports["ui"] = self.ui_event
-        self._pos = Vector(x, y)
-        self._size = Vector(width, height)
+        self.pos = Vector(x, y)
+        self.size = Vector(width, height)
         self.align = align
         self.stretch = stretch
+        self.is_shown = is_shown
 
     @property
     def size(self):
@@ -37,7 +43,7 @@ class NodeUI(node.Node):
 
     @size.setter
     def size(self, size: Vector):
-        print("({}) new size: {}".format(self.name, size.as_tuple()))
+        # print("({}) new size: {}".format(self.name, size.as_tuple()))
         self._size = size
 
     @property
@@ -46,13 +52,28 @@ class NodeUI(node.Node):
 
     @pos.setter
     def pos(self, pos: Vector):
-        print("({}) new pos: {}".format(self.name, pos.as_tuple()))
+        # print("({}) new pos: {}".format(self.name, pos.as_tuple()))
         self._pos = pos
 
     def ui_event(self, event: object) -> None:
         """
         TODO
         """
+
+    def recompose(self) -> None:
+        """
+        Used for fitting the new configuration of ui node
+        """
+
+    def show(self) -> None:
+        """
+        """
+        self.is_shown = True
+
+    def hide(self) -> None:
+        """
+        """
+        self.is_shown = False
 
     # Render is not a good name in this case
     # TODO Should be cacheable

@@ -11,8 +11,10 @@
 #include "window/opengl/window.h"
 #include "window/opengl/render_program.h"
 #include "map.h"
-#include "error.h"
+// #include "error.h"
 
+
+// TODO Rename it to graphics.h or render.h ?
 
 // TODO Garbage collector-like that keeps track of usages per each texture in a certain time window
 

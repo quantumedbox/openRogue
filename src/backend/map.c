@@ -8,6 +8,25 @@
 #include "map.h"
 
 
+#ifdef USE_OMP
+#define OPTIONAL_OMP_PARALLEL_FOR #pragma omp parallel for
+#else
+#define OPTIONAL_OMP_PARALLEL_FOR //
+#endif
+
+
+// Stack-like structure that holds a key and void pointer to data
+struct Bucket
+{
+	key_t			key;
+
+	void* 			data;
+
+	struct Bucket* 	next;
+}
+Bucket;
+
+
 // ----------------------------------------------------------------- Hash functions -- //
 
 /*
@@ -52,9 +71,11 @@ mapNew()
 }
 
 
-static inline Bucket* mapNewBucket()
+static inline
+struct
+Bucket* mapNewBucket()
 {
-	Bucket* new = (Bucket*)calloc(1, sizeof(Bucket));
+	struct Bucket* new = (struct Bucket*)calloc(1, sizeof(struct Bucket));
 
 	return new;
 }
@@ -64,7 +85,7 @@ static inline
 void
 mapAllocateBuckets(Map* m, size_t n)
 {
-	m->buckets = (Bucket*)calloc(n, sizeof(Bucket));
+	m->buckets = (struct Bucket*)calloc(n, sizeof(struct Bucket));
 	m->capacity = n;
 }
 
@@ -92,13 +113,13 @@ mapAdd(Map* m, key_t key, data_t data)
 	// else if (mapAddRecur(m->buckets[idx].next, key, data))
 		// m->len += 1;
 
-	Bucket* b = &m->buckets[idx];
+	struct Bucket* b = &m->buckets[idx];
 
 	while(true)
 	{
 		if (b->next == NULL)
 		{
-			Bucket* new = mapNewBucket();
+			struct Bucket* new = mapNewBucket();
 			new->key 	= key;
 			new->data 	= data;
 			b->next 	= new;
@@ -159,7 +180,7 @@ mapHas(Map* m, key_t key)
 {
 	key_t idx = key % m->capacity;
 
-	Bucket* b = m->buckets[idx].next;
+	struct Bucket* b = m->buckets[idx].next;
 
 	while(b != NULL)
 	{
@@ -197,7 +218,7 @@ mapGet(Map* m, key_t key)
 {
 	key_t idx = key % m->capacity;
 
-	Bucket* base = &m->buckets[idx];
+	struct Bucket* base = &m->buckets[idx];
 	while (base->next != NULL)
 	{
 		if (base->next->key == key)
@@ -218,12 +239,12 @@ mapDel(Map* m, key_t key)
 {
 	key_t idx = key % m->capacity;
 
-	Bucket* base = &m->buckets[idx];
+	struct Bucket* base = &m->buckets[idx];
 	while (base->next != NULL)
 	{
 		if (base->next->key == key)
 		{
-			Bucket* to_free = base->next;
+			struct Bucket* to_free = base->next;
 			base->next = base->next->next;
 			free(to_free);
 			break;
@@ -243,7 +264,7 @@ mapExtend(Map* m)
 
 	m->capacity = pow(2, log2(m->capacity) + 1);
 
-	Bucket* new_array = (Bucket*)calloc(m->capacity, sizeof(Bucket));
+	struct Bucket* new_array = (struct Bucket*)calloc(m->capacity, sizeof(struct Bucket));
 
 	// It definitely could raise race condition as all threads are adding to the same bucket array
 	// OPTIONAL_OMP_PARALLEL_FOR
@@ -262,11 +283,11 @@ mapExtend(Map* m)
 */
 static
 void
-mapReallocateBucketStack(Bucket* buckets, Bucket* stack, size_t cap)
+mapReallocateBucketStack(struct Bucket* buckets, struct Bucket* stack, size_t cap)
 {
 	key_t idx = stack->key % cap;
 
-	Bucket* stack_next = stack->next;
+	struct Bucket* stack_next = stack->next;
 
 	if (buckets[idx].next == NULL) {
 		buckets[idx].next = stack;
@@ -284,7 +305,7 @@ mapReallocateBucketStack(Bucket* buckets, Bucket* stack, size_t cap)
 */
 static
 void
-mapReallocateBucketRecur(Bucket* stack, Bucket* bucket)
+mapReallocateBucketRecur(struct Bucket* stack, struct Bucket* bucket)
 {
 	if (stack->next == NULL) {
 		stack->next = bucket;
@@ -339,7 +360,7 @@ mapClear(Map* m)
 
 static
 void
-mapClearStack(Bucket* stack)
+mapClearStack(struct Bucket* stack)
 {
 	// Data could be not heap allocated
 	// Or could have references to another allocated data
@@ -371,7 +392,7 @@ mapPrint(Map* m)
 
 static
 void
-mapPrintRecur(Bucket* b)
+mapPrintRecur(struct Bucket* b)
 {
 	fprintf(
 	    stdout, "(%p) key: %llu, data at: %p, next: %p\n",

@@ -9,7 +9,8 @@ class Container(ui.NodeUI):
     Shortcut for creating different container types
     Type variants: vertical and horizontal
     """
-    __slots__ = tuple()
+
+    # __slots__ = ()
 
     def __init__(self, type="vertical", **kwargs):
         ui.NodeUI.__init__(self, **kwargs)

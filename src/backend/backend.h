@@ -1,24 +1,29 @@
-// C API for various low-level functionalities which should be done outside of python
+/*
+	C API for various low-level functionalities which should be done outside of python
+*/
 
-// TODO REDO
-// #pragma once
+// ??? This file now is just definitions, maybe rename it ?
+
+#pragma once
 
 #include <inttypes.h>
-#include <stdbool.h>
 
 #include "system.h"
 
-// typedef uint32_t window_id_t;
+// ----------------------------------------------------- Numeric key -- //
 
 typedef size_t key_t;
 
 #define NONE_KEY 0
 
-//
+// --------------------------------------------------------- Bitmask -- //
+
 typedef uint32_t bitmask_t;
 
 #define mask_set_bit(mask, bit) mask |= bit
 #define mask_zero_bit(mask, bit) mask ^= bit
+
+// ------------------------------------------------------- Hex color -- //
 
 typedef uint32_t hex_t;
 
@@ -32,7 +37,3 @@ typedef uint32_t hex_t;
 
 // Helper for setting the shader uniform 3f values, without alpha transparency
 #define hex_uniform3f(hex) hex_r_float(hex), hex_g_float(hex), hex_b_float(hex)
-
-// TODO Unified sindow creation hints
-
-#include "definitions.h"

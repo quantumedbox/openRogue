@@ -1,29 +1,15 @@
+/*
+	Event definitions
+*/
+
 #pragma once
 
 #include <inttypes.h>
 
-typedef struct
-{
-	uint8_t type;
-	uint32_t x;
-	uint32_t y;
-	uint32_t width;
-	uint32_t height;
-
-	union {
-		struct strip {
-			const char* text;
-		};
-		struct tile {
-			const char* symbol;
-		};
-	};
-}
-Primitive;
-
-
-// Generic event for all controllers that describe actions in relative position
-typedef struct {
+/*
+	Generic event for all controllers that describe actions in relative position
+*/
+struct PointerEvent {
 	bitmask_t mouse_action;
 	bool is_pressed;
 	// TODO touch_screen_action; i.e touch_down, touch_press, touch_up
@@ -32,60 +18,57 @@ typedef struct {
 	int32_t y;
 	int32_t x_motion;
 	int32_t y_motion;
-}
-PointerEvent;
+};
 
-
-// Generic event for all controllers that describe named actions
-typedef struct {
+/*
+	Generic event for all controllers that describe named actions
+*/
+struct InputEvent {
 	bitmask_t action;
 	bool is_key_pressed;
 	bool is_key_repeat;
 	uint32_t keycode;
 	bitmask_t keymod;
-}
-InputEvent;
+};
 
-
-// typedef struct
-// {
-// 	// Don't have any data
-// }
-// CloseEvent;
-
-
-typedef struct
+/*
+	System window was resized
+*/
+struct ResizeEvent
 {
 	int32_t width;
 	int32_t height;
-}
-ResizeEvent;
+};
 
-
-typedef struct
+/*
+	System window was repositioned
+*/
+struct ReposEvent
 {
 	int32_t x;
 	int32_t y;
-}
-ReposEvent;
+};
 
-
+/*
+	Event union that encapsulates every event type
+*/
 typedef struct {
 	bitmask_t type;
 	uint32_t timestamp;
 	// uint32_t windowid; // events should always be dispatched by event window
 	union {
-		PointerEvent pointer_event;
-		InputEvent input_event;
-		// CloseEvent close_event;
-		ResizeEvent resize_event;
-		ReposEvent repos_event;
+		struct PointerEvent pointer_event;
+		struct InputEvent input_event;
+		struct ResizeEvent resize_event;
+		struct ReposEvent repos_event;
 		// TODO text_event; // Unicode text output
 	};
 }
 Event;
 
-//
+/*
+	Used for containing and delivering event signals to API caller
+*/
 typedef struct {
 	Event* events;
 	uint32_t len;

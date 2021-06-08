@@ -11,7 +11,7 @@
 #include "window.h"
 #include "map.h"
 #include "text/text.h"
-#include "error.h"
+// #include "error.h"
 
 
 // TODO Positioning of new windows depending on existing ones. Maybe require the caller to specify positions and rely on ui positioning?

@@ -2,6 +2,7 @@
 
 #include <SDL2/SDL.h>
 
+#include "events.h"
 #include "threads.h"
 
 #define OPENGL_MINOR_VER 3
@@ -31,7 +32,7 @@ typedef struct {
 
 	// Switching queues
 	// At given time only one of them should be writable and another - readable
-	int current_queue;
+	int8_t current_queue;
 	EventQueue* queue0;
 	EventQueue* queue1;
 

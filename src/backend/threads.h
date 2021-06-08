@@ -1,8 +1,8 @@
-#pragma once
-
 /*
 	Cross compiler definition for threading and thread safety
 */
+
+#pragma once
 
 // Needs testing
 // TODO Error checking
