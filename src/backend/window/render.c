@@ -85,7 +85,7 @@ RenderObject;
 // ----------------------------------------------------------------- Global objects -- //
 
 
-static FT_Library ft;
+static FT_Library freetype;
 
 static Map* font_pool;
 
@@ -147,7 +147,7 @@ MessageCallback( GLenum source,
 int
 init_text_subsystem()
 {
-	if (FT_Init_FreeType(&ft)) {
+	if (FT_Init_FreeType(&freetype)) {
 		fprintf(stderr, "Could not initialize freetype\n");
 		return -1;
 	}
@@ -266,7 +266,7 @@ new_font( const char* path )
 
 	FT_Face* face = (FT_Face*)malloc(sizeof(FT_Face));
 
-	if (FT_New_Face(ft, suitable, 0, face) != 0)
+	if (FT_New_Face(freetype, suitable, 0, face) != 0)
 	{
 		fprintf(stderr, "Cannot load font at %s\n", suitable);
 		free(face);
@@ -341,12 +341,9 @@ draw_text( key_t font_hash,
 
 	glUseProgram(text_renderer.program);
 
-	// GLint color_modifier_position = glGetUniformLocation(text_renderer.program, "color_modifier");
-	// if (color_modifier_position == -1)
-	// {
-	// 	fprintf(stderr, "Cannot get \"color_modifier\" from text render program\n");
-	// }
+	// ??? Is it okay to hardcode the uniform locations at optimization ?
 	glUniform4f(0, hex_uniform4f(color));
+	glUniform2f(2, (float)window->width, (float)window->height);
 
 	Font* font = mapGet(font_pool, font_hash);
 
@@ -417,12 +414,16 @@ draw_text( key_t font_hash,
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-					// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-
-					// glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, float{0.0f, 0.0f, 0.0f, 0.0f});
-
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+					if (size > TEXT_LINEAR_FILTER_SIZE)
+					{
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+					}
+					else
+					{
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+					}
 
 					glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
 					check_opengl_state("Creation of texture buffer");
@@ -514,10 +515,10 @@ draw_text( key_t font_hash,
 				uint32_t idx = buffer_len * 6 * 4;
 
 				// Sorry to everyone who's reading this shit
-				float pos_left = ((float)x_offset + (i * 0.75) * size) / (window->width / 2) - 1.0f;
-				float pos_right = ((float)x_offset + (i * 0.75 + 1) * size) / (window->width / 2) - 1.0f;
-				float pos_top = ((float)window->height - y_offset) / (window->height / 2) - 1.0f;
-				float pos_bottom = ((float)window->height - y_offset - size) / (window->height / 2) - 1.0f;
+				float pos_left = ((float)x_offset + (i * 0.75) * size) /*/ (window->width / 2) - 1.0f*/;
+				float pos_right = ((float)x_offset + (i * 0.75 + 1) * size) /*/ (window->width / 2) - 1.0f*/;
+				float pos_top = ((float)window->height - y_offset) /*/ (window->height / 2) - 1.0f*/;
+				float pos_bottom = ((float)window->height - y_offset - size) /*/ (window->height / 2) - 1.0f*/;
 
 				float tex_left = (*utf_string % (FONT_TEXTURE_SIZE / spacing)) * \
 				                 ((float)spacing / FONT_TEXTURE_SIZE);
@@ -528,12 +529,12 @@ draw_text( key_t font_hash,
 
 				float tex_top = 1.0 - ((*utf_string % range_size) / \
 				                       (FONT_TEXTURE_SIZE / spacing) + 1) * \
-				                ((float)spacing / FONT_TEXTURE_SIZE);
+				                	   ((float)spacing / FONT_TEXTURE_SIZE);
 
 				float tex_bottom = 1.0 - ((*utf_string % range_size) / \
 				                          (FONT_TEXTURE_SIZE / spacing)) * \
-				                   ((float)spacing / FONT_TEXTURE_SIZE) - \
-				                   ((float)spacing / FONT_TEXTURE_SIZE) / 4;
+				                   		  ((float)spacing / FONT_TEXTURE_SIZE) - \
+				                   		  ((float)spacing / FONT_TEXTURE_SIZE) / 4;
 
 				buffer[idx + 0] = pos_left;
 				buffer[idx + 1] = pos_top;

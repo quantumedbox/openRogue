@@ -19,6 +19,11 @@
 #define ENCODING "utf-32-le"
 #endif
 
+// Size after which fonts will be linear filtered
+#ifndef TEXT_LINEAR_FILTER_SIZE
+#define TEXT_LINEAR_FILTER_SIZE 32
+#endif
+
 /*
     @brief  Initialize everything that is needed for text functionality
 

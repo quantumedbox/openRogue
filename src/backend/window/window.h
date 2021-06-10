@@ -106,3 +106,13 @@ void finish_drawing();
 */
 key_t
 get_current_drawing_window();
+
+
+/*
+	@brief 	Set window icon from image file at path
+
+	@return Returns non-zero value on failure, otherwise - 0
+*/
+ROGUE_EXPORT
+int
+set_window_icon_from_file(key_t w_key, const char* path);

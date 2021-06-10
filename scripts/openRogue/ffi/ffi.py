@@ -83,6 +83,7 @@ class FFIInterface:
         "draw_rect",
         "start_drawing",
         "finish_drawing",
+        "set_window_icon_from_file",
     )
 
     def __init__(self, shared):
@@ -111,6 +112,8 @@ class FFIInterface:
         self.start_drawing.argtypes = c_uint32,
 
         self.finish_drawing = shared.finish_drawing
+
+        self.set_window_icon_from_file = shared.set_window_icon_from_file
 
     def init_window(self, width: int, height: int, title: str) -> 'hash':
         win = self._shared.init_window(width, height, title.encode())

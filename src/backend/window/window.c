@@ -4,6 +4,8 @@
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 #include "backend.h"
 #include "window.h"
@@ -96,9 +98,9 @@ ROGUE_EXPORT
 key_t
 init_window( int width, int height, const char* title )
 {
-	key_t win_key = get_new_window_key();
+	key_t w_key = get_new_window_key();
 
-	if (win_key == 1) {
+	if (w_key == 1) {
 		if (init_window_subsystem() == -1) {
 			new_winodw_key = 0;
 			return NONE_KEY;
@@ -117,7 +119,7 @@ init_window( int width, int height, const char* title )
 
 	if (!win) {
 		fprintf(stderr, "Could not create OpenGL window: %s\n", SDL_GetError());
-		if (win_key == 1) {
+		if (w_key == 1) {
 			SDL_Quit();
 			new_winodw_key = 0;
 		}
@@ -125,7 +127,7 @@ init_window( int width, int height, const char* title )
 	}
 
 	// Make sure that only one OpenGL context is created
-	if (win_key == 1)
+	if (w_key == 1)
 	{
 		opengl_context = SDL_GL_CreateContext(win);
 
@@ -187,13 +189,13 @@ init_window( int width, int height, const char* title )
 
 	rogue_mutex_init(handler->lock);
 
-	mapAdd(window_pool, win_key, handler);
+	mapAdd(window_pool, w_key, handler);
 
-	if (win_key == 1) {
+	if (w_key == 1) {
 		SDL_AddEventWatch(event_queue_former, NULL);
 	}
 
-	return win_key;
+	return w_key;
 }
 
 // ??? Should we exit all systems when all windows are closed ?
@@ -531,14 +533,6 @@ start_drawing( key_t w_key )
 
 	glViewport(0, 0, w->width, w->height);
 
-	// glMatrixMode(GL_PROJECTION);
-	// glLoadIdentity();
-	// glViewport(0, 0, w->width, w->height);
-	// glMatrixMode(GL_MODELVIEW);
-	// glLoadIdentity();
-	// glOrtho(0, w->width, 0, w->height, 1, -1); // Origin in lower-left corner
-	// glOrtho(0, w->width, w->height, 0, 1, -1); // Origin in upper-left corner
-
 	// float aspect = (float)width / (float)height;
 
 	// glm_ortho(0.0, (float)width,
@@ -576,4 +570,39 @@ key_t
 get_current_drawing_window()
 {
 	return current_drawing_window;
+}
+
+// TODO FIX
+ROGUE_EXPORT
+int
+set_window_icon_from_file( key_t w_key,
+                           const char* path )
+{
+	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
+	if (!w) return -1;
+
+	int width, height, n_channels;
+	uint8_t *data = stbi_load(path, &width, &height, &n_channels, 4);
+
+	if (!data) {
+		fprintf(stderr, "Cannot load the image\n");
+		return -1;
+	}
+
+	SDL_Surface* icon = SDL_CreateRGBSurfaceFrom(data, width, height,
+	                    8 * n_channels, width * n_channels,
+	                    0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+
+	if (!icon) {
+		fprintf(stderr, "Cannot create surface from image data, error: %s\n", SDL_GetError());
+		return -1;
+	}
+
+	SDL_SetWindowIcon(w->window, icon);
+
+	SDL_FreeSurface(icon);
+
+	stbi_image_free(data);
+
+	return 0;
 }
