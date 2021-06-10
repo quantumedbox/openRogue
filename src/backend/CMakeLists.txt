@@ -10,16 +10,18 @@ set(CMAKE_C_STANDARD 11)
 
 set(OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../backends)
 
-set(SOURCES window/opengl/window.c
-			window/opengl/text/text.c
+set(SOURCES window/window.c
+			window/render.c
 			map.c)
 
 set(LIBRARY_OUTPUT_PATH ${OUTPUT_DIRECTORY})
 
-set(LINKER_LIBS "opengl32")
+set(OS_SPECIFIC_LIBS "opengl32")
 
 set(DEPS_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../deps)
 
+set(GNU_DEBUG_ARGS -Wall -Wextra -Wpedantic -Werror -g
+				   -Wno-unused-parameter -Wno-unused-variable)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
 					${DEPS_PATH}/include)
@@ -41,14 +43,15 @@ endif()
 if(CMAKE_C_COMPILER_ID MATCHES GNU)
 	add_definitions(-DGLEW_STATIC)
 	link_directories(${LINK_DIRECTORIES} ${DEPS_PATH}/mingw64)
-	set(CMAKE_C_FLAGS_DEBUG -Wall -Wextra -Wpedantic -Werror
-							-g -Wno-unused-parameter -Wno-unused-variable)
+	foreach(ARG ${GNU_DEBUG_ARGS})
+		set(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS} ${ARG})
+	endforeach()
 endif()
 
 
 if(WIN32)
 	# Needed for static linking of SDL2
-	list(APPEND LINKER_LIBS imagehlp dinput8
+	list(APPEND OS_SPECIFIC_LIBS imagehlp dinput8
 							dxguid dxerr8
 							user32 gdi32
 							winmm imm32
@@ -81,4 +84,4 @@ target_link_libraries(SDL_Backend ${WindowSubmodule}
 								  ${SDL2_LIB}
 								  ${GLEW_LIB}
 								  ${FREETYPE_LIB}
-								  ${LINKER_LIBS})
+								  ${OS_SPECIFIC_LIBS})

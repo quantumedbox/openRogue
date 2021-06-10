@@ -5,9 +5,9 @@
 */
 
 #ifdef _MSC_VER
-#define EXPORT_SYMBOL __declspec(dllexport)
+#define ROGUE_EXPORT __declspec(dllexport)
 #else
-#define EXPORT_SYMBOL //
+#define ROGUE_EXPORT //
 #endif
 
 #ifdef _WIN32

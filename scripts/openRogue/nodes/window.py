@@ -48,8 +48,8 @@ class WindowComponent(component.Component):
 
         font = self._api._shared.resolve_font(b"resources/fonts/FSEX300.ttf")
 
-        # font2 = self._api._shared.resolve_font(
-        #     b"resources/fonts/SourceCodePro-Light.ttf")
+        font2 = self._api._shared.resolve_font(
+            b"resources/fonts/SourceCodePro-Light.ttf")
 
         # font3 = self._api._shared.resolve_font(
         #     b"resources/fonts/DelaGothicOne-Regular.ttf")
@@ -89,12 +89,29 @@ class WindowComponent(component.Component):
         #                     text.encode(encoding="utf-32-le"),
         #                     ffi.c_uint32(len(text)), 0x00FFAAFF)
 
+        self._api.draw_text(font, ffi.c_uint32(12), 0, 0,
+                            "Can you read this?".encode(encoding="utf-32-le"),
+                            ffi.c_uint32(len("Can you read this?")),
+                            0xFFFFFFFF)
+
         self._api.draw_text(
-            font, ffi.c_uint32(16), 0, 100,
-            "Небольщой текст для небольшого теста".encode(
-                encoding="utf-32-le"),
-            ffi.c_uint32(len("Небольщой текст для небольшого теста")),
-            0xFFFFFFFF)
+            font, ffi.c_uint32(12), 0, 12,
+            "Можешь это прочесть?".encode(encoding="utf-32-le"),
+            ffi.c_uint32(len("Можешь это прочесть?")), 0xFFFFFFFF)
+
+        self._api.draw_text(
+            font, ffi.c_uint32(24), 0, 24,
+            "Можешь это прочесть?".encode(encoding="utf-32-le"),
+            ffi.c_uint32(len("Можешь это прочесть?")), 0xFFFFFFFF)
+
+        self._api.draw_text(
+            font, ffi.c_uint32(24), 2, 48,
+            "Можешь это прочесть?".encode(encoding="utf-32-le"),
+            ffi.c_uint32(len("Можешь это прочесть?")), 0xFFFFFFFF)
+
+        self._api.draw_text(font2, ffi.c_uint32(12), 0, 80,
+                            "ABC! DDDD".encode(encoding="utf-32-le"),
+                            ffi.c_uint32(len("ABC! DDDD")), 0xFFFFFFFF)
 
         # self._api.draw_text(
         #     font, ffi.c_uint32(48), 0, 148,
@@ -116,7 +133,7 @@ class WindowComponent(component.Component):
         #                     "テストテストテストテストテスト".encode(encoding="utf-32-le"),
         #                     ffi.c_uint32(len("テストテストテストテストテスト")), 0xFFFAAFAF)
 
-        # self._api.draw_rect(0, 0, 100, 100, 0xFFFFFF)
+        self._api.draw_rect(100, 100, 100, 100, 0xFFFFFFFF)
 
         self._api.finish_drawing()
 
