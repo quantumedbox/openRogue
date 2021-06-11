@@ -6,7 +6,7 @@
 #include FT_GLYPH_H
 #include <GL/glew.h>
 
-#include "backend.h"
+#include "rogue_definitions.h"
 #include "render.h"
 #include "window.h"
 #include "render_program.h"

@@ -7,7 +7,7 @@
 #include <inttypes.h>
 
 /*
-	Generic event for all controllers that describe actions in relative position
+	Generic event for all controllers which describes actions in relative position
 */
 struct PointerEvent {
 	bitmask_t mouse_action;
@@ -21,7 +21,7 @@ struct PointerEvent {
 };
 
 /*
-	Generic event for all controllers that describe named actions
+	Generic event for all controllers which describes named actions
 */
 struct InputEvent {
 	bitmask_t action;
@@ -54,7 +54,7 @@ struct ReposEvent
 */
 typedef struct {
 	bitmask_t type;
-	uint32_t timestamp;
+	// uint32_t timestamp;
 	// uint32_t windowid; // events should always be dispatched by event window
 	union {
 		struct PointerEvent pointer_event;

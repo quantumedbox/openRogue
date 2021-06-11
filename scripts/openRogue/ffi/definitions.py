@@ -11,10 +11,6 @@ class C_PointerEvent(Structure):
                 ('y_motion', c_int32)]
 
 
-# class C_CloseEvent(Structure):
-#   _fields_ = []
-
-
 class C_InputEvent(Structure):
     _fields_ = [('action', c_uint32), ('is_key_pressed', c_bool),
                 ('is_key_repeat', c_bool), ('keycode', c_uint32),
@@ -30,19 +26,14 @@ class C_ReposEvent(Structure):
 
 
 class C_EventUnion(Union):
-    _fields_ = [
-        ('pointer_event', C_PointerEvent),
-        ('input_event', C_InputEvent),
-        # ('close_event', C_CloseEvent),
-        ('resize_event', C_ResizeEvent),
-        ('repos_event', C_ReposEvent)
-    ]
+    _fields_ = [('pointer_event', C_PointerEvent),
+                ('input_event', C_InputEvent), ('resize_event', C_ResizeEvent),
+                ('repos_event', C_ReposEvent)]
 
 
 class C_Event(Structure):
     _anonymous_ = ("_union", )
-    _fields_ = [('type', c_uint32), ('timestamp', c_uint32),
-                ('_union', C_EventUnion)]
+    _fields_ = [('type', c_uint32), ('_union', C_EventUnion)]
 
 
 class C_EventQueue(Structure):

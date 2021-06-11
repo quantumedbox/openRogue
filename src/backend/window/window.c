@@ -7,7 +7,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-#include "backend.h"
+#include "rogue_definitions.h"
 #include "window.h"
 #include "map.h"
 #include "render.h"
@@ -64,6 +64,16 @@ get_new_window_key()
 	return ++new_winodw_key;
 }
 
+/*
+	Used for getting currently bound window for drawing
+	It is in function form for preventing direct access from other submodules
+*/
+key_t
+get_current_drawing_window()
+{
+	return current_drawing_window;
+}
+
 
 static
 int
@@ -71,7 +81,6 @@ init_window_subsystem()
 {
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		fprintf(stderr, "Error on SDL initialization:\n%s\n", SDL_GetError());
-		// SIGNAL_ERROR();
 		return -1;
 	}
 
@@ -134,7 +143,6 @@ init_window( int width, int height, const char* title )
 		GLenum error;
 		if ((error = glewInit()) != GLEW_OK) {
 			fprintf(stderr, "Error on GLEW initialization: %s\n", glewGetErrorString(error));
-			// SIGNAL_ERROR();
 			SDL_GL_DeleteContext(opengl_context);
 			SDL_Quit();
 			new_winodw_key = 0;
@@ -270,7 +278,7 @@ dispatch_keypress( EventQueue* queue, SDL_Event event )
 		return;
 
 	current.type = INPUT_EVENT;
-	current.timestamp = event.common.timestamp;
+	// current.timestamp = event.common.timestamp;
 
 	current.input_event.is_key_pressed = event.key.state == SDL_PRESSED ? true : false;
 
@@ -315,7 +323,7 @@ dispatch_mouse_motion( EventQueue* queue, SDL_Event event )
 		return;
 
 	current.type = POINTER_EVENT;
-	current.timestamp = event.common.timestamp;
+	// current.timestamp = event.common.timestamp;
 
 	current.pointer_event.mouse_action 	= MOUSE_MOTION;
 	current.pointer_event.is_pressed 	= 0;
@@ -339,7 +347,7 @@ dispatch_mouse_button( EventQueue* queue, SDL_Event event )
 		return;
 
 	current.type = POINTER_EVENT;
-	current.timestamp = event.common.timestamp;
+	// current.timestamp = event.common.timestamp;
 
 	switch (event.button.button) {
 	case SDL_BUTTON_LEFT:
@@ -373,7 +381,7 @@ dispatch_window_close( EventQueue* queue, SDL_Event event )
 		return;
 
 	current.type = CLOSE_EVENT;
-	current.timestamp = event.common.timestamp;
+	// current.timestamp = event.common.timestamp;
 
 	queue->events[queue->len] = current;
 	queue->len++;
@@ -390,7 +398,7 @@ dispatch_window_resize( EventQueue* queue, SDL_Event event )
 		return;
 
 	current.type = RESIZE_EVENT;
-	current.timestamp = event.common.timestamp;
+	// current.timestamp = event.common.timestamp;
 
 	current.resize_event.width = event.window.data1;
 	current.resize_event.height = event.window.data2;
@@ -410,7 +418,7 @@ dispatch_window_repos( EventQueue* queue, SDL_Event event )
 		return;
 
 	current.type = REPOS_EVENT;
-	current.timestamp = event.common.timestamp;
+	// current.timestamp = event.common.timestamp;
 
 	current.repos_event.x = event.window.data1;
 	current.repos_event.y = event.window.data2;
@@ -566,13 +574,6 @@ finish_drawing()
 }
 
 
-key_t
-get_current_drawing_window()
-{
-	return current_drawing_window;
-}
-
-// TODO FIX
 ROGUE_EXPORT
 int
 set_window_icon_from_file( key_t w_key,
