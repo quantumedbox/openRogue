@@ -89,9 +89,9 @@ class WindowComponent(component.Component):
             "Можешь это прочесть?".encode(encoding="utf-32-le"),
             ffi.c_uint32(len("Можешь это прочесть?")), 0xFFFFFFFF)
 
-        self._api.draw_text(font2, ffi.c_uint32(64), 0, 80,
-                            "abc d".encode(encoding="utf-32-le"),
-                            ffi.c_uint32(len("abc d")), 0xFFFFFFFF)
+        self._api.draw_text(font2, ffi.c_uint32(64), 0, 0,
+                            "ABCBA Dabc d".encode(encoding="utf-32-le"),
+                            ffi.c_uint32(len("ABCBA Dabc d")), 0xFFFFFFFF)
 
         self._api.draw_text(
             font3, ffi.c_uint32(80), 0, 300,

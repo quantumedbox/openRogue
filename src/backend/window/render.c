@@ -322,6 +322,7 @@ draw_text_buffer( float* buffer, size_t buffer_len )
 }
 
 // TODO Could be a lot better or at least more nicely structured
+// TODO Require "width" parameter ?
 ROGUE_EXPORT
 int
 draw_text( key_t font_hash,
@@ -414,16 +415,8 @@ draw_text( key_t font_hash,
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-					if (size > TEXT_LINEAR_FILTER_SIZE)
-					{
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-					}
-					else
-					{
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-					}
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 					glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
 					check_opengl_state("Creation of texture buffer");
@@ -481,7 +474,7 @@ draw_text( key_t font_hash,
 						glTexSubImage2D(
 						    GL_TEXTURE_2D, 0,
 						    (i % (FONT_TEXTURE_SIZE / spacing))*spacing + face->glyph->bitmap_left,
-						    FONT_TEXTURE_SIZE - (i / (FONT_TEXTURE_SIZE / spacing))*spacing - face->glyph->bitmap_top - spacing / 2,
+						    FONT_TEXTURE_SIZE - (i / (FONT_TEXTURE_SIZE / spacing))*spacing - face->glyph->bitmap_top/* - spacing / 2*/,
 						    bitmap_glyph->bitmap.width,
 						    bitmap_glyph->bitmap.rows,
 						    GL_RED,
@@ -520,21 +513,29 @@ draw_text( key_t font_hash,
 				float pos_top = ((float)window->height - y_offset) /*/ (window->height / 2) - 1.0f*/;
 				float pos_bottom = ((float)window->height - y_offset - size) /*/ (window->height / 2) - 1.0f*/;
 
-				float tex_left = (*utf_string % (FONT_TEXTURE_SIZE / spacing)) * \
-				                 ((float)spacing / FONT_TEXTURE_SIZE);
+				// float tex_left = (*utf_string % (FONT_TEXTURE_SIZE / spacing)) * \
+				//                  ((float)spacing / FONT_TEXTURE_SIZE);
 
-				float tex_right = (*utf_string % (FONT_TEXTURE_SIZE / spacing) + 1) * \
-				                  ((float)spacing / FONT_TEXTURE_SIZE) - \
-				                  ((float)spacing / FONT_TEXTURE_SIZE) / 4;
+				// float tex_right = (*utf_string % (FONT_TEXTURE_SIZE / spacing) + 1) * \
+				//                   ((float)spacing / FONT_TEXTURE_SIZE) - \
+				//                   ((float)spacing / FONT_TEXTURE_SIZE) / 4;
 
-				float tex_top = 1.0 - ((*utf_string % range_size) / \
-				                       (FONT_TEXTURE_SIZE / spacing) + 1) * \
-				                	   ((float)spacing / FONT_TEXTURE_SIZE);
+				// float tex_top = 1.0 - ((*utf_string % range_size) / \
+				//                        ((float)FONT_TEXTURE_SIZE / spacing) + 1.0) * \
+				//                 	   ((float)spacing / FONT_TEXTURE_SIZE);
 
-				float tex_bottom = 1.0 - ((*utf_string % range_size) / \
-				                          (FONT_TEXTURE_SIZE / spacing)) * \
-				                   		  ((float)spacing / FONT_TEXTURE_SIZE) - \
-				                   		  ((float)spacing / FONT_TEXTURE_SIZE) / 4;
+				float tex_left = (*utf_string % (FONT_TEXTURE_SIZE / spacing)) * ((float)spacing / FONT_TEXTURE_SIZE);
+
+				float tex_right = (*utf_string % (FONT_TEXTURE_SIZE / spacing)) * ((float)spacing / FONT_TEXTURE_SIZE) + ((float)size / FONT_TEXTURE_SIZE);
+
+				float tex_top = 1.0 - ((*utf_string % range_size) / (FONT_TEXTURE_SIZE / spacing)) * ((float)spacing / FONT_TEXTURE_SIZE) - ((float)size / FONT_TEXTURE_SIZE)*0.75;
+
+				float tex_bottom = 1.0 - (((*utf_string % range_size) / (FONT_TEXTURE_SIZE / spacing))) * ((float)spacing / FONT_TEXTURE_SIZE) + ((float)size / FONT_TEXTURE_SIZE)*0.25;
+
+				// float tex_bottom = 1.0 - ((*utf_string % range_size) / \
+				//                           ((float)FONT_TEXTURE_SIZE / spacing)) * \
+				//                    		  ((float)spacing / FONT_TEXTURE_SIZE) - \
+				//                    		  ((float)spacing / FONT_TEXTURE_SIZE) / 4;
 
 				buffer[idx + 0] = pos_left;
 				buffer[idx + 1] = pos_top;

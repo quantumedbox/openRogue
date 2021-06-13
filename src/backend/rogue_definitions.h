@@ -18,7 +18,7 @@ typedef size_t key_t;
 
 typedef uint32_t bitmask_t;
 
-#define mask_set_bit(mask, bit) mask |= bit
+#define mask_set_bit(mask, bit)  mask |= bit
 #define mask_zero_bit(mask, bit) mask ^= bit
 
 // ------------------------------------------------------- Hex color -- //

@@ -1,11 +1,11 @@
 list of things that have to be done at some point:
 
+. way of prepackaging projects for easy distribution
 . easy way of inspecting the available resources for users and building for developers
 . string method of defining and setting the settings between API and caller
 . profiling methods
 . catching system signals from standard 'signal' module
 . way of pickling to save game states
-. unified c and python coding styles
 . get rid of relative imports
 . 'chance' submodule
 . wchar support in config file
@@ -13,16 +13,16 @@ list of things that have to be done at some point:
 . register the changes that are made by component integration to give ability to delete them
 . use CFFI for API calling
 . libtcod systems integration
-. language procgen
+. language procgen submodule
 . logging
 . optional curses backend
 . curses based debugging/console interface
+. terrain procgen submodule
+. tilemap object
 
 
 priorities:
 
-. text rendering
-. graphics layer in SDL2
 . interface primitives
 
 
@@ -30,11 +30,14 @@ in process:
 
 . events and actions
 . themes
-. node logic, inheritance model
 
 
 done:
 
+. unified c and python coding styles
+. node logic, inheritance model
+. graphics layer in SDL2
+. text rendering
 . cmake lists for building
 . context constructors (building system window on /root/ children from UI classes)
 . scenes and /root/

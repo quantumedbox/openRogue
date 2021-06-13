@@ -2,6 +2,9 @@
 	Executable that resolves the python executable path and config file variables
 */
 
+// It's a fucking mess
+// Maybe rewrite it in C++ as it's almost always present with C compiler that is needed for backend compilation
+
 // TODO Err stream redirection if needed
 // TODO Do not close console on fatal error
 // TODO unix stuff isn't tested at all
