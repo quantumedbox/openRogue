@@ -4,8 +4,8 @@ Corner stone of scene structure
 from . import node
 from . import ui
 from . import window
-from ..types import Vector, implement_component
-from .. import signal
+from openRogue.types import Vector, implement_component
+from openRogue import signal
 
 
 class Root(node.Node):
@@ -65,6 +65,14 @@ class Root(node.Node):
             # Emmit update event each loop for nodes to be processed
             self.emit_event("update", None)
             self.post_loop()
+
+            # ??? Should it be here ?
+            while node.Node._freeing_queue:
+                to_free = node.Node._freeing_queue.pop()
+                parent = to_free._parent()
+                if parent is not None:
+                    parent._children.pop(to_free.name)
+                to_free.free()
 
         # Signal on_exit for every module that could need to do some work before exiting the program
         signal.signal("on_exit")

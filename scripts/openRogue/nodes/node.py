@@ -23,20 +23,20 @@ class Node:
     """
     __slots__ = (
         "name",
-        # "event_ports",
         "_parent",
         "_children",
         "__weakref__",
     )
+    # Used for queuing nodes to be deleted
+    _freeing_queue = []
 
     def __init__(self):
         """
         """
         self._children = OrderedDict()
         self._parent = None
-        # self.event_ports = {"update": "update"}
         # Names only make sense in context of node trees, parent should set the name
-        self.name = ""
+        self.name = "unnamed"
 
     def update(self, event) -> None:
         """
@@ -81,16 +81,19 @@ class Node:
         """
         return self._children.get(name)
 
-    def free_child(self, name: str) -> None:
+    def queue_free(self) -> None:
         """
+        -- DO NOT OVERRIDE --
+        Queue specified child to be deleted
         """
-        child = self._children.get(name)
-        if child is not None:
-            self._children.pop(name)
-            child.free()
-        else:
-            raise KeyError(
-                f"No child by the name of {name} to free in node {self.name}")
+        Node._freeing_queue.append(self)
+        # child = self._children.get(name)
+        # if child is not None:
+        #     self._children.pop(name)
+        #     child.free()
+        # else:
+        #     raise KeyError(
+        #         f"No child by the name of {name} to free in node {self.name}")
 
     def get_parent(self) -> 'Node':
         """

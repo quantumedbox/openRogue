@@ -1,5 +1,6 @@
 list of things that have to be done at some point:
 
+. experiment: negate the dll call overhead by making call queues
 . way of prepackaging projects for easy distribution
 . easy way of inspecting the available resources for users and building for developers
 . string method of defining and setting the settings between API and caller

@@ -1,10 +1,9 @@
 """
 Base class of UI nodes
 """
-
 from . import node
-from ..types import Vector
-from .primitives import Primitive
+from openRogue.types import Vector
+
 from typing import Union, Iterable
 
 # Position and size should be in floating points where whole part is n of tiles relative to upper-left corner
@@ -77,9 +76,9 @@ class NodeUI(node.Node):
 
     # Render is not a good name in this case
     # TODO Should be cacheable
-    def render(self) -> Union[Primitive, Iterable[Primitive], None]:
-        """
-        Should provide primitives that do describe the desirable graphical structure
-        Return value could be a single primitive, iterable of primitives or None
-        """
-        return None
+    # def render(self) -> Union[Primitive, Iterable[Primitive], None]:
+    #     """
+    #     Should provide primitives that do describe the desirable graphical structure
+    #     Return value could be a single primitive, iterable of primitives or None
+    #     """
+    #     return None

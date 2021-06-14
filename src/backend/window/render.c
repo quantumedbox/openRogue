@@ -591,6 +591,7 @@ draw_text( key_t font_hash,
 }
 
 
+// ??? For some reason this method is REALLY slow, needs fixing
 ROGUE_EXPORT
 void
 draw_rect( int32_t x_offset,
@@ -604,10 +605,6 @@ draw_rect( int32_t x_offset,
 
 	glUseProgram(rect_renderer.program);
 
-	// GLint color_modifier_position = glGetUniformLocation(rect_renderer.program, "color_modifier");
-	// if (color_modifier_position == -1) {
-	// 	fprintf(stderr, "Cannot get \"color_modifier\" from rect render program\n");
-	// }
 	glUniform4f(0, hex_uniform4f(color));
 
 	glBindVertexArray(rect_renderer.vao);

@@ -8,9 +8,8 @@ import random
 
 # from . import node
 from . import ui
-from .. import ffi
-
-from ..types import component, Vector
+from openRogue import ffi
+from openRogue.types import component, Vector
 
 # TODO Random roguelike style window titles on default
 
@@ -63,7 +62,6 @@ class WindowComponent(component.Component):
             event = event_queue.events[i]
             if event.type == ffi.EventType.CLOSE_EVENT:
                 self.close_window_behaviour()
-                return
 
             elif event.type == ffi.EventType.RESIZE_EVENT:
                 self.resize_window_behaviour(
@@ -76,8 +74,10 @@ class WindowComponent(component.Component):
 
         self._api.start_drawing(self._window)
 
-        for _ in range(1000):
-            self._api.draw_rect(0, 0, 640, 320, 0x000000FF)
+        for _ in range(10000):
+            self._api.draw_text(font, 12, random.randint(0, 600),
+                                random.randint(0, 600), "Can you read this?",
+                                0xFFFFFFFF)
 
         self._api.draw_rect(0, 0, 640, 320, 0x000000FF)
 
@@ -116,7 +116,8 @@ class WindowComponent(component.Component):
         Called when system window receives close event
         By default it deletes the object from its parent and thus leaves the tree
         """
-        self._parent().free_child(self.name)
+        # self._parent().free_child(self.name)
+        self.queue_free()
 
     def resize_window_behaviour(self, size: Vector) -> None:
         """
