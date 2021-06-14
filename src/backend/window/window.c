@@ -13,6 +13,18 @@
 #include "map.h"
 #include "render.h"
 
+#define OPENGL_MINOR_VER 3
+#define OPENGL_MAJOR_VER 4
+
+#define DEFAULT_WINDOW_NAME "openRogue"
+
+#define WINDOW_FILL_COLOR_R 0.2F
+#define WINDOW_FILL_COLOR_G 0.0F
+#define WINDOW_FILL_COLOR_B 0.062F
+
+// Size of staticly allocated event queue buffer
+#define EVENT_BUFFER_SIZE 16
+
 
 // TODO Positioning of new windows depending on existing ones. Maybe require the caller to specify positions and rely on ui positioning?
 
@@ -454,11 +466,6 @@ get_window_events( key_t w_key )
 		rogue_mutex_unlock(w->lock);
 		return w->queue1;
 	}
-
-	// EventQueue* queue = w->queue;
-	// w->queue = (EventQueue*)malloc(sizeof(EventQueue));
-	// w->queue->events = (Event*)malloc(EVENT_BUFFER_SIZE * sizeof(Event));
-	// w->queue->len = 0;
 }
 
 /*

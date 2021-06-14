@@ -7,7 +7,7 @@
 #ifdef _MSC_VER
 #define ROGUE_EXPORT __declspec(dllexport)
 #else
-#define ROGUE_EXPORT //
+#define ROGUE_EXPORT __attribute__((dllexport))
 #endif
 
 #ifdef _WIN32

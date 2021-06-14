@@ -1,0 +1,7 @@
+
+SIGNALS:
+```
+	on_exit 	--	is called on exiting the root loop function
+					which is end of the program by default
+
+```

@@ -30,7 +30,7 @@ class NodeUI(node.Node):
         Possible stretch args: any combination of "h" and "v" symbols or "" empty string for no stretch
         """
         node.Node.__init__(self)
-        self.event_ports["ui"] = self.ui_event
+        # self.event_ports["ui"] = self.ui_event
         self.pos = Vector(x, y)
         self.size = Vector(width, height)
         self.align = align

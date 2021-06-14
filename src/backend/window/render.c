@@ -12,6 +12,25 @@
 #include "render_program.h"
 #include "map.h"
 
+// Default texture size in both dimensions
+#ifndef FONT_TEXTURE_SIZE
+#define FONT_TEXTURE_SIZE 1024
+#endif
+
+// Max amount of characters per strip
+#ifndef TEXT_BUFFER_SIZE
+#define TEXT_BUFFER_SIZE 128
+#endif
+
+// Maybe it's better to have it in config ?
+#ifndef DEFAULT_FONT
+#define DEFAULT_FONT "resources/fonts/FSEX300.ttf"
+#endif
+
+#ifndef ENCODING
+#define ENCODING "utf-32-le"
+#endif
+
 
 // TODO Garbage collector-like that keeps track of usages per each texture in a certain time window
 
@@ -329,7 +348,7 @@ draw_text( key_t font_hash,
            uint32_t size,
            int32_t x_offset,
            int32_t y_offset,
-           uint32_t* utf_string,
+           char32_t* utf_string,
            uint32_t string_len,
            hex_t color )
 {

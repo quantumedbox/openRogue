@@ -6,10 +6,10 @@ import subprocess
 from .config_reader import get_config
 
 
-def depend(*args) -> None:
+def dependencies(*args) -> None:
     """
-	Resolves pip dependencies on runtime
-	"""
+    Resolves pip dependencies on runtime
+    """
     try:
         import pip
     except ImportError:

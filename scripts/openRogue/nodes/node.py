@@ -23,7 +23,7 @@ class Node:
     """
     __slots__ = (
         "name",
-        "event_ports",
+        # "event_ports",
         "_parent",
         "_children",
         "__weakref__",
@@ -34,7 +34,7 @@ class Node:
         """
         self._children = OrderedDict()
         self._parent = None
-        self.event_ports = {"update": "update"}
+        # self.event_ports = {"update": "update"}
         # Names only make sense in context of node trees, parent should set the name
         self.name = ""
 
@@ -102,9 +102,11 @@ class Node:
     def emit_event(self, ptype: str, event: object) -> None:
         """
         """
+        # Current design doesn't allow receiving all possible event types if needed
         for _, child in self._children.items():
-            if ptype in child.event_ports:
-                getattr(child, child.event_ports[ptype])(event)
+            func_port = getattr(child, ptype)
+            if func_port is not None:
+                func_port(event)
 
     # def __str__(self) -> str:
     # return "\n".join([

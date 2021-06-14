@@ -38,7 +38,6 @@ class C_Event(Structure):
 
 class C_EventQueue(Structure):
     _fields_ = [('events', POINTER(C_Event)), ('len', c_uint32)]
-    # ('window_signals', c_uint32)]
 
 
 class EventType(IntFlag):

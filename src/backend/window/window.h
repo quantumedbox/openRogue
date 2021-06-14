@@ -5,18 +5,6 @@
 #include "rogue_events.h"
 #include "threads.h"
 
-#define OPENGL_MINOR_VER 3
-#define OPENGL_MAJOR_VER 4
-
-#define DEFAULT_WINDOW_NAME "openRogue"
-
-#define WINDOW_FILL_COLOR_R 0.2F
-#define WINDOW_FILL_COLOR_G 0.0F
-#define WINDOW_FILL_COLOR_B 0.062F
-
-// Size of staticly allocated event queue buffer
-#define EVENT_BUFFER_SIZE 16
-
 /*
 */
 typedef struct {
@@ -44,6 +32,12 @@ typedef struct {
 	rogue_mutex_t lock;
 }
 WindowHandler;
+
+/*
+	@brief 	Returns current window key that is bound for drawing
+*/
+key_t
+get_current_drawing_window();
 
 /*
 */
@@ -80,7 +74,7 @@ EventQueue* get_window_events(key_t);
 /*
 */
 ROGUE_EXPORT
-void resize_window(key_t, int width, int height);
+void resize_window(key_t, int w, int h);
 
 /*
 */
@@ -101,12 +95,6 @@ void start_drawing(key_t);
 ROGUE_EXPORT
 void finish_drawing();
 
-/*
-	@brief 	Returns current window key that is bound for drawing
-*/
-key_t
-get_current_drawing_window();
-
 
 /*
 	@brief 	Set window icon from image file at path
@@ -114,5 +102,4 @@ get_current_drawing_window();
 	@return Returns non-zero value on failure, otherwise - 0
 */
 ROGUE_EXPORT
-int
-set_window_icon_from_file(key_t w_key, const char* path);
+int set_window_icon_from_file(key_t, const char* path);
