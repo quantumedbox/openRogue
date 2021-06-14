@@ -34,7 +34,6 @@ class WindowComponent(component.Component):
 
         self._api.set_window_icon_from_file(self._window,
                                             b"resources/images/icon.png")
-
         #
         component.deploy_front(self, "free", self._free_window)
         #
@@ -75,30 +74,30 @@ class WindowComponent(component.Component):
                 self.repos_window_behaviour(
                     Vector(event.repos_event.x, event.repos_event.y))
 
-        self._api.start_drawing(self._window)
+        # self._api.start_drawing(self._window)
 
-        self._api.draw_rect(0, 0, 640, 320, 0x000000FF)
+        # self._api.draw_rect(0, 0, 640, 320, 0x000000FF)
 
-        self._api.draw_text(font, ffi.c_uint32(12), 0, 0,
-                            "Can you read this?".encode(encoding="utf-32-le"),
-                            ffi.c_uint32(len("Can you read this?")),
-                            0xFFFFFFFF)
+        # self._api.draw_text(font, ffi.c_uint32(12), 0, 0,
+        #                     "Can you read this?".encode(encoding="utf-32-le"),
+        #                     ffi.c_uint32(len("Can you read this?")),
+        #                     0xFFFFFFFF)
 
-        self._api.draw_text(
-            font, ffi.c_uint32(12), 0, 12,
-            "Можешь это прочесть?".encode(encoding="utf-32-le"),
-            ffi.c_uint32(len("Можешь это прочесть?")), 0xFFFFFFFF)
+        # self._api.draw_text(
+        #     font, ffi.c_uint32(12), 0, 12,
+        #     "Можешь это прочесть?".encode(encoding="utf-32-le"),
+        #     ffi.c_uint32(len("Можешь это прочесть?")), 0xFFFFFFFF)
 
-        self._api.draw_text(font2, ffi.c_uint32(64), 0, 0,
-                            "ABCBA Dabc d".encode(encoding="utf-32-le"),
-                            ffi.c_uint32(len("ABCBA Dabc d")), 0xFFFFFFFF)
+        # self._api.draw_text(font2, ffi.c_uint32(64), 0, 0,
+        #                     "ABCBA Dabc d".encode(encoding="utf-32-le"),
+        #                     ffi.c_uint32(len("ABCBA Dabc d")), 0xFFFFFFFF)
 
-        self._api.draw_text(
-            font3, ffi.c_uint32(80), 0, 300,
-            "テ ス ト テ ス ト テ ス ト テ ス ト テ ス ト".encode(encoding="utf-32-le"),
-            ffi.c_uint32(len("テ ス ト テ ス ト テ ス ト テ ス ト テ ス ト")), 0xFFFAAFAF)
+        # self._api.draw_text(
+        #     font3, ffi.c_uint32(80), 0, 300,
+        #     "テ ス ト テ ス ト テ ス ト テ ス ト テ ス ト".encode(encoding="utf-32-le"),
+        #     ffi.c_uint32(len("テス ト テ ス ト テ ス ト テ ス ト テ ス ト")), 0xFFFAAFAF)
 
-        self._api.finish_drawing()
+        # self._api.finish_drawing()
 
     def _free_window(self, *args):
         # Prevent double free after force deletion

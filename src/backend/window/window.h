@@ -2,7 +2,7 @@
 
 #include <SDL2/SDL.h>
 
-#include "events.h"
+#include "rogue_events.h"
 #include "threads.h"
 
 #define OPENGL_MINOR_VER 3

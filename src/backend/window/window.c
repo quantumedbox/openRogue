@@ -8,6 +8,7 @@
 #include <stb_image.h>
 
 #include "rogue_definitions.h"
+#include "rogue_events.h"
 #include "window.h"
 #include "map.h"
 #include "render.h"

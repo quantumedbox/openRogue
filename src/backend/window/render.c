@@ -344,7 +344,7 @@ draw_text( key_t font_hash,
 
 	// ??? Is it okay to hardcode the uniform locations at optimization ?
 	glUniform4f(0, hex_uniform4f(color));
-	glUniform2f(2, (float)window->width, (float)window->height);
+	// glUniform2f(2, (float)window->width, (float)window->height);
 
 	Font* font = mapGet(font_pool, font_hash);
 
@@ -423,7 +423,7 @@ draw_text( key_t font_hash,
 
 					// glGenerateMipmap(GL_TEXTURE_2D);
 
-					if (FT_Set_Pixel_Sizes(*(FT_Face*)font->source, 0, size) != 0)
+					if (FT_Set_Pixel_Sizes(*(FT_Face*)font->source, size, size) != 0)
 					{
 						fprintf(stderr, "Cannot set the %llu font to the size of %d\n", font_hash, size);
 						continue;
@@ -508,34 +508,21 @@ draw_text( key_t font_hash,
 				uint32_t idx = buffer_len * 6 * 4;
 
 				// Sorry to everyone who's reading this shit
-				float pos_left = ((float)x_offset + (i * 0.75) * size) /*/ (window->width / 2) - 1.0f*/;
-				float pos_right = ((float)x_offset + (i * 0.75 + 1) * size) /*/ (window->width / 2) - 1.0f*/;
-				float pos_top = ((float)window->height - y_offset) /*/ (window->height / 2) - 1.0f*/;
-				float pos_bottom = ((float)window->height - y_offset - size) /*/ (window->height / 2) - 1.0f*/;
-
-				// float tex_left = (*utf_string % (FONT_TEXTURE_SIZE / spacing)) * \
-				//                  ((float)spacing / FONT_TEXTURE_SIZE);
-
-				// float tex_right = (*utf_string % (FONT_TEXTURE_SIZE / spacing) + 1) * \
-				//                   ((float)spacing / FONT_TEXTURE_SIZE) - \
-				//                   ((float)spacing / FONT_TEXTURE_SIZE) / 4;
-
-				// float tex_top = 1.0 - ((*utf_string % range_size) / \
-				//                        ((float)FONT_TEXTURE_SIZE / spacing) + 1.0) * \
-				//                 	   ((float)spacing / FONT_TEXTURE_SIZE);
+				float pos_left = ((float)x_offset + (i * 0.75) * size) / (window->width / 2) - 1.0f;
+				float pos_right = ((float)x_offset + (i * 0.75 + 1) * size) / (window->width / 2) - 1.0f;
+				float pos_top = ((float)window->height - y_offset) / (window->height / 2) - 1.0f;
+				float pos_bottom = ((float)window->height - y_offset - size) / (window->height / 2) - 1.0f;
 
 				float tex_left = (*utf_string % (FONT_TEXTURE_SIZE / spacing)) * ((float)spacing / FONT_TEXTURE_SIZE);
 
-				float tex_right = (*utf_string % (FONT_TEXTURE_SIZE / spacing)) * ((float)spacing / FONT_TEXTURE_SIZE) + ((float)size / FONT_TEXTURE_SIZE);
+				float tex_right = (*utf_string % (FONT_TEXTURE_SIZE / spacing)) * ((float)spacing / FONT_TEXTURE_SIZE) + \
+								  ((float)size / FONT_TEXTURE_SIZE);
 
-				float tex_top = 1.0 - ((*utf_string % range_size) / (FONT_TEXTURE_SIZE / spacing)) * ((float)spacing / FONT_TEXTURE_SIZE) - ((float)size / FONT_TEXTURE_SIZE)*0.75;
+				float tex_top = 1.0 - ((*utf_string % range_size) / (FONT_TEXTURE_SIZE / spacing)) * \
+									  ((float)spacing / FONT_TEXTURE_SIZE) - ((float)size / FONT_TEXTURE_SIZE)*0.75;
 
-				float tex_bottom = 1.0 - (((*utf_string % range_size) / (FONT_TEXTURE_SIZE / spacing))) * ((float)spacing / FONT_TEXTURE_SIZE) + ((float)size / FONT_TEXTURE_SIZE)*0.25;
-
-				// float tex_bottom = 1.0 - ((*utf_string % range_size) / \
-				//                           ((float)FONT_TEXTURE_SIZE / spacing)) * \
-				//                    		  ((float)spacing / FONT_TEXTURE_SIZE) - \
-				//                    		  ((float)spacing / FONT_TEXTURE_SIZE) / 4;
+				float tex_bottom = 1.0 - (((*utf_string % range_size) / (FONT_TEXTURE_SIZE / spacing))) * \
+										 ((float)spacing / FONT_TEXTURE_SIZE) + ((float)size / FONT_TEXTURE_SIZE)*0.25;
 
 				buffer[idx + 0] = pos_left;
 				buffer[idx + 1] = pos_top;

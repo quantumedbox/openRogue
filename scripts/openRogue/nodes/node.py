@@ -4,6 +4,7 @@ Base interface for every scene object
 # import uuid
 import weakref
 from typing import Union
+from collections import OrderedDict
 
 # ??? Maybe it's better to return/store proxies and not weakrefs?
 
@@ -28,12 +29,10 @@ class Node:
         "__weakref__",
     )
 
-    # TODO _children should be implemented as OrderedDict
-
     def __init__(self):
         """
         """
-        self._children = []
+        self._children = OrderedDict()
         self._parent = None
         self.event_ports = {"update": "update"}
         # Names only make sense in context of node trees, parent should set the name
@@ -69,30 +68,29 @@ class Node:
         Used internally on init_child
         """
         # TODO Check if the name is available
+        if name in self._children:
+            raise NameError(
+                f"Child by the name of \"{name}\" is already present in {self.name}"
+            )
         child.name = name
-        self._children.append(child)
+        self._children[name] = child
         child._parent = weakref.ref(self)
 
     def get_child(self, name: str) -> Union['Node', None]:
         """
         """
-        for child in self._children:
-            if child.name == name:
-                return child
-
-        return None
+        return self._children.get(name)
 
     def free_child(self, name: str) -> None:
         """
         """
-        for child in self._children:
-            if child.name == name:
-                self._children.remove(child)
-                child.free()
-                return
-
-        raise KeyError("No child by the name of {} to free in node {}".format(
-            name, self.name))
+        child = self._children.get(name)
+        if child is not None:
+            self._children.pop(name)
+            child.free()
+        else:
+            raise KeyError(
+                f"No child by the name of {name} to free in node {self.name}")
 
     def get_parent(self) -> 'Node':
         """
@@ -104,15 +102,15 @@ class Node:
     def emit_event(self, ptype: str, event: object) -> None:
         """
         """
-        for child in self._children:
+        for _, child in self._children.items():
             if ptype in child.event_ports:
                 getattr(child, child.event_ports[ptype])(event)
 
-    def __str__(self) -> str:
-        return "\n".join([
-            "%s (%s)" % (self.name, type(self).__name__),
-            # "children: {}".format(", ".join(
-            #   "%s (%s)" % (child.name, type(child).__name__) for child in self._children)
-            # ),
-            # "event_ports: {}".format(self.event_ports),
-        ])
+    # def __str__(self) -> str:
+    # return "\n".join([
+    # "%s (%s)" % (self.name, type(self).__name__),
+    # "children: {}".format(", ".join(
+    #   "%s (%s)" % (child.name, type(child).__name__) for child in self._children)
+    # ),
+    # "event_ports: {}".format(self.event_ports),
+    # ])

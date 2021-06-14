@@ -6,6 +6,7 @@
 
 #include <inttypes.h>
 
+// TODO Needs more thought
 /*
 	Generic event for all controllers which describes actions in relative position
 */
@@ -20,6 +21,7 @@ struct PointerEvent {
 	int32_t y_motion;
 };
 
+// TODO Needs more thought
 /*
 	Generic event for all controllers which describes named actions
 */
@@ -28,6 +30,7 @@ struct InputEvent {
 	bool is_key_pressed;
 	bool is_key_repeat;
 	uint32_t keycode;
+	// uint32_t scancode;
 	bitmask_t keymod;
 };
 

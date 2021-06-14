@@ -12,7 +12,7 @@ set(OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../backends)
 
 set(SOURCES window/window.c
 			window/render.c
-			map.c)
+			../map.c)
 
 set(LIBRARY_OUTPUT_PATH ${OUTPUT_DIRECTORY})
 
@@ -23,7 +23,8 @@ set(DEPS_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../deps)
 set(GNU_DEBUG_ARGS -Wall -Wextra -Wpedantic -Werror -g
 				   -Wno-unused-parameter -Wno-unused-variable)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../
+					${CMAKE_CURRENT_SOURCE_DIR}
 					${DEPS_PATH}/include)
 
 add_library(SDL_Backend SHARED ${SOURCES})

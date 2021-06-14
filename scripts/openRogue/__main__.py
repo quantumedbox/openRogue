@@ -4,11 +4,11 @@ from .types import Vector
 
 signal.impl_signal("on_exit", lambda: print("Goodbye, World!"))
 
-main = nodes.root.init_child("main", nodes.Container)
-alt = nodes.root.init_child("привет?", nodes.Container)
+main = nodes.root.init_child("main", nodes.Container, width=600, height=400)
+alt = nodes.root.init_child("привет?", nodes.Container, width=200, height=200)
 
 # Vectors are kinda clunky?
-main.size = Vector(600, 400)
-main.pos = Vector(120, 120)
+# main.size = Vector(600, 400)
+# main.pos = Vector(120, 120)
 
-nodes.root.loop()
+nodes.root._loop()
