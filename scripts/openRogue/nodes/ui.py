@@ -1,7 +1,7 @@
 """
 Base class of UI nodes
 """
-from . import node
+from openRogue.nodes import node
 from openRogue.types import Vector
 
 from typing import Union, Iterable
@@ -28,7 +28,7 @@ class NodeUI(node.Node):
         Possible align args: "upperleft", "upperright", "bottomleft", "bottomright", "ul", "ur", "bl", "br"
         Possible stretch args: any combination of "h" and "v" symbols or "" empty string for no stretch
         """
-        node.Node.__init__(self)
+        super().__init__()
         # self.event_ports["ui"] = self.ui_event
         self.pos = Vector(x, y)
         self.size = Vector(width, height)

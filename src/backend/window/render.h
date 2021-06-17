@@ -1,5 +1,8 @@
 #pragma once
 
+// cannot import it for cdef, hm...
+typedef uint32_t char32_t;
+
 /*
     @brief  Initialize everything that is needed for text functionality
 
@@ -7,7 +10,7 @@
 
     @return Returns non-zero value on error
 */
-int    init_text_subsystem();
+int init_text_subsystem();
 
 /*
     @brief  Returns string that hints towards encoding in which all drawing strings should be
@@ -26,7 +29,7 @@ const char* get_encoding();
     @return Key identification for a font
 */
 ROGUE_EXPORT
-key_t   resolve_font    ( const char* path );
+key_t resolve_font( const char* path );
 
 /*
     @brief  Renders given string to the current drawing window with specified font at the offset position
@@ -42,21 +45,19 @@ key_t   resolve_font    ( const char* path );
 
     @return Non-zero value on error, otherwise 0
 */
-ROGUE_EXPORT
-int     draw_text       ( key_t font_hash,
-                          uint32_t size,
-                          int32_t x_offset,
-                          int32_t y_offset,
-                          char32_t* utf_string,
-                          uint32_t string_len,
-                          hex_t color );
+ROGUE_EXPORT int draw_text( key_t font_hash,
+                            uint32_t size,
+                            int32_t x_offset,
+                            int32_t y_offset,
+                            char32_t* utf_string,
+                            uint32_t string_len,
+                            hex_t color );
 
 /*
     @brief  Draw rectangle at currently bound window
 */
-ROGUE_EXPORT
-void    draw_rect       ( int32_t x_offset,
-                          int32_t y_offset,
-                          int32_t width,
-                          int32_t height,
-                          hex_t color );
+ROGUE_EXPORT void draw_rect( int32_t x_offset,
+                             int32_t y_offset,
+                             int32_t width,
+                             int32_t height,
+                             hex_t color );

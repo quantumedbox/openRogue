@@ -4,7 +4,8 @@ Corner stone of scene structure
 from . import node
 from . import ui
 from . import window
-from openRogue.types import Vector, implement_component
+from . import container
+from openRogue.types import Vector
 from openRogue import signal
 
 
@@ -20,19 +21,21 @@ class Root(node.Node):
     )
 
     def __init__(self):
-        node.Node.__init__(self)
+        super().__init__()
         self.name = "root"
         # TODO get screen size (should it be implemented in the Backend? by SDL_ListModes() for example)
         self.size = Vector(0, 0)
         self._should_stop = False
 
-    def attach_child(self, name: str, child: 'Node') -> None:
+    def attach_child(self, name: str, child: 'Node') -> 'Node':
         """
         Contextual constructor that implements system window component for every attached UI child
         """
-        node.Node.attach_child(self, name, child)
+        child.name = name
         if issubclass(type(child), ui.NodeUI):
-            implement_component(child, window.WindowComponent)
+            child = window.WindowComponent(child)
+        super().attach_child(name, child)
+        return child
 
     def pre_loop(self) -> None:
         """
@@ -57,18 +60,15 @@ class Root(node.Node):
         Init game loop
         Should not be called manually
         """
-        while True:
-            # Check if any of children implement window component and if not, - exit the loop
-            if self._should_stop == True:
-                break
+        while not self._should_stop:
             self.pre_loop()
             # Emmit update event each loop for nodes to be processed
-            self.emit_event("update", None)
+            self.recieve_event("update_event", None)
             self.post_loop()
 
             # ??? Should it be here ?
-            while node.Node._freeing_queue:
-                to_free = node.Node._freeing_queue.pop()
+            while super()._freeing_queue:
+                to_free = super()._freeing_queue.pop()
                 parent = to_free._parent()
                 if parent is not None:
                     parent._children.pop(to_free.name)

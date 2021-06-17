@@ -2,13 +2,16 @@ cmake_minimum_required(VERSION 3.0)
 
 project(SDL_Backend C)
 
-# TODO Release and debug flags
+# TODO msvc args
 
 set(LIBRARY_OUTPUT_DIRECTORY)
 
 set(CMAKE_C_STANDARD 11)
 
-set(OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../backends)
+# gcc adds 'lib' to the name, but msvc doesn't, what should we do ?
+set(OUTPUT_NAME "libopenRogue_SDL")
+
+set(OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../backends/${OUTPUT_NAME})
 
 set(SOURCES window/window.c
 			window/render.c
@@ -20,8 +23,19 @@ set(OS_SPECIFIC_LIBS "opengl32")
 
 set(DEPS_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../deps)
 
-set(GNU_DEBUG_ARGS -Wall -Wextra -Wpedantic -Werror -g
-				   -Wno-unused-parameter -Wno-unused-variable)
+if(NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE Debug FORCE)
+endif()
+
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+	set(GNU_ARGS -Wall -Wextra -Wpedantic -Werror -g
+				 -Wno-unused-parameter -Wno-unused-variable)
+else()
+	set(GNU_ARGS -Wall -Wextra -Wpedantic -Werror -O3 -mavx2
+				 -Wno-unused-parameter -Wno-unused-variable)
+endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../
 					${CMAKE_CURRENT_SOURCE_DIR}
@@ -44,7 +58,7 @@ endif()
 if(CMAKE_C_COMPILER_ID MATCHES GNU)
 	add_definitions(-DGLEW_STATIC)
 	link_directories(${LINK_DIRECTORIES} ${DEPS_PATH}/mingw64)
-	foreach(ARG ${GNU_DEBUG_ARGS})
+	foreach(ARG ${GNU_ARGS})
 		set(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS} ${ARG})
 	endforeach()
 endif()

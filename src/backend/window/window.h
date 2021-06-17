@@ -41,8 +41,7 @@ get_current_drawing_window();
 
 /*
 */
-ROGUE_EXPORT
-const char** get_feature_list();
+ROGUE_EXPORT const char** get_feature_list();
 
 /*
 	@brief 	Create new window
@@ -52,12 +51,12 @@ const char** get_feature_list();
 	@return Hash key of newly created window of 0 on failure
 */
 ROGUE_EXPORT
-key_t init_window(int width, int height, const char* title);
+key_t init_window( int width, int height, const char* title );
 
 /*
 */
 ROGUE_EXPORT
-void close_window(key_t);
+void close_window( key_t );
 
 /*
 	@brief	Main way of getting and processing window events
@@ -68,32 +67,27 @@ void close_window(key_t);
 
 	@return Reference to EventQueue struct or NULL if window key is not valid
 */
-ROGUE_EXPORT
-EventQueue* get_window_events(key_t);
+ROGUE_EXPORT EventQueue* get_window_events( key_t );
 
 /*
 */
-ROGUE_EXPORT
-void resize_window(key_t, int w, int h);
+ROGUE_EXPORT void resize_window( key_t, int w, int h );
 
 /*
 */
-ROGUE_EXPORT
-void repos_window(key_t, int x, int y);
+ROGUE_EXPORT void repos_window( key_t, int x, int y );
 
 /*
 	@brief 	Prepares the window for drawing
 			Should be called before any drawing functions
 */
-ROGUE_EXPORT
-void start_drawing(key_t);
+ROGUE_EXPORT void start_drawing( key_t );
 
 /*
 	@brief 	Update the current drawing window with what is in context
 			Actual clearing of buffer happens by this function
 */
-ROGUE_EXPORT
-void finish_drawing();
+ROGUE_EXPORT void finish_drawing();
 
 
 /*
@@ -101,5 +95,4 @@ void finish_drawing();
 
 	@return Returns non-zero value on failure, otherwise - 0
 */
-ROGUE_EXPORT
-int set_window_icon_from_file(key_t, const char* path);
+ROGUE_EXPORT int set_window_icon_from_file( key_t, const char* path );

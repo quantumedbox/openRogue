@@ -6,14 +6,15 @@ they are base game objects that do have standard interfaces as every other objec
 """
 import random
 
-# from . import node
-from . import ui
 from openRogue import ffi
+from openRogue.nodes import ui, node
 from openRogue.types import component, Vector
 
 # TODO Random roguelike style window titles on default
 
 # TODO Customizable closing behavior (and other things)
+
+# !!! TODO !!! Get rid of component system or reimplement it in a new way
 
 
 class WindowComponent(component.Component):
@@ -21,11 +22,13 @@ class WindowComponent(component.Component):
     NodeUI component that manages the behavior of binded window
     It should not interfere with any possible node attribute
     """
-    def __init__(self):
+    def __init__(self, base):
         # Specific for this window API
         # TODO Ability to change desired API on creation or after
         # POSSIBLE SOLUTION: Setting global API state machine:
         #   ffi.bind_window_creation_api("curses")
+        super().__init__(base)
+
         self._api = ffi.manager.resolve("default")
 
         self._window = self._api.init_window(self.size.width, self.size.height,
@@ -34,20 +37,22 @@ class WindowComponent(component.Component):
         self._api.set_window_icon_from_file(self._window,
                                             b"resources/images/icon.png")
         #
-        component.deploy_front(self, "free", self._free_window)
-        #
-        component.deploy_back(self, "update", self._update_window)
-        #
-        component.deploy_back(self,
-                              "size",
-                              self._resize_window,
-                              propf="setter")
-        #
-        component.deploy_back(self, "pos", self._repos_window, propf="setter")
+        # component.deploy_front(self, "free", self._free_window)
+        # #
+        # component.deploy_back(self, "update_event", self._update_window)
+        # #
+        # component.deploy_back(self,
+        #                       "size",
+        #                       self._resize_window,
+        #                       propf="setter")
+        # #
+        # component.deploy_back(self, "pos", self._repos_window, propf="setter")
 
-    def _update_window(self, *args):
+    def update_event(self, event_packet):
         """
         """
+        self._base.update_event(event_packet)
+
         event_queue = self._api.get_window_events(self._window)
 
         font = self._api._shared.resolve_font(b"resources/fonts/FSEX300.ttf")
@@ -74,10 +79,8 @@ class WindowComponent(component.Component):
 
         self._api.start_drawing(self._window)
 
-        for _ in range(10000):
-            self._api.draw_text(font, 12, random.randint(0, 600),
-                                random.randint(0, 600), "Can you read this?",
-                                0xFFFFFFFF)
+        for _ in range(1000):
+            self._api.draw_rect(0, 0, 640, 320, 0x000000FF)
 
         self._api.draw_rect(0, 0, 640, 320, 0x000000FF)
 
@@ -93,19 +96,37 @@ class WindowComponent(component.Component):
 
         self._api.finish_drawing()
 
-    def _free_window(self, *args):
+    def recieve_event(self, event_name, event_packet) -> None:
+        self._base.recieve_event(event_name, event_packet)
+        if event_name == "update_event":
+            self.update_event(event_packet)
+
+    def queue_free(self) -> None:
+        node.Node._freeing_queue.append(self)
+
+    def free(self):
+        self._base.free()
         # Prevent double free after force deletion
         if self._window is not None:
             print("Window is closed:", self.name)
             self._api.close_window(self._window)
             self._window = None
 
-    def _resize_window(self, *args):
-        self._api.resize_window(self._window, self.size.width,
-                                self.size.height)
+    def get_size(self):
+        return self._base.size
 
-    def _repos_window(self, *args):
-        self._api.repos_window(self._window, self.pos.x, self.pos.y)
+    def set_size(self, value: Vector):
+        self._base.size = value
+        self._api.resize_window(self._window, value.width, value.height)
+
+    size = property(get_size, set_size)
+
+    def get_pos(self):
+        return self._base.pos
+
+    def set_pos(self, value: Vector):
+        self._base.pos = value
+        self._api.repos_window(self._window, value.x, value.y)
 
     # ------------------------------------------------------------ Behaviors --- #
     # Special window component callbacks that are called on specific window events

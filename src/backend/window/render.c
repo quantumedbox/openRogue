@@ -352,34 +352,35 @@ draw_text( key_t font_hash,
            uint32_t string_len,
            hex_t color )
 {
-	if (string_len == 0)
-		return 0;
+	WindowHandler* window;
+	Font* font;
+	FontSize* font_s;
+	FT_Face face;
 
-	WindowHandler* window = (WindowHandler*)mapGet(window_pool, get_current_drawing_window());
+	window = (WindowHandler*)mapGet(window_pool, get_current_drawing_window());
 	if (!window)
 		return -1;
 
-	glUseProgram(text_renderer.program);
-
-	// ??? Is it okay to hardcode the uniform locations at optimization ?
-	glUniform4f(0, hex_uniform4f(color));
-	// glUniform2f(2, (float)window->width, (float)window->height);
-
-	Font* font = mapGet(font_pool, font_hash);
+	font = mapGet(font_pool, font_hash);
 
 	if (font == NULL) {
 		fprintf(stderr, "Cannot create buffer texture from unresolved font\n");
 		return -1;
 	}
 
-	FontSize* font_s = mapGet(font->sizes, size);
+	face = (*(FT_Face*)font->source);
+
+	font_s = mapGet(font->sizes, size);
 
 	if (font_s == NULL) {
 		font_s = new_font_size();
 		mapAdd(font->sizes, size, font_s);
 	}
 
-	FT_Face face = (*(FT_Face*)font->source);
+	glUseProgram(text_renderer.program);
+
+	// ??? Is it okay to hardcode the uniform locations for optimization ?
+	glUniform4f(0, hex_uniform4f(color));
 
 	// How much glyphs contained in a single texture
 	// Spacing between characters is exaggerated because of the need to accommodate the bearings
@@ -439,8 +440,6 @@ draw_text( key_t font_hash,
 
 					glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, FONT_TEXTURE_SIZE, FONT_TEXTURE_SIZE, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
 					check_opengl_state("Creation of texture buffer");
-
-					// glGenerateMipmap(GL_TEXTURE_2D);
 
 					if (FT_Set_Pixel_Sizes(*(FT_Face*)font->source, size, size) != 0)
 					{
@@ -616,7 +615,7 @@ draw_rect( int32_t x_offset,
 	float pos_top = ((float)window->height - y_offset) / (window->height / 2) - 1.0f;
 	float pos_bottom = ((float)window->height - y_offset - height) / (window->height / 2) - 1.0f;
 
-	float buffer[] = {
+	float buffer[6 * 2] = {
 		pos_left, pos_top,
 		pos_left, pos_bottom,
 		pos_right, pos_top,
@@ -629,9 +628,9 @@ draw_rect( int32_t x_offset,
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	// glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	glBindVertexArray(0);
+	// glBindVertexArray(0);
 }
 
 

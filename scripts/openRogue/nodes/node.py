@@ -3,7 +3,7 @@ Base interface for every scene object
 """
 # import uuid
 import weakref
-from typing import Union
+from typing import Union, Any
 from collections import OrderedDict
 
 # ??? Maybe it's better to return/store proxies and not weakrefs?
@@ -13,32 +13,31 @@ from collections import OrderedDict
 # TODO Concrete name structure
 # TODO Delete node from scene without getting the parent ?
 
+# Parent should be the sole owner of all its children
+
 
 class Node:
     """
-    Basic node implements tree hierarchy and event ports
-
-    Parent should be the owner of all children nodes that only
-    gives weak references to access them
+    Basic node that implements tree hierarchy and event logic
     """
     __slots__ = (
         "name",
         "_parent",
         "_children",
+        "_components",
         "__weakref__",
     )
+
     # Used for queuing nodes to be deleted
     _freeing_queue = []
 
     def __init__(self):
-        """
-        """
-        self._children = OrderedDict()
         self._parent = None
-        # Names only make sense in context of node trees, parent should set the name
         self.name = "unnamed"
+        self._children = OrderedDict()
+        self._components = OrderedDict()
 
-    def update(self, event) -> None:
+    def update_event(self, event_packet) -> None:
         """
         -- FREE TO OVERRIDE --
         """
@@ -59,15 +58,13 @@ class Node:
         Arguments for class instancing are passed through kwargs
         """
         child = cls(**kwargs)
-        self.attach_child(name, child)
-        return child
+        return self.attach_child(name, child)
 
-    def attach_child(self, name: str, child: 'Node') -> None:
+    def attach_child(self, name: str, child: 'Node') -> 'Node':
         """
         Attach already instanced node
         Used internally on init_child
         """
-        # TODO Check if the name is available
         if name in self._children:
             raise NameError(
                 f"Child by the name of \"{name}\" is already present in {self.name}"
@@ -75,6 +72,7 @@ class Node:
         child.name = name
         self._children[name] = child
         child._parent = weakref.ref(self)
+        return child
 
     def get_child(self, name: str) -> Union['Node', None]:
         """
@@ -83,17 +81,9 @@ class Node:
 
     def queue_free(self) -> None:
         """
-        -- DO NOT OVERRIDE --
         Queue specified child to be deleted
         """
         Node._freeing_queue.append(self)
-        # child = self._children.get(name)
-        # if child is not None:
-        #     self._children.pop(name)
-        #     child.free()
-        # else:
-        #     raise KeyError(
-        #         f"No child by the name of {name} to free in node {self.name}")
 
     def get_parent(self) -> 'Node':
         """
@@ -102,20 +92,11 @@ class Node:
             return self._parent()
         return None
 
-    def emit_event(self, ptype: str, event: object) -> None:
+    def recieve_event(self, event_name: str, event_packet: object) -> None:
         """
         """
-        # Current design doesn't allow receiving all possible event types if needed
-        for _, child in self._children.items():
-            func_port = getattr(child, ptype)
-            if func_port is not None:
-                func_port(event)
-
-    # def __str__(self) -> str:
-    # return "\n".join([
-    # "%s (%s)" % (self.name, type(self).__name__),
-    # "children: {}".format(", ".join(
-    #   "%s (%s)" % (child.name, type(child).__name__) for child in self._children)
-    # ),
-    # "event_ports: {}".format(self.event_ports),
-    # ])
+        if event_name == "update_event":
+            if hasattr(self, "update_event"):
+                self.update_event(event_packet)
+            for _, child in self._children.items():
+                child.recieve_event(event_name, event_packet)

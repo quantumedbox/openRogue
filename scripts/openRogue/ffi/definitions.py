@@ -4,42 +4,6 @@ Doubled im Python C enum which is used for communicating the change of window st
 from enum import IntFlag
 from ctypes import *
 
-
-class C_PointerEvent(Structure):
-    _fields_ = [('mouse_action', c_uint32), ('is_pressed', c_bool),
-                ('x', c_int32), ('y', c_int32), ('x_motion', c_int32),
-                ('y_motion', c_int32)]
-
-
-class C_InputEvent(Structure):
-    _fields_ = [('action', c_uint32), ('is_key_pressed', c_bool),
-                ('is_key_repeat', c_bool), ('keycode', c_uint32),
-                ('keymod', c_uint32)]
-
-
-class C_ResizeEvent(Structure):
-    _fields_ = [('width', c_int32), ('height', c_int32)]
-
-
-class C_ReposEvent(Structure):
-    _fields_ = [('x', c_int32), ('y', c_int32)]
-
-
-class C_EventUnion(Union):
-    _fields_ = [('pointer_event', C_PointerEvent),
-                ('input_event', C_InputEvent), ('resize_event', C_ResizeEvent),
-                ('repos_event', C_ReposEvent)]
-
-
-class C_Event(Structure):
-    _anonymous_ = ("_union", )
-    _fields_ = [('type', c_uint32), ('_union', C_EventUnion)]
-
-
-class C_EventQueue(Structure):
-    _fields_ = [('events', POINTER(C_Event)), ('len', c_uint32)]
-
-
 class EventType(IntFlag):
     UNKNOUN_EVENT = 0
     POINTER_EVENT = 1
