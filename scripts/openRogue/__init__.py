@@ -7,8 +7,8 @@ Submodules:
 """
 import sys
 
-from . import modules
-from . import config_reader
+from openRogue import modules
+from openRogue import config_reader
 
 modules.register_module("openRogue", "0.1a")
 

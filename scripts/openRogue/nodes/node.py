@@ -1,19 +1,14 @@
 """
 Base interface for every scene object
 """
-# import uuid
 import weakref
+
 from typing import Union, Any
 from collections import OrderedDict
 
 # ??? Maybe it's better to return/store proxies and not weakrefs?
 
-# TODO Vertual method "tree_entered" that is called when node is added to an other node that is in /root/ tree
 # TODO Re-attachment of nodes
-# TODO Concrete name structure
-# TODO Delete node from scene without getting the parent ?
-
-# Parent should be the sole owner of all its children
 
 
 class Node:
@@ -36,21 +31,6 @@ class Node:
         self.name = "unnamed"
         self._children = OrderedDict()
         self._components = OrderedDict()
-
-    def update_event(self, event_packet) -> None:
-        """
-        -- FREE TO OVERRIDE --
-        """
-
-    def free(self) -> None:
-        """
-        -- FREE TO OVERRIDE --
-        Used for deallocating data which is not tracked by garbage collector
-        Or as callback on deletion
-        """
-
-    def __del__(self) -> None:
-        self.free()
 
     def init_child(self, name: str, cls, **kwargs) -> 'Node':
         """
@@ -92,11 +72,26 @@ class Node:
             return self._parent()
         return None
 
-    def recieve_event(self, event_name: str, event_packet: object) -> None:
+    def recieve_event(self, event_type: str, event_packet: object) -> None:
         """
         """
-        if event_name == "update_event":
-            if hasattr(self, "update_event"):
-                self.update_event(event_packet)
+        if event_type == "update":
+            if hasattr(self, "update"):
+                self.update(event_packet)
             for _, child in self._children.items():
-                child.recieve_event(event_name, event_packet)
+                child.recieve_event(event_type, event_packet)
+
+    def update(self, event_packet) -> None:
+        """
+        -- FREE TO OVERRIDE --
+        """
+
+    def free(self) -> None:
+        """
+        -- FREE TO OVERRIDE --
+        Used for deallocating data which is not tracked by garbage collector
+        Or as callback on deletion
+        """
+
+    def __del__(self) -> None:
+        self.free()

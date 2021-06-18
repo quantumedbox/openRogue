@@ -1,10 +1,7 @@
 """
 Corner stone of scene structure
 """
-from . import node
-from . import ui
-from . import window
-from . import container
+from openRogue.nodes import node, ui, window, container
 from openRogue.types import Vector
 from openRogue import signal
 
@@ -18,13 +15,16 @@ class Root(node.Node):
     __slots__ = (
         "size",
         "_should_stop",
+        "_max_tile_size",
     )
 
     def __init__(self):
         super().__init__()
         self.name = "root"
         # TODO get screen size (should it be implemented in the Backend? by SDL_ListModes() for example)
-        self.size = Vector(0, 0)
+        # Screen resolution
+        self.size = None
+        # Limits the maximum amount of tiles that could be rendered
         self._should_stop = False
 
     def attach_child(self, name: str, child: 'Node') -> 'Node':
@@ -58,12 +58,13 @@ class Root(node.Node):
     def _loop(self) -> None:
         """
         Init game loop
-        Should not be called manually
+        Usually is called from engine
         """
         while not self._should_stop:
             self.pre_loop()
             # Emmit update event each loop for nodes to be processed
-            self.recieve_event("update_event", None)
+            self.recieve_event("update", None)
+            self.recieve_event("render", {})
             self.post_loop()
 
             # ??? Should it be here ?

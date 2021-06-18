@@ -2,7 +2,6 @@
 Doubled im Python C enum which is used for communicating the change of window state
 """
 from enum import IntFlag
-from ctypes import *
 
 class EventType(IntFlag):
     UNKNOUN_EVENT = 0

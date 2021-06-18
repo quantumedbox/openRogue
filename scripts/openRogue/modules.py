@@ -4,7 +4,7 @@ Centralized module resolution, registry and control
 import inspect
 import os
 
-from . import signal
+from openRogue import signal
 
 from types import ModuleType
 

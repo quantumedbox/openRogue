@@ -7,6 +7,10 @@ Does not really work on anything but CPython, but do not require external depend
 # For now idea is to make FFIInterface object that does the communications with shared objects
 # That way we could actually have multiple APIs at the same time
 
+# TODO Fill every argtypes and restype params
+
+# TODO Probably isn't up to date, cffi is preffered for now
+
 import os
 from ctypes import *
 

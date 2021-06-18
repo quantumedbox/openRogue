@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
@@ -12,6 +13,7 @@
 #include "window.h"
 #include "map.h"
 #include "render.h"
+#include "threads.h"
 
 #define OPENGL_MINOR_VER 3
 #define OPENGL_MAJOR_VER 4
@@ -25,10 +27,38 @@
 // Size of staticly allocated event queue buffer
 #define EVENT_BUFFER_SIZE 16
 
-
 // TODO Positioning of new windows depending on existing ones. Maybe require the caller to specify positions and rely on ui positioning?
 
-// TODO Put event logic in a separate file
+
+// -------------------------------------------------------------------- Definitions -- //
+
+
+typedef struct {
+	SDL_Window* window;
+	// SDL_GLContext context; // Now GL context is global for all windows of single thread
+
+	// SDL Window ID
+	uint32_t id;
+
+	// Switching queues
+	// At given time only one of them should be writable and another - readable
+	int8_t current_queue;
+	EventQueue* queue0;
+	EventQueue* queue1;
+
+	// Updated on start_drawing()
+	int width;
+	int height;
+
+	// ??? Should they be here ? or it's better to have global counter
+	uint32_t time_delta;
+	uint32_t prev_timestamp;
+
+	// Used for preventing sigegiv from SDL EventWatch thread
+	rogue_mutex_t lock;
+}
+WindowHandler;
+
 
 // ----------------------------------------------------------------- Global objects -- //
 
@@ -51,19 +81,23 @@ Map* window_pool = NULL;
 static int event_queue_former(void*, SDL_Event*);
 
 
-// TODO
-// Idea is that APIs could give the information about their functionalities
-// The fact that it is done via strings gives it the ability to have non-standard features without modifying headers or engines
-const char* FEATURE_LIST[] = {
-	"shaders",
-	"...",
-};
+// -------------------------------------------------------------------------- Specs -- //
 
-// TODO It is kinda bad to return char**, maybe we should do something else?
+
+const uint32_t MAX_TILE_SIZE[2] = {128, 128};
+
+
 ROGUE_EXPORT
-const char** get_feature_list ()
+struct spec_data
+get_spec( const char* spec )
 {
-	return FEATURE_LIST;
+	struct spec_data ret = { .type = DATA_NONE, .data = NULL, .len = 0 };
+
+	if (!strcmp(spec, "max_tile_size")) {
+		ret = { .type = DATA_UINT32, .data = &MAX_TILE_SIZE, .len = 2 };
+	}
+
+	return ret;
 }
 
 

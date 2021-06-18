@@ -1,6 +1,6 @@
-from . import signal
-from . import nodes
-from .types import Vector
+from openRogue import signal
+from openRogue import nodes
+from openRogue.types import Vector
 
 signal.impl_signal("on_exit", lambda: print("Goodbye, World!"))
 
@@ -14,5 +14,6 @@ alt = nodes.root.init_child("привет?", nodes.Container, width=200, height=
 # Vectors are kinda clunky?
 main.size = Vector(600, 400)
 # main.pos = Vector(120, 120)
-
+main.pos.x = 480
+print(main.pos)
 nodes.root._loop()

@@ -15,7 +15,7 @@ set(OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../backends/${OUTPUT_NAME})
 
 set(SOURCES window/window.c
 			window/render.c
-			../map.c)
+			../common/map.c)
 
 set(LIBRARY_OUTPUT_PATH ${OUTPUT_DIRECTORY})
 
@@ -37,7 +37,7 @@ else()
 				 -Wno-unused-parameter -Wno-unused-variable)
 endif()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../common/
 					${CMAKE_CURRENT_SOURCE_DIR}
 					${DEPS_PATH}/include)
 

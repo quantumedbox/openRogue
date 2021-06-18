@@ -1,7 +1,7 @@
 """
 Node that structures children UI nodes by its rules
 """
-from . import ui
+from openRogue.nodes import ui
 
 
 class Container(ui.NodeUI):

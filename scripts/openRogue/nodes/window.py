@@ -4,8 +4,6 @@ Window node implementation
 openRogue has a rather unique understanding of windows, -
 they are base game objects that do have standard interfaces as every other object in the scene
 """
-import random
-
 from openRogue import ffi
 from openRogue.nodes import ui, node
 from openRogue.types import component, Vector
@@ -34,24 +32,15 @@ class WindowComponent(component.Component):
         self._window = self._api.init_window(self.size.width, self.size.height,
                                              self.name)
 
+        self._max_tile_size = self._api.get_max_tile_size()
+
         self._api.set_window_icon_from_file(self._window,
                                             b"resources/images/icon.png")
-        #
-        # component.deploy_front(self, "free", self._free_window)
-        # #
-        # component.deploy_back(self, "update_event", self._update_window)
-        # #
-        # component.deploy_back(self,
-        #                       "size",
-        #                       self._resize_window,
-        #                       propf="setter")
-        # #
-        # component.deploy_back(self, "pos", self._repos_window, propf="setter")
 
-    def update_event(self, event_packet):
+    def update(self, event_packet):
         """
         """
-        self._base.update_event(event_packet)
+        self._base.update(event_packet)
 
         event_queue = self._api.get_window_events(self._window)
 
@@ -79,27 +68,27 @@ class WindowComponent(component.Component):
 
         self._api.start_drawing(self._window)
 
-        for _ in range(1000):
-            self._api.draw_rect(0, 0, 640, 320, 0x000000FF)
+        # for _ in range(1000):
+        #     self._api.draw_rect(0, 0, 640, 320, 0x000000FF)
 
-        self._api.draw_rect(0, 0, 640, 320, 0x000000FF)
+        # self._api.draw_rect(0, 0, 640, 320, 0x000000FF)
 
         self._api.draw_text(font, 12, 0, 0, "Can you read this?", 0xFFFFFFFF)
 
-        self._api.draw_text(font, 12, 0, 12, "Можешь это прочесть?",
-                            0xFFFFFFFF)
+        # self._api.draw_text(font, 12, 0, 12, "Можешь это прочесть?",
+        #                     0xFFFFFFFF)
 
-        self._api.draw_text(font2, 64, 0, 0, "ABCBA Dabc d", 0xFFFFFFFF)
+        # self._api.draw_text(font2, 64, 0, 0, "ABCBA Dabc d", 0xFFFFFFFF)
 
-        self._api.draw_text(font3, 80, 0, 300, "テ ス ト テ ス ト テ ス ト テ ス ト テ ス ト",
-                            0xFFFAAFAF)
+        # self._api.draw_text(font3, 80, 0, 300, "テ ス ト テ ス ト テ ス ト テ ス ト テ ス ト",
+        #                     0xFFFAAFAF)
 
         self._api.finish_drawing()
 
-    def recieve_event(self, event_name, event_packet) -> None:
-        self._base.recieve_event(event_name, event_packet)
-        if event_name == "update_event":
-            self.update_event(event_packet)
+    def recieve_event(self, event_type, event_packet) -> None:
+        self._base.recieve_event(event_type, event_packet)
+        if event_type == "update":
+            self.update(event_packet)
 
     def queue_free(self) -> None:
         node.Node._freeing_queue.append(self)
@@ -122,11 +111,14 @@ class WindowComponent(component.Component):
     size = property(get_size, set_size)
 
     def get_pos(self):
+        # TODO Catch changes to .x or .y
         return self._base.pos
 
     def set_pos(self, value: Vector):
         self._base.pos = value
         self._api.repos_window(self._window, value.x, value.y)
+
+    pos = property(get_pos, set_pos)
 
     # ------------------------------------------------------------ Behaviors --- #
     # Special window component callbacks that are called on specific window events

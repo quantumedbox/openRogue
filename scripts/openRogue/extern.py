@@ -3,7 +3,7 @@ import sys
 import importlib
 import subprocess
 
-from .config_reader import get_config
+from openRogue.config_reader import get_config
 
 
 def dependencies(*args) -> None:

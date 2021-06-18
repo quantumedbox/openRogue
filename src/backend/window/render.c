@@ -368,7 +368,12 @@ draw_text( key_t font_hash,
 		return -1;
 	}
 
-	face = (*(FT_Face*)font->source);
+	if (font->type == FONT_SOURCE_FREETYPE) {
+		face = (*(FT_Face*)font->source);
+	} else {
+		// TODO Support for bitmaps
+		return -1;
+	}
 
 	font_s = mapGet(font->sizes, size);
 
@@ -523,7 +528,7 @@ draw_text( key_t font_hash,
 			// Glyph buffering
 			if (buffer_len < TEXT_BUFFER_SIZE)
 			{
-				uint32_t idx = buffer_len * 6 * 4;
+				register uint32_t idx = buffer_len * 6 * 4;
 
 				// Sorry to everyone who's reading this shit
 				float pos_left = ((float)x_offset + (i * 0.75) * size) / (window->width / 2) - 1.0f;
@@ -542,35 +547,35 @@ draw_text( key_t font_hash,
 				float tex_bottom = 1.0 - (((*utf_string % range_size) / (FONT_TEXTURE_SIZE / spacing))) * \
 										 ((float)spacing / FONT_TEXTURE_SIZE) + ((float)size / FONT_TEXTURE_SIZE)*0.25;
 
-				buffer[idx + 0] = pos_left;
-				buffer[idx + 1] = pos_top;
-				buffer[idx + 2] = tex_left;
-				buffer[idx + 3] = tex_top;
+				buffer[idx++] = pos_left;
+				buffer[idx++] = pos_top;
+				buffer[idx++] = tex_left;
+				buffer[idx++] = tex_top;
 
-				buffer[idx + 4] = pos_left;
-				buffer[idx + 5] = pos_bottom;
-				buffer[idx + 6] = tex_left;
-				buffer[idx + 7] = tex_bottom;
+				buffer[idx++] = pos_left;
+				buffer[idx++] = pos_bottom;
+				buffer[idx++] = tex_left;
+				buffer[idx++] = tex_bottom;
 
-				buffer[idx + 8] = pos_right;
-				buffer[idx + 9] = pos_top;
-				buffer[idx + 10] = tex_right;
-				buffer[idx + 11] = tex_top;
+				buffer[idx++] = pos_right;
+				buffer[idx++] = pos_top;
+				buffer[idx++] = tex_right;
+				buffer[idx++] = tex_top;
 
-				buffer[idx + 12] = pos_left;
-				buffer[idx + 13] = pos_bottom;
-				buffer[idx + 14] = tex_left;
-				buffer[idx + 15] = tex_bottom;
+				buffer[idx++] = pos_left;
+				buffer[idx++] = pos_bottom;
+				buffer[idx++] = tex_left;
+				buffer[idx++] = tex_bottom;
 
-				buffer[idx + 16] = pos_right;
-				buffer[idx + 17] = pos_bottom;
-				buffer[idx + 18] = tex_right;
-				buffer[idx + 19] = tex_bottom;
+				buffer[idx++] = pos_right;
+				buffer[idx++] = pos_bottom;
+				buffer[idx++] = tex_right;
+				buffer[idx++] = tex_bottom;
 
-				buffer[idx + 20] = pos_right;
-				buffer[idx + 21] = pos_top;
-				buffer[idx + 22] = tex_right;
-				buffer[idx + 23] = tex_top;
+				buffer[idx++] = pos_right;
+				buffer[idx++] = pos_top;
+				buffer[idx++] = tex_right;
+				buffer[idx++] = tex_top;
 
 				buffer_len++;
 			}
@@ -628,9 +633,9 @@ draw_rect( int32_t x_offset,
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	// glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	// glBindVertexArray(0);
+	glBindVertexArray(0);
 }
 
 

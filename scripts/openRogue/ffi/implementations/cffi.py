@@ -82,6 +82,7 @@ class FFIInterface:
         "start_drawing",
         "finish_drawing",
         "set_window_icon_from_file",
+        "get_spec",
     )
 
     def __init__(self, shared):
@@ -95,11 +96,10 @@ class FFIInterface:
         self.start_drawing = shared.start_drawing
         self.finish_drawing = shared.finish_drawing
         self.set_window_icon_from_file = shared.set_window_icon_from_file
+        self.get_spec = shared.get_spec
 
     def init_window(self, width: int, height: int, title: str) -> int:
-        win = self._shared.init_window(width, height, title.encode())
-
-        return win
+        return self._shared.init_window(width, height, title.encode())
 
     def draw_text(self,
                   font: int,

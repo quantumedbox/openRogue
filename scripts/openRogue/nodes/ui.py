@@ -54,7 +54,12 @@ class NodeUI(node.Node):
         # print("({}) new pos: {}".format(self.name, pos.as_tuple()))
         self._pos = pos
 
-    def ui_event(self, event: object) -> None:
+    def render(self, carry) -> None:
+        """
+        TODO
+        """
+
+    def receive_ui_event(self, event: object) -> None:
         """
         TODO
         """
