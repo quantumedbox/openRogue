@@ -2,6 +2,8 @@
 """
 from typing import Any
 
+# TODO Needs testing, there might be problems
+
 # TODO Deletion of components
 # TODO Ways of customizable component chaining
 
@@ -41,14 +43,23 @@ class Component:
     def __getattr__(self, attr: str) -> Any:
         check_attr = self.__dict__.get(attr)
         if check_attr is not None:
+            if type(check_attr) is property:
+                return check_attr.fget(self)
             return check_attr
+
         check_attr = type(self).__dict__.get(attr)
         if check_attr is not None:
+            if type(check_attr) is property:
+                return check_attr.fget(self)
             return check_attr
+
         for base in type(self).__bases__:
             check_attr = base.__dict__.get(attr)
             if check_attr is not None:
+                if type(check_attr) is property:
+                    return check_attr.fget(self)
                 return check_attr
+
         return getattr(self.__dict__.get("_base"), attr)
 
     def __setattr__(self, attr: str, value: Any) -> None:
@@ -72,7 +83,9 @@ class Component:
                         if type(check_attr) is property:
                             check_attr.fset(cur_base, value)
                             return
+
             cur_base = cur_base.__dict__["_base"]
+
         if callable(value) and hasattr(value, "__get__"):
             value = value.__get__(cur_base, type(cur_base))
         setattr(cur_base, attr, value)

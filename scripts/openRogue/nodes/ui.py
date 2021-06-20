@@ -42,7 +42,7 @@ class NodeUI(node.Node):
 
     @size.setter
     def size(self, size: Vector):
-        # print("({}) new size: {}".format(self.name, size.as_tuple()))
+        print(f"{self.name}: new size -> ({size.x}, {size.y})")
         self._size = size
 
     @property
@@ -51,7 +51,7 @@ class NodeUI(node.Node):
 
     @pos.setter
     def pos(self, pos: Vector):
-        # print("({}) new pos: {}".format(self.name, pos.as_tuple()))
+        print(f"{self.name}: new pos -> ({pos.x}, {pos.y})")
         self._pos = pos
 
     def render(self, carry) -> None:

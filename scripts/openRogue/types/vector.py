@@ -2,8 +2,7 @@
 """
 
 # ??? Maybe just use tuples ???
-# TODO Calculation methods
-# TODO Numpy implementation if needed (or even binding to cglm if we need calculations)
+# TODO Arithmetic methods (+ - * / and such)
 
 
 class Vector:
@@ -21,25 +20,25 @@ class Vector:
             raise ValueError(
                 f"Cannot construct vector from given args: {args}")
 
-    def set_x(self, x):
-        self._x = x
+    # def set_x(self, x):
+    #     self._x = x
 
     def get_x(self):
         return self._x
 
-    def set_y(self, y):
-        self._y = y
+    # def set_y(self, y):
+    #     self._y = y
 
     def get_y(self):
         return self._y
 
     # aliases for coords
-    x = property(get_x, set_x)
-    y = property(get_y, set_y)
+    x = property(get_x)  #, set_x)
+    y = property(get_y)  #, set_y)
 
     # aliases for sizes
-    width = property(get_x, set_x)
-    height = property(get_y, set_y)
+    width = property(get_x)  #, set_x)
+    height = property(get_y)  #, set_y)
 
     def as_tuple(self) -> (int, int):
         return (self.x, self.y)

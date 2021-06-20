@@ -12,8 +12,8 @@ alt = nodes.root.init_child("привет?", nodes.Container, width=200, height=
 #     add_to = add_to.init_child("привет?", nodes.Container)
 
 # Vectors are kinda clunky?
-main.size = Vector(600, 400)
+# main.size = Vector(600, 400)
 # main.pos = Vector(120, 120)
-main.pos.x = 480
-print(main.pos)
+# main.pos = Vector(main.pos.x, main.pos.y)
+
 nodes.root._loop()

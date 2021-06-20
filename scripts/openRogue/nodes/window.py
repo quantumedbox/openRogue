@@ -97,7 +97,7 @@ class WindowComponent(component.Component):
         self._base.free()
         # Prevent double free after force deletion
         if self._window is not None:
-            print("Window is closed:", self.name)
+            print(f"{self.name}: closed")
             self._api.close_window(self._window)
             self._window = None
 
@@ -111,7 +111,6 @@ class WindowComponent(component.Component):
     size = property(get_size, set_size)
 
     def get_pos(self):
-        # TODO Catch changes to .x or .y
         return self._base.pos
 
     def set_pos(self, value: Vector):

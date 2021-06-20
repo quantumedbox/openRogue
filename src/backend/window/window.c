@@ -216,6 +216,31 @@ init_window( int width, int height, const char* title )
 		SDL_AddEventWatch(event_queue_former, NULL);
 	}
 
+	// Push events of initial window metrics
+	{
+		int win_x, win_y;
+		SDL_GetWindowPosition(win, &win_x, &win_y);
+
+		SDL_Event init_win_pos_event;
+		init_win_pos_event.type = SDL_WINDOWEVENT;
+		init_win_pos_event.window.windowID = handler->id;
+		init_win_pos_event.window.event = SDL_WINDOWEVENT_MOVED;
+		init_win_pos_event.window.data1 = win_x;
+		init_win_pos_event.window.data2 = win_y;
+		SDL_PushEvent(&init_win_pos_event);
+
+		int win_width, win_height;
+		SDL_GetWindowSize(win, &win_width, &win_height);
+
+		SDL_Event init_win_size_event;
+		init_win_size_event.type = SDL_WINDOWEVENT;
+		init_win_size_event.window.windowID = handler->id;
+		init_win_size_event.window.event = SDL_WINDOWEVENT_MOVED;
+		init_win_size_event.window.data1 = win_width;
+		init_win_size_event.window.data2 = win_height;
+		SDL_PushEvent(&init_win_pos_event);
+	}
+
 	return w_key;
 }
 
@@ -538,6 +563,7 @@ start_drawing( key_t w_key )
 
 	current_drawing_window = w_key;
 
+	// TODO Could get the change it from events ?
 	SDL_GetWindowSize(w->window, &w->width, &w->height);
 
 	// Align the viewport size to be even for the consistent pixel alignment
