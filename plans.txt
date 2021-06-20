@@ -12,7 +12,6 @@ list of things that have to be done at some point:
 . wchar support in config file
 . reattachment of nodes and restructuring them accordingly
 . register the changes that are made by component integration to give ability to delete them
-. use CFFI for API calling
 . libtcod systems integration
 . language procgen submodule
 . logging
@@ -29,12 +28,13 @@ priorities:
 
 in process:
 
-. events and actions
 . themes
 
 
 done:
 
+. events and actions
+. use CFFI for API calling
 . unified c and python coding styles
 . node logic, inheritance model
 . graphics layer in SDL2

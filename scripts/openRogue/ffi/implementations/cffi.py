@@ -4,13 +4,18 @@ Works as alternative to standard ctypes that works more independently throughout
 """
 
 import os
-from cffi import FFI
+import cffi
 
 # from .definitions import *
 from openRogue.config_reader import get_config
 from openRogue.extern import dependencies
 
+from typing import Any
+
 dependencies("cffi")
+
+# Should not be here
+ffi = cffi.FFI()
 
 
 class FFIManager:
@@ -43,7 +48,6 @@ class FFIManager:
         folder = os.path.abspath('backends/' + path)
 
         if os.path.isdir(folder):
-            ffi = FFI()
             with open(folder + '/cdef.h', "r") as f:
                 ffi.cdef(f.read())
             path_buff = os.environ["PATH"]
@@ -82,7 +86,6 @@ class FFIInterface:
         "start_drawing",
         "finish_drawing",
         "set_window_icon_from_file",
-        "get_spec",
     )
 
     def __init__(self, shared):
@@ -96,7 +99,6 @@ class FFIInterface:
         self.start_drawing = shared.start_drawing
         self.finish_drawing = shared.finish_drawing
         self.set_window_icon_from_file = shared.set_window_icon_from_file
-        self.get_spec = shared.get_spec
 
     def init_window(self, width: int, height: int, title: str) -> int:
         return self._shared.init_window(width, height, title.encode())
@@ -109,3 +111,7 @@ class FFIInterface:
                   text: str,
                   color: int = 0xFFFFFFFF) -> None:
         self._shared.draw_text(font, size, x, y, text, len(text), color)
+
+    def get_spec(self, spec: bytearray) -> Any:
+        data = self._shared.get_spec(spec)
+        return eval(ffi.string(data))

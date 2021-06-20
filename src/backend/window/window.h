@@ -1,22 +1,38 @@
 #pragma once
 
+#include <SDL2/SDL_video.h>
 
-enum {
-	DATA_NONE,
-	DATA_INT32,
-	DATA_UINT32,
-	DATA_INT64,
-	DATA_UINT64,
-	DATA_BOOL,
-	DATA_CSTR,
-	DATA_WCSTR,
-};
+#include "rogue_events.h"
+#include "threads.h"
 
-struct spec_data {
-	int type;
-	void* data;
-	size_t len;
-};
+// -------------------------------------------------------------------- Definitions -- //
+
+
+typedef struct {
+	SDL_Window* window;
+	// SDL_GLContext context; // Now GL context is global for all windows of single thread
+
+	// SDL Window ID
+	uint32_t id;
+
+	// Switching queues
+	// At given time only one of them should be writable and another - readable
+	int8_t current_queue;
+	EventQueue* queue0;
+	EventQueue* queue1;
+
+	// Updated on start_drawing()
+	int width;
+	int height;
+
+	// ??? Should they be here ? or it's better to have global counter
+	uint32_t time_delta;
+	uint32_t prev_timestamp;
+
+	// Used for preventing sigegiv from SDL EventWatch thread
+	rogue_mutex_t lock;
+}
+WindowHandler;
 
 
 // ----------------------------------------------------------------------- Internal -- //
@@ -29,13 +45,15 @@ key_t get_current_drawing_window();
 
 // ----------------------------------------------------------------------- Exported -- //
 
+
+// ??? Problem: if we decide to use this backend with other languages - we will have to
+//				find ways to evaluate these strings which is not convenient
 /*
 	@brief	Way of getting APi specifications
 
-	@return spec_data struct of with field 'data' specified to data itself
-			and 'len' describing the array length, where cast is defined by 'type'
+	@return wchar string that contains data that could be evaluated to valid Python
 */
-ROGUE_EXPORT struct spec_data get_spec( const char* spec );
+ROGUE_EXPORT wchar_t* get_spec( const char* spec );
 
 /*
 	@brief 	Create new window

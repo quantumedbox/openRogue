@@ -11,9 +11,15 @@ class Vector:
     """
     __slots__ = ("_x", "_y")
 
-    def __init__(self, x, y):
-        self._x = x
-        self._y = y
+    def __init__(self, *args):
+        if isinstance(args[0], int):
+            self._x = args[0]
+            self._y = args[1]
+        elif hasattr(args[0], "__iter__"):
+            self._x, self._y = args[0]
+        else:
+            raise ValueError(
+                f"Cannot construct vector from given args: {args}")
 
     def set_x(self, x):
         self._x = x

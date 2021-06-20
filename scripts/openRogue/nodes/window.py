@@ -32,7 +32,7 @@ class WindowComponent(component.Component):
         self._window = self._api.init_window(self.size.width, self.size.height,
                                              self.name)
 
-        self._max_tile_size = self._api.get_max_tile_size()
+        self._max_tile_size = Vector(self._api.get_spec(b"max_tile_size"))
 
         self._api.set_window_icon_from_file(self._window,
                                             b"resources/images/icon.png")
