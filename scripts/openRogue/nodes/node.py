@@ -19,7 +19,6 @@ class Node:
         "name",
         "_parent",
         "_children",
-        "_components",
         "__weakref__",
     )
 
@@ -30,7 +29,6 @@ class Node:
         self._parent = None
         self.name = "unnamed"
         self._children = OrderedDict()
-        self._components = OrderedDict()
 
     def init_child(self, name: str, cls, **kwargs) -> 'Node':
         """

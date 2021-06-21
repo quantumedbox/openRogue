@@ -14,7 +14,7 @@ python="./python/pypy3"
 backend_api="libopenRogue_SDL"
 
 # used for jit shared object compilation
-c_compiler="./tcc/tcc"
+# c_compiler="./tcc/tcc"
 
 # PYTHONPATH of running python subprocess
 script_path="./scripts"

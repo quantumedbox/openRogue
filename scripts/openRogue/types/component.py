@@ -43,20 +43,20 @@ class Component:
     def __getattr__(self, attr: str) -> Any:
         check_attr = self.__dict__.get(attr)
         if check_attr is not None:
-            if type(check_attr) is property:
+            if isinstance(check_attr, property):
                 return check_attr.fget(self)
             return check_attr
 
-        check_attr = type(self).__dict__.get(attr)
+        check_attr = self.__class__.__dict__.get(attr)
         if check_attr is not None:
-            if type(check_attr) is property:
+            if isinstance(check_attr, property):
                 return check_attr.fget(self)
             return check_attr
 
-        for base in type(self).__bases__:
+        for base in self.__class__.__bases__:
             check_attr = base.__dict__.get(attr)
             if check_attr is not None:
-                if type(check_attr) is property:
+                if isinstance(check_attr, property):
                     return check_attr.fget(self)
                 return check_attr
 
@@ -67,20 +67,20 @@ class Component:
         while isinstance(cur_base, Component):
             check_attr = cur_base.__dict__.get(attr)
             if check_attr is not None:
-                if type(check_attr) is property:
+                if isinstance(check_attr, property):
                     check_attr.fset(cur_base, value)
                     return
             else:
-                check_attr = type(cur_base).__dict__.get(attr)
+                check_attr = cur_base.__class__.__dict__.get(attr)
                 if check_attr is not None:
-                    if type(check_attr) is property:
+                    if isinstance(check_attr, property):
                         check_attr.fset(cur_base, value)
                         return
 
-                for base in type(cur_base).__bases__:
+                for base in cur_base.__class__.__bases__:
                     check_attr = base.__dict__.get(attr)
                     if check_attr is not None:
-                        if type(check_attr) is property:
+                        if isinstance(check_attr, property):
                             check_attr.fset(cur_base, value)
                             return
 

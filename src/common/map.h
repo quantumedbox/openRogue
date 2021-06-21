@@ -32,7 +32,7 @@ typedef void* data_t;
 
 typedef struct
 {
-	// PROBLEM: first bucket elements cannot contain any data or key, but still have fields for it which is unnecessary
+	// !!! PROBLEM: first bucket elements cannot contain any data or key, but still have fields for it which is unnecessary
 	struct Bucket* 	buckets;
 
 	// num of allocated buckets in memory

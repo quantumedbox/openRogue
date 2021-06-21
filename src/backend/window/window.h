@@ -49,7 +49,7 @@ key_t get_current_drawing_window();
 // ??? Problem: if we decide to use this backend with other languages - we will have to
 //				find ways to evaluate these strings which is not convenient
 /*
-	@brief	Way of getting APi specifications
+	@brief	Way of getting API specifications
 
 	@return wchar string that contains data that could be evaluated to valid Python
 */
@@ -60,7 +60,7 @@ ROGUE_EXPORT wchar_t* get_spec( const char* spec );
 			This function is entry for an API and thus, by calling it for the first time it initializes everything
 			On failure it should reverse all states to back they were
 
-	@return Hash key of newly created window of 0 on failure
+	@return Hash key of newly created window or 0 on failure
 */
 ROGUE_EXPORT key_t init_window( int width, int height, const char* title );
 
@@ -99,10 +99,18 @@ ROGUE_EXPORT void start_drawing( key_t );
 */
 ROGUE_EXPORT void finish_drawing();
 
-
 /*
 	@brief 	Set window icon from image file at path
 
 	@return Returns non-zero value on failure, otherwise - 0
 */
 ROGUE_EXPORT int set_window_icon_from_file( key_t, const char* path );
+
+/*
+	Functions for getting actual system window metrics
+*/
+ROGUE_EXPORT int get_window_x_position( key_t w_key );
+ROGUE_EXPORT int get_window_y_position( key_t w_key );
+
+ROGUE_EXPORT int get_window_width( key_t w_key );
+ROGUE_EXPORT int get_window_height( key_t w_key );

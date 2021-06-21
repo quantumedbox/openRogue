@@ -32,7 +32,11 @@
 #endif
 
 
-// TODO Garbage collector-like that keeps track of usages per each texture in a certain time window
+// TODO Multiline text drawing calls for tilemaps and such
+
+// TODO Font style modificators
+
+// TODO Garbage collector-like mechanism that keeps track of usages per each texture in a certain time window
 
 // TODO Function to render text vertically ?
 

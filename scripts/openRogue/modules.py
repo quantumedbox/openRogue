@@ -26,7 +26,7 @@ class ModuleInfo:
 
 
 # Maybe make the version as integer ?
-def register_module(name: str, version: str):
+def register(name: str, version: str):
     """
     Module registry functionality
     Doc string of the module is used as description text

@@ -10,9 +10,7 @@ from openRogue.types import component, Vector
 
 # TODO Random roguelike style window titles on default
 
-# TODO Customizable closing behavior (and other things)
-
-# !!! TODO !!! Get rid of component system or reimplement it in a new way
+# TODO Support all kinds of input events
 
 
 class WindowComponent(component.Component):
@@ -44,14 +42,6 @@ class WindowComponent(component.Component):
 
         event_queue = self._api.get_window_events(self._window)
 
-        font = self._api._shared.resolve_font(b"resources/fonts/FSEX300.ttf")
-
-        font2 = self._api._shared.resolve_font(
-            b"resources/fonts/SourceCodePro-Light.ttf")
-
-        font3 = self._api._shared.resolve_font(
-            b"resources/fonts/DelaGothicOne-Regular.ttf")
-
         for i in range(event_queue.len):
             event = event_queue.events[i]
             if event.type == ffi.EventType.CLOSE_EVENT:
@@ -66,29 +56,14 @@ class WindowComponent(component.Component):
                 self.repos_window_behaviour(
                     Vector(event.repos_event.x, event.repos_event.y))
 
-        self._api.start_drawing(self._window)
-
-        # for _ in range(1000):
-        #     self._api.draw_rect(0, 0, 640, 320, 0x000000FF)
-
-        # self._api.draw_rect(0, 0, 640, 320, 0x000000FF)
-
-        self._api.draw_text(font, 12, 0, 0, "Can you read this?", 0xFFFFFFFF)
-
-        # self._api.draw_text(font, 12, 0, 12, "Можешь это прочесть?",
-        #                     0xFFFFFFFF)
-
-        # self._api.draw_text(font2, 64, 0, 0, "ABCBA Dabc d", 0xFFFFFFFF)
-
-        # self._api.draw_text(font3, 80, 0, 300, "テ ス ト テ ス ト テ ス ト テ ス ト テ ス ト",
-        #                     0xFFFAAFAF)
-
-        self._api.finish_drawing()
-
     def recieve_event(self, event_type, event_packet) -> None:
         self._base.recieve_event(event_type, event_packet)
         if event_type == "update":
             self.update(event_packet)
+            self._api.start_drawing(self._window)
+            # TODO max_tile_size should be declared in style/theme
+            self._base.render({"max_tile_size": self._max_tile_size})
+            self._api.finish_drawing()
 
     def queue_free(self) -> None:
         node.Node._freeing_queue.append(self)

@@ -1,11 +1,11 @@
-from openRogue import signal
-from openRogue import nodes
-from openRogue.types import Vector
+# from openRogue import signal
+# from openRogue import nodes
+# from openRogue.types import Vector
 
-signal.impl_signal("on_exit", lambda: print("Goodbye, World!"))
+# signal.impl_signal("on_exit", lambda: print("Goodbye, World!"))
 
-main = nodes.root.init_child("main", nodes.Container, width=600, height=400)
-alt = nodes.root.init_child("привет?", nodes.Container, width=200, height=200)
+# main = nodes.root.init_child("main", nodes.Container, width=600, height=400)
+# alt = nodes.root.init_child("привет?", nodes.Container, width=200, height=200)
 
 # add_to = alt
 # for _ in range(1000):
@@ -16,4 +16,4 @@ alt = nodes.root.init_child("привет?", nodes.Container, width=200, height=
 # main.pos = Vector(120, 120)
 # main.pos = Vector(main.pos.x, main.pos.y)
 
-nodes.root._loop()
+# nodes.root._loop()

@@ -26,6 +26,11 @@
 // Size of staticly allocated event queue buffer
 #define EVENT_BUFFER_SIZE 16
 
+
+// TODO Current initialization by first window is dumb
+// 		Init should be called by API caller
+//		As well as "Deinit"
+
 // TODO Positioning of new windows depending on existing ones. Maybe require the caller to specify positions and rely on ui positioning?
 
 
@@ -53,15 +58,15 @@ static int event_queue_former(void*, SDL_Event*);
 // -------------------------------------------------------------------------- Specs -- //
 
 
-#define MAX_TILE_SIZE L"(128, 128)"
-
 ROGUE_EXPORT
 wchar_t*
 get_spec( const char* spec )
 {
-	if (!strcmp(spec, "max_tile_size")) {
-		return MAX_TILE_SIZE;
-	}
+#define ADD_SPEC(n, v) 	if (!strcmp(spec, n)) return v;
+
+	ADD_SPEC("version", L"openRogue backend API -- pre-public version");
+
+	ADD_SPEC("max_tile_size", L"(128, 128)");
 
 	return L"None";
 }
@@ -216,31 +221,6 @@ init_window( int width, int height, const char* title )
 		SDL_AddEventWatch(event_queue_former, NULL);
 	}
 
-	// Push events of initial window metrics
-	{
-		int win_x, win_y;
-		SDL_GetWindowPosition(win, &win_x, &win_y);
-
-		SDL_Event init_win_pos_event;
-		init_win_pos_event.type = SDL_WINDOWEVENT;
-		init_win_pos_event.window.windowID = handler->id;
-		init_win_pos_event.window.event = SDL_WINDOWEVENT_MOVED;
-		init_win_pos_event.window.data1 = win_x;
-		init_win_pos_event.window.data2 = win_y;
-		SDL_PushEvent(&init_win_pos_event);
-
-		int win_width, win_height;
-		SDL_GetWindowSize(win, &win_width, &win_height);
-
-		SDL_Event init_win_size_event;
-		init_win_size_event.type = SDL_WINDOWEVENT;
-		init_win_size_event.window.windowID = handler->id;
-		init_win_size_event.window.event = SDL_WINDOWEVENT_MOVED;
-		init_win_size_event.window.data1 = win_width;
-		init_win_size_event.window.data2 = win_height;
-		SDL_PushEvent(&init_win_pos_event);
-	}
-
 	return w_key;
 }
 
@@ -273,6 +253,58 @@ close_window( key_t w_key )
 	rogue_mutex_destroy(w->lock);
 
 	free(w);
+}
+
+
+ROGUE_EXPORT
+int
+get_window_x_position( key_t w_key )
+{
+	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
+	if (!w) return 0;
+
+	int x, _;
+	SDL_GetWindowPosition(w->window, &x, &_);
+	return x;
+}
+
+
+ROGUE_EXPORT
+int
+get_window_y_position( key_t w_key )
+{
+	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
+	if (!w) return 0;
+
+	int y, _;
+	SDL_GetWindowPosition(w->window, &_, &y);
+	return y;
+}
+
+
+ROGUE_EXPORT
+int
+get_window_width( key_t w_key )
+{
+	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
+	if (!w) return 0;
+
+	int width, _;
+	SDL_GetWindowSize(w->window, &width, &_);
+	return width;
+}
+
+
+ROGUE_EXPORT
+int
+get_window_height( key_t w_key )
+{
+	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
+	if (!w) return 0;
+
+	int _, height;
+	SDL_GetWindowSize(w->window, &_, &height);
+	return height;
 }
 
 
@@ -466,7 +498,6 @@ dispatch_window_repos( EventQueue* queue, SDL_Event event )
 }
 
 
-// TODO Rename to something more fitting
 ROGUE_EXPORT
 EventQueue*
 get_window_events( key_t w_key )
@@ -474,7 +505,7 @@ get_window_events( key_t w_key )
 	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
 	if (!w) return NULL;
 
-	// Process all events and clear the SDL queue
+	// Clear the SDL queue
 	SDL_Event _;
 	while (SDL_PollEvent(&_)) {}
 
@@ -511,7 +542,7 @@ event_queue_former( void* _, SDL_Event* event_ptr )
 	}
 
 	else if ((event.type == SDL_KEYDOWN) || (event.type == SDL_KEYUP)) {
-		WindowHandler* w = (WindowHandler*)mapGet(window_pool, event.motion.windowID);
+		WindowHandler* w = (WindowHandler*)mapGet(window_pool, event.key.windowID);
 		if (!w) return 0;
 		rogue_mutex_lock(w->lock);
 		dispatch_keypress(w->current_queue ? w->queue1 : w->queue0, event);
@@ -574,15 +605,6 @@ start_drawing( key_t w_key )
 		w->height--;
 
 	glViewport(0, 0, w->width, w->height);
-
-	// float aspect = (float)width / (float)height;
-
-	// glm_ortho(0.0, (float)width,
-	//           0.0, (float)height,
-	//           0.0f, 100.0f,
-	//           current_window_projection);
-
-	// glOrtho(-0.5, (float)(w->width - 1) + 0.5, (float)(w->height - 1) + 0.5, -0.5, 0.0, 1.0);
 }
 
 

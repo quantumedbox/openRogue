@@ -64,7 +64,6 @@ class Root(node.Node):
             self.pre_loop()
             # Emmit update event each loop for nodes to be processed
             self.recieve_event("update", None)
-            self.recieve_event("render", {})
             self.post_loop()
 
             # ??? Should it be here ?

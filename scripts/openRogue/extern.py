@@ -25,7 +25,7 @@ def dependencies(*args) -> None:
     for module in args:
         try:
             importlib.import_module(module)
-            print("module {} in present".format(module))
+            # print("module {} in present".format(module))
         except ImportError:
             print("cannot find {}, installing it from pip...".format(module))
             subprocess.check_call(

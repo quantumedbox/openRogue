@@ -9,6 +9,7 @@ import cffi
 # from .definitions import *
 from openRogue.config_reader import get_config
 from openRogue.extern import dependencies
+from openRogue.types import Vector
 
 from typing import Any
 
@@ -56,7 +57,7 @@ class FFIManager:
             os.environ["PATH"] = path_buff
             self.interfaces[name] = FFIInterface(lib)
         else:
-            raise NameError("Cannot find {} backend".format(path))
+            raise NameError(f"Cannot find {path} backend")
 
     def swap_current_api(name: str, path=None) -> str:
         """
@@ -115,3 +116,13 @@ class FFIInterface:
     def get_spec(self, spec: bytearray) -> Any:
         data = self._shared.get_spec(spec)
         return eval(ffi.string(data))
+
+    def get_window_position(self, w_key: int) -> Vector:
+        x = self._shared.get_window_x_position(w_key)
+        y = self._shared.get_window_y_position(w_key)
+        return Vector(x, y)
+
+    def get_window_size(self, w_key: int) -> Vector:
+        w = self._shared.get_window_width(w_key)
+        h = self._shared.get_window_height(w_key)
+        return Vector(w, h)

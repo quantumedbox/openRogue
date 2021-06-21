@@ -9,8 +9,8 @@ DEFAULT_CONFIG_PATH = "./config"
 
 DEFAULTS = {
     "language": "en_EN",
-    "backend_api": "./openRogue",
-    "c_compiler": "./tcc/tcc",
+    # "backend_api": "libopenRogue_SDL",
+    # "c_compiler": "./tcc/tcc",
     "script_path": "./scripts",
     "engine_module": "openRogue",
     "debug": True,

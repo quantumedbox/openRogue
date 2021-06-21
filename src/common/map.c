@@ -23,8 +23,7 @@ struct Bucket
 	void* 			data;
 
 	struct Bucket* 	next;
-}
-Bucket;
+};
 
 
 // ----------------------------------------------------------------- Hash functions -- //
@@ -120,9 +119,9 @@ mapAdd(Map* m, key_t key, data_t data)
 		if (b->next == NULL)
 		{
 			struct Bucket* new = mapNewBucket();
-			new->key 	= key;
-			new->data 	= data;
-			b->next 	= new;
+			new->key = key;
+			new->data = data;
+			b->next = new;
 
 			m->len++;
 
