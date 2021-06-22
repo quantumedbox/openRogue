@@ -5,6 +5,8 @@ import subprocess
 
 from openRogue.config_reader import get_config
 
+# TODO Something is broken now
+
 
 def dependencies(*args) -> None:
     """
@@ -18,9 +20,11 @@ def dependencies(*args) -> None:
             subprocess.check_call([sys.executable, "-m", "ensurepip"])
         else:
             print("pip isn't present, trying to get it from get-pip.py")
-            subprocess.check_call(
-                [sys.executable,
-                 get_config("scriptPath") + "/get-pip.py"])
+            subprocess.check_call([
+                sys.executable,
+                get_config("script_path") + '/' + get_config("engine_module") +
+                "/get-pip.py"
+            ])
 
     for module in args:
         try:

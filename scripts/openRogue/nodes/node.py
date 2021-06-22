@@ -8,6 +8,8 @@ from collections import OrderedDict
 
 # ??? Maybe it's better to return/store proxies and not weakrefs?
 
+# TODO Adding nodes while iterating could crash the app, we should prevent it
+
 # TODO Re-attachment of nodes
 
 

@@ -5,7 +5,7 @@ openRogue has a rather unique understanding of windows, -
 they are base game objects that do have standard interfaces as every other object in the scene
 """
 from openRogue import ffi
-from openRogue.nodes import ui, node
+from openRogue.nodes import ui, node, style_manager
 from openRogue.types import component, Vector
 
 # TODO Random roguelike style window titles on default
@@ -36,8 +36,6 @@ class WindowComponent(component.Component):
                                             b"resources/images/icon.png")
 
     def update(self, event_packet):
-        """
-        """
         self._base.update(event_packet)
 
         event_queue = self._api.get_window_events(self._window)
@@ -60,10 +58,7 @@ class WindowComponent(component.Component):
         self._base.recieve_event(event_type, event_packet)
         if event_type == "update":
             self.update(event_packet)
-            self._api.start_drawing(self._window)
-            # TODO max_tile_size should be declared in style/theme
-            self._base.render({"max_tile_size": self._max_tile_size})
-            self._api.finish_drawing()
+            self._drawing_cycle()
 
     def queue_free(self) -> None:
         node.Node._freeing_queue.append(self)
@@ -93,6 +88,68 @@ class WindowComponent(component.Component):
         self._api.repos_window(self._window, value.x, value.y)
 
     pos = property(get_pos, set_pos)
+
+    def _drawing_cycle(self) -> None:
+        """
+        """
+        init_render_package = {
+            "_api": self._api,
+            "_max_tile_size": self._max_tile_size,
+            "x_origin": -self._base.pos.x,
+            "y_origin": -self._base.pos.y,
+        }
+
+        self._api.start_drawing(self._window)
+
+        # TODO Styles are rather costly now which isn't ideal
+
+        stack = []
+
+        # Node to which window is attached is a special case:
+        style = style_manager.resolve(self._base.style)
+
+        if style.get("common", None) is not None:
+            init_render_package.update(style["common"].items())
+        if style.get(self._base.style_id, None) is not None:
+            init_render_package.update(style[self._base.style_id].items())
+        init_render_package.update(self._base.style_attrs.items())
+
+        # Render it as each tile is equal to a single pixel
+        unit_render_package = init_render_package.copy()
+        unit_render_package.update([("tile_width", 1), ("tile_height", 1)])
+        self._base.render(unit_render_package)
+
+        init_render_package["x_origin"] += self._base.pos.x
+        init_render_package["y_origin"] += self._base.pos.y
+
+        for _, child in self._base._children.items():
+            if isinstance(child, ui.NodeUI):
+                stack.append((child, init_render_package.copy()))
+
+        # Descend down the tree
+        while len(stack) != 0:
+            cur_node, render_package = stack.pop()
+
+            style = style_manager.resolve(cur_node.style)
+
+            if style.get("common", None) is not None:
+                render_package.update(style["common"].items())
+            if style.get(cur_node.style_id, None) is not None:
+                render_package.update(style[cur_node.style_id].items())
+            render_package.update(cur_node.style_attrs.items())
+
+            cur_node.render(render_package)
+
+            render_package[
+                "x_origin"] += cur_node.pos.x * render_package["tile_width"]
+            render_package[
+                "y_origin"] += cur_node.pos.y * render_package["tile_height"]
+
+            for _, child in cur_node._children.items():
+                if isinstance(child, ui.NodeUI):
+                    stack.append((child, render_package.copy()))
+
+        self._api.finish_drawing()
 
     # ------------------------------------------------------------ Behaviors --- #
     # Special window component callbacks that are called on specific window events

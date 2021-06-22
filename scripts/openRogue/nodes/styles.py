@@ -2,21 +2,22 @@
 Themes are the main way of implementing visuals of interfaces
 They consist of special tags that correlate to colors, tile sizes, visual accents and etc.
 """
+from openRogue.types import Color
 
 # TODO Reading default theme from preference files
 
 # If there's no concrete value for element - it should be derived from parent
-DEFAULT_THEME = {
+DEFAULT_STYLE = {
     "common": {
         "tile_width": 24,
         "tile_height": 24,
         "font_size": 24,
     },
     "text": {
-        "fg_color": (255, 255, 255)
+        "fg_color": Color(255, 255, 255)
     },
     "panel": {
-        "bg_color": (125, 125, 125)
+        "bg_color": Color(125, 125, 125)
     },
 }
 
@@ -28,7 +29,9 @@ class StyleManager:
     __slots__ = ("styles", )
 
     def __init__(self):
-        self.styles = {"default": DEFAULT_THEME}
+        self.styles = {"default": DEFAULT_STYLE}
 
     def resolve(self, style: str) -> {}:
+        if style == "":
+            return self.styles["default"]
         return self.styles.get(style, self.styles["default"])

@@ -16,16 +16,18 @@ print(sys.version)
 config_reader.update_config()
 
 if sys.version_info[0] != 3:
-    raise RuntimeError("Given openRogue implementation requires Python 3")
+    raise Error("Given openRogue implementation requires Python 3")
 
-print("""initializing openRogue...
-press Ctrl+C to stop execution if needed""")
+print("""Initializing openRogue...
+Press Ctrl+C to stop execution if needed""")
+
+from openRogue import nodes
 
 # Public access from openRogue import
-from openRogue import nodes
 from openRogue.nodes import root
+from openRogue.types import *
 
-# Base window that is guaranteed
+# Guaranteed base window
 root.init_child("main", nodes.Container, width=600, height=400)
 
 # Load script modules
@@ -40,5 +42,5 @@ for f in os.listdir(config_reader.get_config("script_path")):
         sys.modules[f] = module
         spec.loader.exec_module(module)
 
-# Enter game loop
+# Enter game logic loop
 root._loop()

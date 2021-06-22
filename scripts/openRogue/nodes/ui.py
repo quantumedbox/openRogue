@@ -12,26 +12,32 @@ from typing import Union, Iterable
 
 class NodeUI(node.Node):
 
-    __slots__ = ("x", "y", "width", "height", "align", "stretch", "is_shown",
-                 "_size", "_pos")
+    __slots__ = ("x", "y", "width", "height", "style", "style_id", "align",
+                 "stretch", "is_shown", "_size", "_pos")
 
     def __init__(self,
                  x=0,
                  y=0,
                  width=120,
                  height=80,
+                 style="",
+                 style_id="",
+                 style_attrs={},
                  align="ul",
                  stretch="h",
                  is_shown=True):
         # Are short args preferable?
         """
         Possible align args: "upperleft", "upperright", "bottomleft", "bottomright", "ul", "ur", "bl", "br"
-        Possible stretch args: any combination of "h" and "v" symbols or "" empty string for no stretch
+        Possible stretch args: any combination of "h" and "v" symbols or "" string for no stretch
         """
         super().__init__()
         # self.event_ports["ui"] = self.ui_event
         self.pos = Vector(x, y)
         self.size = Vector(width, height)
+        self.style = style
+        self.style_id = style_id
+        self.style_attrs = style_attrs
         self.align = align
         self.stretch = stretch
         self.is_shown = is_shown
@@ -78,12 +84,3 @@ class NodeUI(node.Node):
         """
         """
         self.is_shown = False
-
-    # Render is not a good name in this case
-    # TODO Should be cacheable
-    # def render(self) -> Union[Primitive, Iterable[Primitive], None]:
-    #     """
-    #     Should provide primitives that do describe the desirable graphical structure
-    #     Return value could be a single primitive, iterable of primitives or None
-    #     """
-    #     return None

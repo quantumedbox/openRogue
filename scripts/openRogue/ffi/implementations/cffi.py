@@ -2,18 +2,17 @@
 FFI implemented through external cffi module
 Works as alternative to standard ctypes that works more independently throughout python implementations (especially PyPy)
 """
+from openRogue.extern import dependencies
+dependencies("cffi")
 
 import os
 import cffi
 
 # from .definitions import *
 from openRogue.config_reader import get_config
-from openRogue.extern import dependencies
 from openRogue.types import Vector
 
 from typing import Any
-
-dependencies("cffi")
 
 # Should not be here
 ffi = cffi.FFI()

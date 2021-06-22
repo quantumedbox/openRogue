@@ -8,7 +8,7 @@
 language="english"
 
 # path to desirable python executable (otherwise python is picked from PATH or standard ./python directory)
-python="./python/pypy3"
+# python="./python/pypy3"
 
 # default backend override
 backend_api="libopenRogue_SDL"
