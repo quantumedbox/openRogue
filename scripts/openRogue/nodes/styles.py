@@ -10,14 +10,15 @@ from openRogue.types import Color
 DEFAULT_STYLE = {
     "common": {
         "tile_width": 24,
-        "tile_height": 24,
+        "tile_height": 16,
         "font_size": 24,
     },
     "text": {
-        "fg_color": Color(255, 255, 255)
+        "fg_color": Color(255, 255, 255),
+        "font": "resources/fonts/FSEX300.ttf",
     },
     "panel": {
-        "bg_color": Color(125, 125, 125)
+        "bg_color": Color(125, 125, 125),
     },
 }
 

@@ -1,6 +1,3 @@
-"""
-Node that structures children UI nodes by its rules
-"""
 from openRogue.nodes import ui
 
 # ???   What is better: having two separate classes for vert and hori containers
@@ -9,6 +6,7 @@ from openRogue.nodes import ui
 
 class Container(ui.NodeUI):
     """
+    Node that structures children UI nodes by its rules
     """
 
     # __slots__ = ()

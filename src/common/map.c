@@ -7,12 +7,18 @@
 
 #include "map.h"
 
-
+// Pass -DUSE_OMP for implementing omp for loops
 #ifdef USE_OMP
-#define OPTIONAL_OMP_PARALLEL_FOR #pragma omp parallel for
+#define OMP_PARALLEL_FOR #pragma omp parallel for
 #else
-#define OPTIONAL_OMP_PARALLEL_FOR //
+#define OMP_PARALLEL_FOR //
 #endif
+
+#define MAP_INIT_CAPACITY 	16		// should be power of 2
+
+#define MAP_INIT_THRESHOLD 	0.75
+
+#define MAP_MAX_CAPACITY	4096
 
 
 // Stack-like structure that holds a key and void pointer to data
@@ -266,7 +272,7 @@ mapExtend(Map* m)
 	struct Bucket* new_array = (struct Bucket*)calloc(m->capacity, sizeof(struct Bucket));
 
 	// It definitely could raise race condition as all threads are adding to the same bucket array
-	// OPTIONAL_OMP_PARALLEL_FOR
+	// OMP_PARALLEL_FOR
 	for (register size_t i = 0; i < old_capacity; i++)
 	{
 		if (m->buckets[i].next != NULL)
@@ -336,7 +342,7 @@ mapClear(Map* m)
 {
 	// pthread_mutex_lock(&m->lock);
 
-	OPTIONAL_OMP_PARALLEL_FOR
+	OMP_PARALLEL_FOR
 	for (register size_t i = 0; i < m->capacity; i++)
 	{
 		if (m->buckets[i].next != NULL) {
@@ -404,6 +410,12 @@ mapPrintRecur(struct Bucket* b)
 	if (b->next != NULL)
 		mapPrintRecur(b->next);
 }
+
+//
+#undef OMP_PARALLEL_FOR
+#undef MAP_INIT_CAPACITY
+#undef MAP_INIT_THRESHOLD
+#undef MAP_MAX_CAPACITY
 
 
 // TODO Check for memory leakage

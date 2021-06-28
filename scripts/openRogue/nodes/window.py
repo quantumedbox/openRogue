@@ -122,7 +122,7 @@ class WindowComponent(component.Component):
         init_render_package["x_origin"] += self._base.pos.x
         init_render_package["y_origin"] += self._base.pos.y
 
-        for _, child in self._base._children.items():
+        for _, child in reversed(self._base._children.items()):
             if isinstance(child, ui.NodeUI):
                 stack.append((child, init_render_package.copy()))
 
@@ -145,7 +145,7 @@ class WindowComponent(component.Component):
             render_package[
                 "y_origin"] += cur_node.pos.y * render_package["tile_height"]
 
-            for _, child in cur_node._children.items():
+            for _, child in reversed(cur_node._children.items()):
                 if isinstance(child, ui.NodeUI):
                     stack.append((child, render_package.copy()))
 

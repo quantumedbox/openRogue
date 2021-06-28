@@ -15,12 +15,6 @@
 
 // #include <pthread.h>
 
-#define MAP_INIT_CAPACITY 	16		// should be power of 2
-
-#define MAP_INIT_THRESHOLD 	0.75
-
-#define MAP_MAX_CAPACITY	4096
-
 
 // -------------------------------------------------------------- Type degfinitions -- //
 
@@ -62,7 +56,7 @@ void 	mapDestroy	(Map*);
 void 	mapClear	(Map*);
 void 	mapPrint 	(Map*);
 
-static 	struct Bucket* mapNewBucket		();
+static 	struct Bucket* mapNewBucket	();
 static  void 	mapExtend			(Map*);
 static 	void 	mapAllocateBuckets	(Map*, size_t n);
 static  void 	mapExtend			(Map*);

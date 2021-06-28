@@ -76,17 +76,9 @@ class FFIManager:
 class FFIInterface:
     """
     """
-    __slots__ = (
-        "_shared",
-        "close_window",
-        "get_window_events",
-        "resize_window",
-        "repos_window",
-        "draw_rect",
-        "start_drawing",
-        "finish_drawing",
-        "set_window_icon_from_file",
-    )
+    __slots__ = ("_shared", "close_window", "get_window_events",
+                 "resize_window", "repos_window", "draw_rect", "start_drawing",
+                 "finish_drawing", "set_window_icon_from_file", "resolve_font")
 
     def __init__(self, shared):
         self._shared = shared
@@ -95,6 +87,7 @@ class FFIInterface:
         self.get_window_events = shared.get_window_events
         self.resize_window = shared.resize_window
         self.repos_window = shared.repos_window
+        self.resolve_font = shared.resolve_font
         self.draw_rect = shared.draw_rect
         self.start_drawing = shared.start_drawing
         self.finish_drawing = shared.finish_drawing
@@ -115,13 +108,3 @@ class FFIInterface:
     def get_spec(self, spec: bytearray) -> Any:
         data = self._shared.get_spec(spec)
         return eval(ffi.string(data))
-
-    def get_window_position(self, w_key: int) -> Vector:
-        x = self._shared.get_window_x_position(w_key)
-        y = self._shared.get_window_y_position(w_key)
-        return Vector(x, y)
-
-    def get_window_size(self, w_key: int) -> Vector:
-        w = self._shared.get_window_width(w_key)
-        h = self._shared.get_window_height(w_key)
-        return Vector(w, h)

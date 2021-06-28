@@ -257,58 +257,6 @@ close_window( key_t w_key )
 
 
 ROGUE_EXPORT
-int
-get_window_x_position( key_t w_key )
-{
-	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
-	if (!w) return 0;
-
-	int x, _;
-	SDL_GetWindowPosition(w->window, &x, &_);
-	return x;
-}
-
-
-ROGUE_EXPORT
-int
-get_window_y_position( key_t w_key )
-{
-	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
-	if (!w) return 0;
-
-	int y, _;
-	SDL_GetWindowPosition(w->window, &_, &y);
-	return y;
-}
-
-
-ROGUE_EXPORT
-int
-get_window_width( key_t w_key )
-{
-	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
-	if (!w) return 0;
-
-	int width, _;
-	SDL_GetWindowSize(w->window, &width, &_);
-	return width;
-}
-
-
-ROGUE_EXPORT
-int
-get_window_height( key_t w_key )
-{
-	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
-	if (!w) return 0;
-
-	int _, height;
-	SDL_GetWindowSize(w->window, &_, &height);
-	return height;
-}
-
-
-ROGUE_EXPORT
 void
 resize_window( key_t w_key, int width, int height )
 {

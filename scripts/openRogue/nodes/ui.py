@@ -32,7 +32,11 @@ class NodeUI(node.Node):
         Possible stretch args: any combination of "h" and "v" symbols or "" string for no stretch
         """
         super().__init__()
-        # self.event_ports["ui"] = self.ui_event
+
+        # Stupid fix for problem of 'recompose' calling when attrs are not yet set
+        self._pos = Vector(x, y)
+        self._size = Vector(width, height)
+
         self.pos = Vector(x, y)
         self.size = Vector(width, height)
         self.style = style
@@ -50,6 +54,7 @@ class NodeUI(node.Node):
     def size(self, size: Vector):
         print(f"{self.name}: new size -> ({size.x}, {size.y})")
         self._size = size
+        self.recompose()
 
     @property
     def pos(self):
@@ -59,6 +64,7 @@ class NodeUI(node.Node):
     def pos(self, pos: Vector):
         print(f"{self.name}: new pos -> ({pos.x}, {pos.y})")
         self._pos = pos
+        self.recompose()
 
     def render(self, carry) -> None:
         """

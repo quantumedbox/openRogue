@@ -41,40 +41,17 @@
 const char* interpreters[] = {
 	"python", "py", "python3", "pypy3", "ipy",
 };
-const size_t n_interpreters = sizeof(interpreters) / sizeof(*interpreters);
 
 const char* dirs_to_lookup[] = {
 	"/python",
 };
-const size_t n_dirs = sizeof(dirs_to_lookup) / sizeof(*dirs_to_lookup);
+
+int N_INTERPRETERS = sizeof(interpreters) / sizeof(*interpreters);
+
+int N_DIRS = sizeof(dirs_to_lookup) / sizeof(*dirs_to_lookup);
 
 
 char* ENGINEMODULE = NULL;
-
-
-// char*
-// nix_path_to_windows_path (const char* path)
-// {
-// 	char* n;
-// 	// discrad relative './'
-// 	if (strstr(path, "./") == path) {
-// 		n = (char*)calloc(strlen(&path[2]) + 1, sizeof(char));
-// 		strcpy(n, &path[2]);
-// 	} else {
-// 		n = (char*)calloc(strlen(path) + 1, sizeof(char));
-// 		strcpy(n, path);
-// 	}
-// 	// swap '/' to '\'
-// 	char* p = strtok(n, "/");
-// 	while (p != NULL) {
-// 		char* next = strtok(NULL, "/");
-// 		if (next != NULL) {
-// 			p[strlen(p)] = '\\';
-// 		}
-// 		p = next;
-// 	}
-// 	return n;
-// }
 
 
 // returned value should be freed
@@ -102,6 +79,7 @@ get_config_variable (const char* var_name)
 		// For now - just spit an error
 		char* n_l = strchr(buff, '\n');
 		if (n_l == NULL) {
+			fclose(f);
 			printf("Line %llu is too long for buffer to contain\n", cur_line);
 			exit(EXIT_FAILURE);
 		}
@@ -230,13 +208,13 @@ resolve_python ()
 		free(python_v);
 	}
 	// Search in PATH
-	for (int i = 0; i < n_interpreters; i++) {
+	for (int i = 0; i < N_INTERPRETERS; i++) {
 		if (start_python(interpreters[i])) {
 			return true;
 		}
 	}
 	// Search in subdirectories
-	for (int i = 0; i < n_dirs; i++) {
+	for (int i = 0; i < N_DIRS; i++) {
 		char buff[PATH_MAX];
 		get_dir(buff, PATH_MAX);
 
@@ -254,17 +232,11 @@ resolve_python ()
 			} else
 				exit(errno);
 
-			// #ifdef _WIN32
-			// char* winpath = nix_path_to_windows_path(buff);
-			// strcpy(buff, winpath);
-			// free(winpath);
-			// #endif
-
 			ssize_t dir_b = strlen(buff);
 			buff[dir_b] = '/';
 
 			// TODO Path len checks
-			for (int i = 0; i < n_interpreters; i++) {
+			for (int i = 0; i < N_INTERPRETERS; i++) {
 				strcpy(buff + dir_b + 1, interpreters[i]);
 				if (start_python(buff)) {
 					return true;

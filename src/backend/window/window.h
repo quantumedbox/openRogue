@@ -105,12 +105,3 @@ ROGUE_EXPORT void finish_drawing();
 	@return Returns non-zero value on failure, otherwise - 0
 */
 ROGUE_EXPORT int set_window_icon_from_file( key_t, const char* path );
-
-/*
-	Functions for getting actual system window metrics
-*/
-ROGUE_EXPORT int get_window_x_position( key_t w_key );
-ROGUE_EXPORT int get_window_y_position( key_t w_key );
-
-ROGUE_EXPORT int get_window_width( key_t w_key );
-ROGUE_EXPORT int get_window_height( key_t w_key );
