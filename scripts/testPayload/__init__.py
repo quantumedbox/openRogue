@@ -1,5 +1,7 @@
 """
-Testing and showcasing module showing workflow
+#This is comment, all lines that begin with '#' are considered to be comments
+#All lines that begin with '@' are module attributes that will be evaluated
+@description="Testing and showcasing module showing workflow"
 @version=0.0000000001
 @authors=["nobody", "everybody"]
 """
@@ -39,6 +41,3 @@ text2 = nest2.init_child(
 )
 
 rogue.root.init_child("huh!", rogue.nodes.Label, text="Cool!")
-
-print(isinstance(main, rogue.nodes.ui.NodeUI))
-# print(text._lines)

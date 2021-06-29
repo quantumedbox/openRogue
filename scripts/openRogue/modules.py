@@ -1,55 +1,37 @@
 """
 Centralized module resolution, registry and control
 """
-import inspect
-import os
-
-from openRogue import signal
-
 from types import ModuleType
+
+
+class ModuleManager:
+    __slots__ = ("_modules")
+
+    def __init__(self):
+        self._modules = {}
+
+    def register(self, module: ModuleType) -> None:
+        args = {}
+        for line in module.__doc__.splitlines():
+            if line.startswith('@'):
+                divisor = line.find('=')
+                if divisor != -1:
+                    args[line[1:divisor]] = eval(line[divisor + 1:])
+
+        mod = ModuleInfo(**args)
+        self._modules[module.__name__] = mod
 
 
 class ModuleInfo:
     """
     Standard way of describing and getting information about modules through signals
     """
-    __slots__ = ('name', 'version', 'description', 'path')
 
-    def __init__(self, name: str, version: str, description: str, path: str):
-        self.name = name
-        self.version = version
-        self.description = description
-        self.path = path
+    # __slots__ = ('name', 'version', 'description', 'path')
+
+    def __init__(self, **kwargs):
+        for name, value in kwargs.items():
+            setattr(self, name, value)
 
     def __call__(self):
         return self
-
-
-# Maybe make the version as integer ?
-def register(name: str, version: str):
-    """
-    Module registry functionality
-    Doc string of the module is used as description text
-    ! Should be called from __init__
-    """
-    caller = get_caller_module()
-    signal.impl_signal(
-        "module_info",
-        ModuleInfo(name, version, caller.__doc__, caller.__file__))
-
-
-def get_modules_info() -> list:
-    """
-    Returns ModuleInfo list with info about all registered objects
-    """
-    modules = []
-    signal.signal_dispatch("module_info", lambda x: modules.append(x))
-    return modules
-
-
-def get_caller_module() -> ModuleType:
-    """
-    Returns module from which caller function was called
-    ! May be a lot of possible problems with that
-    """
-    return inspect.getmodule(inspect.stack()[2][0])

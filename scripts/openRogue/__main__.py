@@ -2,7 +2,10 @@ import os
 import sys
 import importlib
 
+from . import module_manager
+
 from openRogue import nodes
+from openRogue import modules
 from openRogue import config_reader
 
 from openRogue.nodes import root
@@ -22,6 +25,7 @@ for f in os.listdir(config_reader.get_config("script_path")):
         module = importlib.util.module_from_spec(spec)
         sys.modules[f] = module
         spec.loader.exec_module(module)
+        module_manager.register(module)
 
 # Enter game logic loop
 root._loop()
