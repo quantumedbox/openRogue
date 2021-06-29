@@ -11,12 +11,17 @@ class Container(ui.NodeUI):
 
     # __slots__ = ()
 
-    def __init__(self, type="vertical", **kwargs):
+    def __init__(self, **kwargs):
         style_id_test = kwargs.get("style_id")
         if style_id_test is None:
             kwargs["style_id"] = "panel"
         super().__init__(**kwargs)
 
+
+class PanelContainer(Container):
+    """
+    Renderable container
+    """
     def render(self, render_packet: dict) -> None:
         render_packet["_api"].draw_rect(
             render_packet["x_origin"] +

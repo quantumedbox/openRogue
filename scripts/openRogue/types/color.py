@@ -12,8 +12,8 @@ class Color:
     def __new__(_, r, g, b, a=255) -> int:
         output = int()
         output |= a
-        output |= b << 0x8
-        output |= g << 0xF
-        output |= r << 0x18
+        output |= b << 8
+        output |= g << 16
+        output |= r << 24
 
         return output

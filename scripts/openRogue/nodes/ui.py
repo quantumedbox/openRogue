@@ -12,8 +12,8 @@ from typing import Union, Iterable
 
 class NodeUI(node.Node):
 
-    __slots__ = ("x", "y", "width", "height", "style", "style_id", "align",
-                 "stretch", "is_shown", "_size", "_pos")
+    __slots__ = ("style", "style_id", "style_attrs", "align", "stretch",
+                 "is_shown", "_size", "_pos")
 
     def __init__(self,
                  x=0,

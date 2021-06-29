@@ -26,11 +26,12 @@ class Label(ui.NodeUI):
         Restructures text to fit within node boundaries
         """
         width, height = self.size.as_tuple()
+        x, y = self.pos.as_tuple()
 
         cur_line = ""
 
         cur_x = 0
-        cur_y = 0
+        cur_y = y
 
         self._lines = []
 
@@ -38,12 +39,12 @@ class Label(ui.NodeUI):
         # TODO Division of very long words
         for word in self.text.split():
             word_len = len(word)
-            if cur_x + word_len >= width + 1:
+            if cur_x + word_len >= width + 1 - x:
                 # Wrap words that are too long into multiple lines
-                while word_len > width:
-                    self._lines.append(word[:width - cur_x])
-                    word = word[width - cur_x + 1:]
-                    word_len -= width - cur_x
+                while word_len > width - x + 1:
+                    self._lines.append(word[:width - cur_x - x + 1])
+                    word = word[width - cur_x - x + 1:]
+                    word_len -= width - cur_x - x + 1
                     cur_x = 0
                     cur_y += 1
                 if cur_line != "":

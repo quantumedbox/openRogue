@@ -6,6 +6,9 @@ from openRogue.types import Color
 
 # TODO Reading default theme from preference files
 
+# TODO Recursion-depth dependent styles ?
+#      Or rather styles attrs that are dependent on render_package args
+
 # If there's no concrete value for element - it should be derived from parent
 DEFAULT_STYLE = {
     "common": {

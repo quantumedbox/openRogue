@@ -1,48 +1,44 @@
 """
-    Testing and showcasing module showing workflow
+Testing and showcasing module showing workflow
+@version=0.0000000001
+@authors=["nobody", "everybody"]
 """
 import openRogue as rogue
 
-# Get rid of requirement to call it manually, engine loader could get the information from __init__ doc
-rogue.modules.register("testPayload", "pre-release")
+main = rogue.root.get_child("main")
 
-test = rogue.root.init_child("тест",
-                             rogue.nodes.Container,
-                             width=400,
-                             height=80,
-                             style_attrs={"bg_color": rogue.Color(5, 5, 255)})
-
-nest = test.init_child("test",
+nest = main.init_child("test",
                        rogue.nodes.Container,
                        x=1,
                        y=1,
                        width=16,
                        height=8)
 
-nest2 = test.init_child("test2",
+nest2 = main.init_child("test2",
                         rogue.nodes.Container,
                         x=20,
                         y=6,
                         width=24,
                         height=20,
                         style_attrs={
-                            "bg_color": rogue.Color(255, 0, 0, 150),
+                            "bg_color": rogue.Color(255, 0, 0, 255),
                         })
 
 text = nest.init_child(
     "text",
     rogue.nodes.Label,
     text=
-    "Что насчёт этого? Huh. ???? Что насчёт этого? Huh. ???? Что насчёт этого? Huh. ???? Что насчёт этого? Huh. ????",
-    width=15,
-    height=8)
+    "AAAAAAAAAAAAAAAAAAAAAAA Что насчёт этого? Huh. ???? Что насчёт этого? Huh. ???? Что насчёт этого? Huh. ???? Что насчёт этого? Huh. ????"
+)
 
 text2 = nest2.init_child(
     "text",
     rogue.nodes.Label,
     text=
     "IT IS KINDA SUS ??? IT IS KINDA SUS ??? IT IS KINDA SUS ??? IT IS KINDA SUS ??? IT IS KINDA SUS ??? IT IS KINDA SUS ??? IT IS KINDA SUS ??? IT IS KINDA SUS ???",
-    width=24,
-    height=20)
+)
 
-print(text._lines)
+rogue.root.init_child("huh!", rogue.nodes.Label, text="Cool!")
+
+print(isinstance(main, rogue.nodes.ui.NodeUI))
+# print(text._lines)

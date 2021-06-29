@@ -9,6 +9,9 @@ from typing import Any
 
 # TODO redirect __call__ to base ???
 
+# TODO !!! Cannot set attrs to self from component functions which is a big problem
+# TODO !!! Cannot check isinstance after chaining the component
+
 
 class Component:
     """
@@ -17,6 +20,9 @@ class Component:
     . When setting attributes they're set to the original base and not components
     . You have to be careful and not call/get attributes from the base directly
     """
+    def __new__(cls, *args, **kwargs):
+        print(cls, args, kwargs)
+
     def __init__(self, base) -> None:
         # To not trigger the __setattr__
         self.__dict__["_base"] = base

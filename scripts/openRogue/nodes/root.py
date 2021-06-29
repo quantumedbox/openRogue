@@ -1,7 +1,7 @@
 """
 Corner stone of scene structure
 """
-from openRogue.nodes import node, ui, window, container
+from openRogue.nodes import node, ui, container, window, container
 from openRogue.types import Vector
 from openRogue import signal
 
@@ -15,7 +15,6 @@ class Root(node.Node):
     __slots__ = (
         "size",
         "_should_stop",
-        "_max_tile_size",
     )
 
     def __init__(self):
@@ -31,10 +30,19 @@ class Root(node.Node):
         """
         Contextual constructor that implements system window component for every attached UI child
         """
-        child.name = name
         if issubclass(type(child), ui.NodeUI):
-            child = window.WindowComponent(child)
-        super().attach_child(name, child)
+            # If child is Container then swap its class to WindowContainer
+            if issubclass(type(child), container.Container):
+                child = window.WindowContainer(name=name)
+                super().attach_child(name, child)
+            # Otherwise create new WindowContainer to accommodate the object
+            else:
+                # TODO Get the window size needed to accommodate the object ?
+                win = window.WindowContainer(name=name)
+                win.attach_child(name, child)
+                # TODO We should consider how to name such windows
+                super().attach_child('_' + name + '_window', win)
+        child.name = name
         return child
 
     def pre_loop(self) -> None:
@@ -44,7 +52,7 @@ class Root(node.Node):
         By default it contains logic that stops the loop when there's no window objects left
         """
         for _, child in self._children.items():
-            if issubclass(type(child), window.WindowComponent):
+            if issubclass(type(child), window.WindowContainer):
                 break
         else:
             self.stop()
