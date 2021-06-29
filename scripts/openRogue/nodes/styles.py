@@ -9,8 +9,8 @@ from openRogue.types import Color
 # If there's no concrete value for element - it should be derived from parent
 DEFAULT_STYLE = {
     "common": {
-        "tile_width": 24,
-        "tile_height": 16,
+        "tile_width": 12,
+        "tile_height": 18,
         "font_size": 24,
     },
     "text": {

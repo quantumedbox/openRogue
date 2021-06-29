@@ -24,7 +24,7 @@ set(OS_SPECIFIC_LIBS "opengl32")
 set(DEPS_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../deps)
 
 if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE Debug FORCE)
+	set(CMAKE_BUILD_TYPE Debug)
 endif()
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
@@ -50,17 +50,19 @@ set_target_properties(SDL_Backend PROPERTIES
 # MSVC specific setting
 if(CMAKE_C_COMPILER_ID MATCHES MSVC)
 	if(CMAKE_SIZEOF_VOID_P MATCHES 8)
-		link_directories(${LINK_DIRECTORIES} ${DEPS_PATH}/msvc64)
+		set(DEPS_LINK_PATH ${DEPS_PATH}/msvc64)
+		# link_directories(${LINK_DIRECTORIES} ${DEPS_PATH}/msvc64)
 	endif()
 endif()
 
 # MinGW/GNU specific settings
 if(CMAKE_C_COMPILER_ID MATCHES GNU)
-	add_definitions(-DGLEW_STATIC)
-	link_directories(${LINK_DIRECTORIES} ${DEPS_PATH}/mingw64)
 	foreach(ARG ${GNU_ARGS})
 		set(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS} ${ARG})
 	endforeach()
+	add_definitions(-DGLEW_STATIC)
+	set(DEPS_LINK_PATH ${DEPS_PATH}/mingw64)
+	# link_directories(${LINK_DIRECTORIES} ${DEPS_PATH}/mingw64)
 endif()
 
 
@@ -75,19 +77,19 @@ if(WIN32)
 							uuid setupapi)
 endif()
 
-find_library(SDL2_LIB sdl2)
+find_library(SDL2_LIB sdl2 PATH ${DEPS_LINK_PATH})
 
 if(NOT SDL2_LIB)
 	message(SEND_ERROR "Cannot resolve SDL2 lib")
 endif()
 
-find_library(GLEW_LIB glew32)
+find_library(GLEW_LIB glew32 PATH ${DEPS_LINK_PATH})
 
 if(NOT GLEW_LIB)
 	message(SEND_ERROR "Cannot resolve GLEW lib")
 endif()
 
-find_library(FREETYPE_LIB freetype freetyped)
+find_library(FREETYPE_LIB freetype freetyped PATH ${DEPS_LINK_PATH})
 
 if(NOT FREETYPE_LIB)
 	message(SEND_ERROR "Cannot resolve freetype lib")

@@ -350,6 +350,7 @@ ROGUE_EXPORT
 int
 draw_text( key_t font_hash,
            uint32_t size,
+           uint32_t width,
            int32_t x_offset,
            int32_t y_offset,
            char32_t* utf_string,
@@ -501,7 +502,7 @@ draw_text( key_t font_hash,
 						glTexSubImage2D(
 						    GL_TEXTURE_2D, 0,
 						    (i % (FONT_TEXTURE_SIZE / spacing))*spacing + face->glyph->bitmap_left,
-						    FONT_TEXTURE_SIZE - (i / (FONT_TEXTURE_SIZE / spacing))*spacing - face->glyph->bitmap_top/* - spacing / 2*/,
+						    FONT_TEXTURE_SIZE - (i / (FONT_TEXTURE_SIZE / spacing))*spacing - face->glyph->bitmap_top,
 						    bitmap_glyph->bitmap.width,
 						    bitmap_glyph->bitmap.rows,
 						    GL_RED,
@@ -534,22 +535,21 @@ draw_text( key_t font_hash,
 			{
 				register uint32_t idx = buffer_len * 6 * 4;
 
-				// Sorry to everyone who's reading this shit
-				float pos_left = ((float)x_offset + (i * 0.75) * size) / (window->width / 2) - 1.0f;
-				float pos_right = ((float)x_offset + (i * 0.75 + 1) * size) / (window->width / 2) - 1.0f;
+				float pos_left = ((float)x_offset + i * width) / (window->width / 2) - 1.0f;
+				float pos_right = ((float)x_offset + i * width + size) / (window->width / 2) - 1.0f;
 				float pos_top = ((float)window->height - y_offset) / (window->height / 2) - 1.0f;
 				float pos_bottom = ((float)window->height - y_offset - size) / (window->height / 2) - 1.0f;
 
 				float tex_left = (*utf_string % (FONT_TEXTURE_SIZE / spacing)) * ((float)spacing / FONT_TEXTURE_SIZE);
 
 				float tex_right = (*utf_string % (FONT_TEXTURE_SIZE / spacing)) * ((float)spacing / FONT_TEXTURE_SIZE) + \
-								  ((float)size / FONT_TEXTURE_SIZE);
+				                  ((float)size / FONT_TEXTURE_SIZE);
 
 				float tex_top = 1.0 - ((*utf_string % range_size) / (FONT_TEXTURE_SIZE / spacing)) * \
-									  ((float)spacing / FONT_TEXTURE_SIZE) - ((float)size / FONT_TEXTURE_SIZE)*0.75;
+				                ((float)spacing / FONT_TEXTURE_SIZE) - ((float)size / FONT_TEXTURE_SIZE) * 0.75;
 
 				float tex_bottom = 1.0 - (((*utf_string % range_size) / (FONT_TEXTURE_SIZE / spacing))) * \
-										 ((float)spacing / FONT_TEXTURE_SIZE) + ((float)size / FONT_TEXTURE_SIZE)*0.25;
+				                   ((float)spacing / FONT_TEXTURE_SIZE) + ((float)size / FONT_TEXTURE_SIZE) * 0.25;
 
 				buffer[idx++] = pos_left;
 				buffer[idx++] = pos_top;

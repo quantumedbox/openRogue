@@ -47,6 +47,7 @@ key_t resolve_font( const char* path );
 */
 ROGUE_EXPORT int draw_text( key_t font_hash,
                             uint32_t size,
+                            uint32_t width,
                             int32_t x_offset,
                             int32_t y_offset,
                             char32_t* utf_string,

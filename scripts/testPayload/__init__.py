@@ -19,34 +19,30 @@ nest = test.init_child("test",
                        width=16,
                        height=8)
 
-# nest2 = test.init_child("test2",
-#                         rogue.nodes.Container,
-#                         x=6,
-#                         y=6,
-#                         width=2,
-#                         height=20,
-#                         style_attrs={
-#                             "bg_color": rogue.Color(255, 0, 0, 150),
-#                         })
-
-# nest.init_child("test",
-#                 rogue.nodes.Container,
-#                 x=1,
-#                 y=1,
-#                 width=16,
-#                 height=8,
-#                 style_attrs={
-#                     "tile_width": 12,
-#                     "tile_height": 12,
-#                     "bg_color": rogue.Color(25, 65, 34, 200),
-#                 })
+nest2 = test.init_child("test2",
+                        rogue.nodes.Container,
+                        x=20,
+                        y=6,
+                        width=24,
+                        height=20,
+                        style_attrs={
+                            "bg_color": rogue.Color(255, 0, 0, 150),
+                        })
 
 text = nest.init_child(
     "text",
     rogue.nodes.Label,
     text=
-    "longfuckingshithuh test me! i want to be tested!!! hm, does it work or not? i'm not quite sure yet",
-    width=16,
+    "Что насчёт этого? Huh. ???? Что насчёт этого? Huh. ???? Что насчёт этого? Huh. ???? Что насчёт этого? Huh. ????",
+    width=15,
     height=8)
+
+text2 = nest2.init_child(
+    "text",
+    rogue.nodes.Label,
+    text=
+    "IT IS KINDA SUS ??? IT IS KINDA SUS ??? IT IS KINDA SUS ??? IT IS KINDA SUS ??? IT IS KINDA SUS ??? IT IS KINDA SUS ??? IT IS KINDA SUS ??? IT IS KINDA SUS ???",
+    width=24,
+    height=20)
 
 print(text._lines)

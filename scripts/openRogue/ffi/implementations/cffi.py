@@ -99,12 +99,13 @@ class FFIInterface:
     def draw_text(self,
                   font: int,
                   size: int,
+                  width: int,
                   x: int,
                   y: int,
                   text: str,
                   color: int = 0xFFFFFFFF) -> None:
-        self._shared.draw_text(font, size, x, y, text, len(text), color)
+        self._shared.draw_text(font, size, width, x, y, text, len(text), color)
 
-    def get_spec(self, spec: bytearray) -> Any:
-        data = self._shared.get_spec(spec)
+    def get_spec(self, spec: str) -> Any:
+        data = self._shared.get_spec(spec.encode(encoding='ascii'))
         return eval(ffi.string(data))
