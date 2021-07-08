@@ -1,6 +1,8 @@
 """
 Corner stone of scene structure
 """
+import time
+
 from openRogue.nodes import node, ui, container, window, container
 from openRogue.types import Vector
 from openRogue import signal
@@ -68,10 +70,16 @@ class Root(node.Node):
         Init game loop
         Usually is called from engine
         """
+        prev_time = time.perf_counter()
+        cur_time = prev_time + 1.0
+
         while not self._should_stop:
+            delta = cur_time - prev_time
+            cur_time, prev_time = time.perf_counter(), cur_time
+
             self.pre_loop()
             # Emmit update event each loop for nodes to be processed
-            self.recieve_event("update", None)
+            self.recieve_event("update", delta)
             self.post_loop()
 
             # ??? Should it be here ?

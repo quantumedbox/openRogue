@@ -21,12 +21,12 @@ class WindowContainer(container.PanelContainer):
     """
     __slots__ = ("_api", "_window_id", "_max_tile_size")
 
-    def __init__(self, name=None, *args, **kwargs):
+    def __init__(self, name=None, width=320, height=240, *args, **kwargs):
         # Specific for this window API
         # TODO Ability to change desired API on creation or after
         # POSSIBLE SOLUTION: Setting global API state machine:
         #   ffi.bind_window_creation_api("curses")
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, width=width, height=height, **kwargs)
 
         if name is not None:
             self.name = name

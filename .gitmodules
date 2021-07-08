@@ -1,0 +1,3 @@
+[submodule "scripts\\openRogue\\ecs"]
+	path = scripts\\openRogue\\ecs
+	url = https://github.com/benmoran56/esper

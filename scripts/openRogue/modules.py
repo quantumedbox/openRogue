@@ -4,6 +4,21 @@ Centralized module resolution, registry and control
 from types import ModuleType
 
 
+class ModuleInfo:
+    """
+    Standard way of describing and getting information about modules through signals
+    """
+
+    # __slots__ = ('name', 'version', 'description', 'path')
+
+    def __init__(self, **kwargs):
+        for name, value in kwargs.items():
+            setattr(self, name, value)
+
+    def __call__(self):
+        return self
+
+
 class ModuleManager:
     __slots__ = ("_modules")
 
@@ -21,17 +36,5 @@ class ModuleManager:
         mod = ModuleInfo(**args)
         self._modules[module.__name__] = mod
 
-
-class ModuleInfo:
-    """
-    Standard way of describing and getting information about modules through signals
-    """
-
-    # __slots__ = ('name', 'version', 'description', 'path')
-
-    def __init__(self, **kwargs):
-        for name, value in kwargs.items():
-            setattr(self, name, value)
-
-    def __call__(self):
-        return self
+    def resolve(self, module_name: str) -> ModuleInfo:
+        return self._modules.get(module_name, None)

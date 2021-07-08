@@ -64,8 +64,8 @@ class Label(ui.NodeUI):
                 render_packet["_api"].resolve_font(
                     render_packet["font"].encode()),
                 render_packet["tile_height"], render_packet["tile_width"],
-                render_packet["x_origin"] +
-                (self.pos.x * render_packet["tile_width"]),
-                render_packet["y_origin"] +
-                ((self.pos.y + n) * render_packet["tile_height"]), cur_line,
-                render_packet["fg_color"])
+                int((render_packet["x_origin"]) +
+                    (self.pos.x * render_packet["tile_width"])),
+                int((render_packet["y_origin"]) +
+                    ((self.pos.y + n) * render_packet["tile_height"])),
+                cur_line, render_packet["fg_color"])
