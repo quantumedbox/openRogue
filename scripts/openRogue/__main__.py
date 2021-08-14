@@ -12,7 +12,7 @@ from openRogue.nodes import root
 from openRogue.types import *
 
 # Guaranteed base window
-root.init_child("main", nodes.Container, width=600, height=400)
+root.init_child("main", nodes.window.WindowContainer, width=600, height=400)
 
 # Load script modules
 for f in os.listdir(config_reader.get_config("script_path")):

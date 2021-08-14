@@ -243,7 +243,7 @@ new_font_size()
 
 /*
 	@brief	If desired path is not valid then default font path is used
-			If default font isn't valid - returns NULL to signal critical error
+			If default font isn't valid - returns NULL to signal error
 */
 static
 const char*
@@ -275,9 +275,7 @@ find_suitable_font( const char* desired )
 // TODO Bitmap fonts
 /*
 	@brief 	Creates new font from file at the path argument
-			Returns NULL on critical error
-
-	@warn 	API caller should listen to ERRORCODE value for panics!
+			Returns NULL on error
 */
 static
 Font*
@@ -345,7 +343,6 @@ draw_text_buffer( float* buffer, size_t buffer_len )
 }
 
 // TODO Could be a lot better or at least more nicely structured
-// TODO Require "width" parameter ?
 ROGUE_EXPORT
 int
 draw_text( key_t font_hash,
@@ -397,7 +394,7 @@ draw_text( key_t font_hash,
 	uint32_t spacing = floor(size * 1.25);
 	uint32_t range_size = pow((int32_t)floor(FONT_TEXTURE_SIZE / spacing), 2);
 
-	// VBO constructor -- 6 vertices with 4 floats with each
+	// VBO constructor -- 6 vertices with 4 floats for each glyph
 	float buffer[TEXT_BUFFER_SIZE * 6 * 4];
 	size_t buffer_len = 0;
 

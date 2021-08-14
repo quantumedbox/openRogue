@@ -611,3 +611,13 @@ set_window_icon_from_file( key_t w_key,
 
 	return 0;
 }
+
+ROGUE_EXPORT
+int
+set_window_title( key_t w_key, const char* title )
+{
+	WindowHandler* w = (WindowHandler*)mapGet(window_pool, w_key);
+	if (!w) return -1;
+
+	SDL_SetWindowTitle(w->window, title);
+}

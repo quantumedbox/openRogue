@@ -109,3 +109,6 @@ class FFIInterface:
     def get_spec(self, spec: str) -> Any:
         data = self._shared.get_spec(spec.encode(encoding='ascii'))
         return eval(ffi.string(data))
+
+    def set_window_title(self, w_key: int, title: str):
+        self._shared.set_window_title(w_key, title.encode())

@@ -19,17 +19,14 @@ class WindowContainer(container.PanelContainer):
     """
     Special NodeUI container that is used as way of integrating system and openRogue node trees 
     """
-    __slots__ = ("_api", "_window_id", "_max_tile_size")
+    __slots__ = ("_api", "_window_id", "_max_tile_size", "_name")
 
-    def __init__(self, name=None, width=320, height=240, *args, **kwargs):
+    def __init__(self, name="unnamed", width=320, height=240, *args, **kwargs):
         # Specific for this window API
         # TODO Ability to change desired API on creation or after
         # POSSIBLE SOLUTION: Setting global API state machine:
         #   ffi.bind_window_creation_api("curses")
         super().__init__(*args, width=width, height=height, **kwargs)
-
-        if name is not None:
-            self.name = name
 
         self._api = ffi.manager.resolve("default")
 
@@ -40,6 +37,8 @@ class WindowContainer(container.PanelContainer):
 
         self._api.set_window_icon_from_file(self._window_id,
                                             b"resources/images/icon.png")
+
+        self.name = name
 
     def update(self, event_packet):
         super().update(event_packet)
@@ -96,6 +95,16 @@ class WindowContainer(container.PanelContainer):
             self._api.repos_window(self._window_id, value.x, value.y)
 
     pos = property(get_pos, set_pos)
+
+    def get_name(self):
+        return self._name
+
+    def set_name(self, title: str):
+        self._name = title
+        if getattr(self, "_api", False):
+            self._api.set_window_title(self._window_id, title)
+
+    name = property(get_name, set_name)
 
     def _drawing_cycle(self) -> None:
         """

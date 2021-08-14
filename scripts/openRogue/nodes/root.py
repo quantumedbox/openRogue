@@ -32,26 +32,22 @@ class Root(node.Node):
         """
         Contextual constructor that implements system window component for every attached UI child
         """
-        if issubclass(type(child), ui.NodeUI):
-            # If child is Container then swap its class to WindowContainer
-            if issubclass(type(child), container.Container):
-                child = window.WindowContainer(name=name)
-                super().attach_child(name, child)
-            # Otherwise create new WindowContainer to accommodate the object
-            else:
-                # TODO Get the window size needed to accommodate the object ?
-                win = window.WindowContainer(name=name)
-                win.attach_child(name, child)
-                # TODO We should consider how to name such windows
-                super().attach_child('_' + name + '_window', win)
         child.name = name
+        if isinstance(child, window.WindowContainer):
+            super().attach_child(name, child)
+        elif issubclass(type(child), ui.NodeUI):
+            # TODO Get the window size needed to accommodate the object ?
+            win = window.WindowContainer(name=name)
+            win.attach_child(name, child)
+            # TODO We should consider how to name such windows
+            super().attach_child('_' + name + '_window', win)
         return child
 
     def pre_loop(self) -> None:
         """
         -- FREE TO OVERRIDE --
         This function is called each cycle before everything else
-        By default it contains logic that stops the loop when there's no window objects left
+        By default it contains logic that stops the loop when there's no WindowContainers left
         """
         for _, child in self._children.items():
             if issubclass(type(child), window.WindowContainer):
@@ -68,7 +64,7 @@ class Root(node.Node):
     def _loop(self) -> None:
         """
         Init game loop
-        Usually is called from engine
+        By default is called from engine itself
         """
         prev_time = time.perf_counter()
         cur_time = prev_time + 1.0

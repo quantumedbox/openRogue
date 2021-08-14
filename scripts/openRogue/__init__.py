@@ -22,3 +22,4 @@ module_manager = modules.ModuleManager()
 # Provide public access from openRogue import
 from openRogue.nodes import root
 from openRogue.types import *
+from openRogue.utils import *

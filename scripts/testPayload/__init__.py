@@ -46,5 +46,4 @@ def sine_func(self, delta) -> None:
     self.pos = rogue.types.Vector(self.pos.x, sine.step(delta))
 
 
-# rogue.override(nest2, 'update', sine_func)
-nest2.update = sine_func.__get__(nest2, type(nest2))
+rogue.override_method(nest2, 'update', sine_func)

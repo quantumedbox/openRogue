@@ -105,3 +105,8 @@ ROGUE_EXPORT void finish_drawing();
 	@return Returns non-zero value on failure, otherwise - 0
 */
 ROGUE_EXPORT int set_window_icon_from_file( key_t, const char* path );
+
+/*
+	@brief 	Set window title
+*/
+ROGUE_EXPORT int set_window_title( key_t, const char* );

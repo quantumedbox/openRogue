@@ -7,7 +7,6 @@ list of things that have to be done at some point:
 . profiling methods
 . catching system signals from standard 'signal' module
 . way of pickling to save game states
-. get rid of relative imports
 . 'chance' submodule
 . wchar support in config file
 . reattachment of nodes and restructuring them accordingly
@@ -28,11 +27,13 @@ priorities:
 
 in process:
 
-. themes
+. class-based behaviour setting
+. get rid of relative imports
 
 
 done:
 
+. themes
 . events and actions
 . use CFFI for API calling
 . unified c and python coding styles
