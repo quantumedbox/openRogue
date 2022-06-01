@@ -1,0 +1,3 @@
+C:/Users/QuantumedBox/Desktop/tryings/openRogue/src/loader/build/CMakeFiles/rebuild_cache.dir
+C:/Users/QuantumedBox/Desktop/tryings/openRogue/src/loader/build/CMakeFiles/OpenRogue_Loader.dir
+C:/Users/QuantumedBox/Desktop/tryings/openRogue/src/loader/build/CMakeFiles/edit_cache.dir

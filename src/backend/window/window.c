@@ -542,7 +542,7 @@ start_drawing( key_t w_key )
 
 	current_drawing_window = w_key;
 
-	// TODO Could get the change it from events ?
+	// TODO Could get the change from events ?
 	SDL_GetWindowSize(w->window, &w->width, &w->height);
 
 	// Align the viewport size to be even for the consistent pixel alignment

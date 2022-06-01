@@ -1,0 +1,6 @@
+# charmaps are just special python code that is used for building bitmap fonts from image files
+# it allows automatic glyph width and height dissection from image size and number of characters in a set
+# if .charmap of the same name as font image isn't present then it assumes extended_ascii set
+
+# 0-255
+extended_ascii()

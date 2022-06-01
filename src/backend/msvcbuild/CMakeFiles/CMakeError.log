@@ -1,0 +1,108 @@
+Compiling the C compiler identification source file "CMakeCCompilerId.c" failed.
+Compiler: C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/14.29.30037/bin/Hostx86/x64/cl.exe 
+Build flags: 
+Id flags:  
+
+The output was:
+2
+Оптимизирующий компилятор Microsoft (R) C/C++ версии 19.29.30037 для x64
+(C) Корпорация Майкрософт (Microsoft Corporation).  Все права защищены.
+
+CMakeCCompilerId.c
+Microsoft (R) Incremental Linker Version 14.29.30037.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+/out:CMakeCCompilerId.exe 
+CMakeCCompilerId.obj 
+LINK : fatal error LNK1104: не удается открыть файл "kernel32.lib"
+
+
+Detecting C compiler ABI info failed to compile with the following output:
+Change Dir: C:/Users/QuantumedBox/Desktop/tryings/openRogue/src/backend/msvcbuild/CMakeFiles/CMakeTmp
+
+Run Build Command(s):nmake -f Makefile /nologo cmTC_501db\fast && 	"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\bin\HostX86\x64\nmake.exe"  -f CMakeFiles\cmTC_501db.dir\build.make /nologo -L                  CMakeFiles\cmTC_501db.dir\build
+Building C object CMakeFiles/cmTC_501db.dir/CMakeCCompilerABI.c.obj
+	"C:\Program Files\CMake\bin\cmake.exe" -E cmake_cl_compile_depends --dep-file=CMakeFiles\cmTC_501db.dir\CMakeCCompilerABI.c.obj.d --working-dir=C:\Users\QuantumedBox\Desktop\tryings\openRogue\src\backend\msvcbuild\CMakeFiles\CMakeTmp --filter-prefix="╧Ёшьхўрэшх: тъы■ўхэшх Їрщыр:  " -- "C:\PROGRA~2\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x64\cl.exe" @C:\Users\QUANTU~1\AppData\Local\Temp\nmE20A.tmp
+CMakeCCompilerABI.c
+Linking C executable cmTC_501db.exe
+	"C:\Program Files\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_501db.dir --rc=rc --mt=CMAKE_MT-NOTFOUND --manifests -- "C:\PROGRA~2\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x64\link.exe" /nologo @CMakeFiles\cmTC_501db.dir\objects1.rsp @C:\Users\QUANTU~1\AppData\Local\Temp\nmE536.tmp
+RC Pass 1: command "rc /fo CMakeFiles\cmTC_501db.dir/manifest.res CMakeFiles\cmTC_501db.dir/manifest.rc" failed (exit code 0) with the following output:
+Не удается найти указанный файлNMAKE : fatal error U1077: "C:\Program Files\CMake\bin\cmake.exe" : тючтЁр∙хээ√щ ъюф "0xffffffff"
+Stop.
+NMAKE : fatal error U1077: "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\bin\HostX86\x64\nmake.exe" : тючтЁр∙хээ√щ ъюф "0x2"
+Stop.
+
+
+
+
+Determining if the C compiler works failed with the following output:
+Change Dir: C:/Users/QuantumedBox/Desktop/tryings/openRogue/src/backend/msvcbuild/CMakeFiles/CMakeTmp
+
+Run Build Command(s):nmake -f Makefile /nologo cmTC_58232\fast && 	"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\bin\HostX86\x64\nmake.exe"  -f CMakeFiles\cmTC_58232.dir\build.make /nologo -L                  CMakeFiles\cmTC_58232.dir\build
+Building C object CMakeFiles/cmTC_58232.dir/testCCompiler.c.obj
+	"C:\Program Files\CMake\bin\cmake.exe" -E cmake_cl_compile_depends --dep-file=CMakeFiles\cmTC_58232.dir\testCCompiler.c.obj.d --working-dir=C:\Users\QuantumedBox\Desktop\tryings\openRogue\src\backend\msvcbuild\CMakeFiles\CMakeTmp --filter-prefix="╧Ёшьхўрэшх: тъы■ўхэшх Їрщыр:  " -- "C:\PROGRA~2\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x64\cl.exe" @C:\Users\QUANTU~1\AppData\Local\Temp\nmE5D1.tmp
+testCCompiler.c
+Linking C executable cmTC_58232.exe
+	"C:\Program Files\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_58232.dir --rc=rc --mt=CMAKE_MT-NOTFOUND --manifests -- "C:\PROGRA~2\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x64\link.exe" /nologo @CMakeFiles\cmTC_58232.dir\objects1.rsp @C:\Users\QUANTU~1\AppData\Local\Temp\nmE65E.tmp
+RC Pass 1: command "rc /fo CMakeFiles\cmTC_58232.dir/manifest.res CMakeFiles\cmTC_58232.dir/manifest.rc" failed (exit code 0) with the following output:
+Не удается найти указанный файлNMAKE : fatal error U1077: "C:\Program Files\CMake\bin\cmake.exe" : тючтЁр∙хээ√щ ъюф "0xffffffff"
+Stop.
+NMAKE : fatal error U1077: "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\bin\HostX86\x64\nmake.exe" : тючтЁр∙хээ√щ ъюф "0x2"
+Stop.
+
+
+
+Compiling the C compiler identification source file "CMakeCCompilerId.c" failed.
+Compiler: C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/14.29.30037/bin/Hostx86/x64/cl.exe 
+Build flags: /DWIN32;/D_WINDOWS;/W3
+Id flags:  
+
+The output was:
+2
+Оптимизирующий компилятор Microsoft (R) C/C++ версии 19.29.30037 для x64
+(C) Корпорация Майкрософт (Microsoft Corporation).  Все права защищены.
+
+CMakeCCompilerId.c
+Microsoft (R) Incremental Linker Version 14.29.30037.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+/out:CMakeCCompilerId.exe 
+CMakeCCompilerId.obj 
+LINK : fatal error LNK1104: не удается открыть файл "kernel32.lib"
+
+
+Detecting C compiler ABI info failed to compile with the following output:
+Change Dir: C:/Users/QuantumedBox/Desktop/tryings/openRogue/src/backend/msvcbuild/CMakeFiles/CMakeTmp
+
+Run Build Command(s):nmake -f Makefile /nologo cmTC_03904\fast && 	"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\bin\HostX86\x64\nmake.exe"  -f CMakeFiles\cmTC_03904.dir\build.make /nologo -L                  CMakeFiles\cmTC_03904.dir\build
+Building C object CMakeFiles/cmTC_03904.dir/CMakeCCompilerABI.c.obj
+	"C:\Program Files\CMake\bin\cmake.exe" -E cmake_cl_compile_depends --dep-file=CMakeFiles\cmTC_03904.dir\CMakeCCompilerABI.c.obj.d --working-dir=C:\Users\QuantumedBox\Desktop\tryings\openRogue\src\backend\msvcbuild\CMakeFiles\CMakeTmp --filter-prefix="╧Ёшьхўрэшх: тъы■ўхэшх Їрщыр:  " -- "C:\PROGRA~2\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x64\cl.exe" @C:\Users\QUANTU~1\AppData\Local\Temp\nmD647.tmp
+CMakeCCompilerABI.c
+Linking C executable cmTC_03904.exe
+	"C:\Program Files\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_03904.dir --rc=rc --mt=CMAKE_MT-NOTFOUND --manifests -- "C:\PROGRA~2\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x64\link.exe" /nologo @CMakeFiles\cmTC_03904.dir\objects1.rsp @C:\Users\QUANTU~1\AppData\Local\Temp\nmD6D4.tmp
+RC Pass 1: command "rc /fo CMakeFiles\cmTC_03904.dir/manifest.res CMakeFiles\cmTC_03904.dir/manifest.rc" failed (exit code 0) with the following output:
+Не удается найти указанный файлNMAKE : fatal error U1077: "C:\Program Files\CMake\bin\cmake.exe" : тючтЁр∙хээ√щ ъюф "0xffffffff"
+Stop.
+NMAKE : fatal error U1077: "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\bin\HostX86\x64\nmake.exe" : тючтЁр∙хээ√щ ъюф "0x2"
+Stop.
+
+
+
+
+Determining if the C compiler works failed with the following output:
+Change Dir: C:/Users/QuantumedBox/Desktop/tryings/openRogue/src/backend/msvcbuild/CMakeFiles/CMakeTmp
+
+Run Build Command(s):nmake -f Makefile /nologo cmTC_d72a9\fast && 	"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\bin\HostX86\x64\nmake.exe"  -f CMakeFiles\cmTC_d72a9.dir\build.make /nologo -L                  CMakeFiles\cmTC_d72a9.dir\build
+Building C object CMakeFiles/cmTC_d72a9.dir/testCCompiler.c.obj
+	"C:\Program Files\CMake\bin\cmake.exe" -E cmake_cl_compile_depends --dep-file=CMakeFiles\cmTC_d72a9.dir\testCCompiler.c.obj.d --working-dir=C:\Users\QuantumedBox\Desktop\tryings\openRogue\src\backend\msvcbuild\CMakeFiles\CMakeTmp --filter-prefix="╧Ёшьхўрэшх: тъы■ўхэшх Їрщыр:  " -- "C:\PROGRA~2\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x64\cl.exe" @C:\Users\QUANTU~1\AppData\Local\Temp\nmD760.tmp
+testCCompiler.c
+Linking C executable cmTC_d72a9.exe
+	"C:\Program Files\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_d72a9.dir --rc=rc --mt=CMAKE_MT-NOTFOUND --manifests -- "C:\PROGRA~2\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\bin\Hostx86\x64\link.exe" /nologo @CMakeFiles\cmTC_d72a9.dir\objects1.rsp @C:\Users\QUANTU~1\AppData\Local\Temp\nmD7DE.tmp
+RC Pass 1: command "rc /fo CMakeFiles\cmTC_d72a9.dir/manifest.res CMakeFiles\cmTC_d72a9.dir/manifest.rc" failed (exit code 0) with the following output:
+Не удается найти указанный файлNMAKE : fatal error U1077: "C:\Program Files\CMake\bin\cmake.exe" : тючтЁр∙хээ√щ ъюф "0xffffffff"
+Stop.
+NMAKE : fatal error U1077: "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Tools\MSVC\14.29.30037\bin\HostX86\x64\nmake.exe" : тючтЁр∙хээ√щ ъюф "0x2"
+Stop.
+
+
+

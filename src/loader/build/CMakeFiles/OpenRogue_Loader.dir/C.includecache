@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/QuantumedBox/Desktop/tryings/openRogue/src/loader/loader.c
+stdlib.h
+-
+stdio.h
+-
+string.h
+-
+stdbool.h
+-
+limits.h
+-
+dirent.h
+-
+windows.h
+-
+direct.h
+-
+unistd.h
+-
+

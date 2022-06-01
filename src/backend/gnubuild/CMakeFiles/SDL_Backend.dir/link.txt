@@ -1,0 +1,3 @@
+"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\SDL_Backend.dir/objects.a
+C:\compilers\mingw64\bin\ar.exe cr CMakeFiles\SDL_Backend.dir/objects.a @CMakeFiles\SDL_Backend.dir\objects1.rsp
+C:\compilers\mingw64\bin\gcc.exe -Wno-unused-variable -g -shared -o C:\Users\QuantumedBox\Desktop\tryings\openRogue\backends\libopenRogue_SDL\libopenRogue_SDL.dll -Wl,--out-implib,C:\Users\QuantumedBox\Desktop\tryings\openRogue\backends\libopenRogue_SDL\libSDL_Backend.dll.a -Wl,--major-image-version,0,--minor-image-version,0 -Wl,--whole-archive CMakeFiles\SDL_Backend.dir/objects.a -Wl,--no-whole-archive @CMakeFiles\SDL_Backend.dir\linklibs.rsp
